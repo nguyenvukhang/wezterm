@@ -108,9 +108,6 @@ enum SubCommand {
     )]
     Start(StartCommand),
 
-    #[command(name = "connect", about = "Connect to wezterm multiplexer")]
-    Connect(ConnectCommand),
-
     #[command(name = "ls-fonts", about = "Display information about fonts")]
     LsFonts(LsFontsCommand),
 
@@ -1010,21 +1007,6 @@ fn run() -> anyhow::Result<()> {
             wezterm_blob_leases::clear_storage();
             res
         }
-        SubCommand::Connect(connect) => run_terminal_gui(
-            StartCommand {
-                domain: Some(connect.domain_name.clone()),
-                class: connect.class,
-                workspace: connect.workspace,
-                position: connect.position,
-                prog: connect.prog,
-                always_new_process: true,
-                attach: true,
-                _cmd: false,
-                no_auto_connect: false,
-                cwd: None,
-            },
-            Some(connect.domain_name),
-        ),
         SubCommand::LsFonts(cmd) => run_ls_fonts(config, &cmd),
         SubCommand::ShowKeys(cmd) => run_show_keys(config, &cmd),
     }
