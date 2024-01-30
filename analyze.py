@@ -2,7 +2,7 @@ import os
 from os import path
 import re
 
-path_regex = re.compile(r'.*path="([a-z0-9\/\.-]*)".*')
+path_regex = re.compile(r'.*path="([a-z0-9_\/\.-]*)".*')
 
 
 class Project:
@@ -41,7 +41,9 @@ def parse_cargo_toml(fp: str) -> list[str]:
         hit = path_regex.match(line)
         if "path=" in line and hit is not None:
             dep = hit.groups()[0]
-            return path.normpath(path.join(path.dirname(fp), dep))
+            dep = path.normpath(path.join(path.dirname(fp), dep))
+            if path.isdir(dep):
+                return dep
 
     lines = map(parse_path, lines)
     lines = filter(lambda v: v is not None, lines)
