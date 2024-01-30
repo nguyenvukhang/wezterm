@@ -1,12 +1,7 @@
-use crate::Mux;
-use portable_pty::{ChildKiller, ExitStatus};
-use smol::channel::{bounded, Receiver as AsyncReceiver};
 use std::io::{Read, Write};
-use std::sync::mpsc::{Receiver, TryRecvError};
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Receiver;
 use termwiz::cell::unicode_column_width;
 use termwiz::lineedit::*;
-use wezterm_ssh::SshChildProcess;
 
 #[derive(Default)]
 struct PasswordPromptHost {
@@ -35,36 +30,6 @@ impl LineEditorHost for PasswordPromptHost {
                 unicode_column_width(placeholder, None) * cursor_position,
             )
         }
-    }
-}
-
-#[derive(Debug)]
-struct KillerInner {
-    killer: Option<Box<dyn ChildKiller + Send + Sync>>,
-    /// If we haven't populated `killer` by the time someone has called
-    /// `kill`, then we use this to remember to kill as soon as we recv
-    /// the child process.
-    pending_kill: bool,
-}
-
-#[derive(Debug, Clone)]
-struct WrappedSshChildKiller {
-    inner: Arc<Mutex<KillerInner>>,
-}
-
-impl ChildKiller for WrappedSshChildKiller {
-    fn kill(&mut self) -> std::io::Result<()> {
-        let mut killer = self.inner.lock().unwrap();
-        if let Some(killer) = killer.killer.as_mut() {
-            killer.kill()
-        } else {
-            killer.pending_kill = true;
-            Ok(())
-        }
-    }
-
-    fn clone_killer(&self) -> Box<dyn ChildKiller + Send + Sync> {
-        Box::new(self.clone())
     }
 }
 
