@@ -84,5 +84,5 @@ for p in projects:
         print("[1]", p.dir, dirs(p.needed_by))
 
 for p in projects:
-    if p.needs("spawn"):
+    if p.needs("open-url"):
         print("*", p.dir)

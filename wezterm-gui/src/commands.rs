@@ -1663,40 +1663,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Shell", "Detach"],
             icon: Some("md_pipe_disconnected"),
         },
-        OpenUri(uri) => match uri.as_ref() {
-            "https://wezfurlong.org/wezterm/" => CommandDef {
-                brief: "Documentation".into(),
-                doc: "Visit the wezterm documentation website".into(),
-                keys: vec![],
-                args: &[],
-                menubar: &["Help"],
-                icon: Some("md_help"),
-            },
-            "https://github.com/wez/wezterm/discussions/" => CommandDef {
-                brief: "Discuss on GitHub".into(),
-                doc: "Visit wezterm's GitHub discussion".into(),
-                keys: vec![],
-                args: &[],
-                menubar: &["Help"],
-                icon: Some("oct_comment_discussion"),
-            },
-            "https://github.com/wez/wezterm/issues/" => CommandDef {
-                brief: "Search or report issue on GitHub".into(),
-                doc: "Visit wezterm's GitHub issues".into(),
-                keys: vec![],
-                args: &[],
-                menubar: &["Help"],
-                icon: Some("fa_ticket"),
-            },
-            _ => CommandDef {
-                brief: format!("Open {uri} in your browser").into(),
-                doc: format!("Open {uri} in your browser").into(),
-                keys: vec![],
-                args: &[],
-                menubar: &[],
-                icon: Some("oct_browser"),
-            },
-        },
         SendString(text) => CommandDef {
             brief: format!(
                 "Sends `{text}` to the active pane, \
@@ -2130,9 +2096,6 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         ShowLauncher,
         ShowTabNavigator,
         // ----------------- Help
-        OpenUri("https://wezfurlong.org/wezterm/".to_string()),
-        OpenUri("https://github.com/wez/wezterm/discussions/".to_string()),
-        OpenUri("https://github.com/wez/wezterm/issues/".to_string()),
         ShowDebugOverlay,
         // ----------------- Misc
         OpenLinkAtMouseCursor,

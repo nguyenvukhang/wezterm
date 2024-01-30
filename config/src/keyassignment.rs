@@ -608,7 +608,6 @@ pub enum KeyAssignment {
     CharSelect(CharSelectArguments),
 
     ResetTerminal,
-    OpenUri(String),
     ActivateCommandPalette,
     ActivateWindow(usize),
     ActivateWindowRelative(isize),

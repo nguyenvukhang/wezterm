@@ -2984,9 +2984,6 @@ impl TermWindow {
                     termwiz::escape::Esc::Code(termwiz::escape::EscCode::FullReset),
                 )]);
             }
-            OpenUri(link) => {
-                wezterm_open_url::open_url(link);
-            }
             ActivateCommandPalette => {
                 let modal = crate::termwindow::palette::CommandPalette::new(self);
                 self.set_modal(Rc::new(modal));
