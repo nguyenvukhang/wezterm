@@ -5,7 +5,7 @@ use anyhow::{anyhow, bail, Context};
 use async_ossl::AsyncSslStream;
 use async_trait::async_trait;
 use codec::*;
-use config::{configuration, SshDomain, TlsDomainClient, UnixDomain, UnixTarget};
+use config::{configuration, TlsDomainClient, UnixDomain, UnixTarget};
 use filedescriptor::FileDescriptor;
 use futures::FutureExt;
 use mux::client::ClientId;
@@ -643,58 +643,6 @@ impl Reconnectable {
     /// message to the user.
     fn wezterm_bin_path(path: &Option<String>) -> String {
         path.as_deref().unwrap_or("wezterm").to_string()
-    }
-
-    fn ssh_connect(
-        &mut self,
-        ssh_dom: SshDomain,
-        initial: bool,
-        ui: &mut ConnectionUI,
-    ) -> anyhow::Result<()> {
-        let ssh_config = mux::ssh::ssh_domain_to_ssh_config(&ssh_dom)?;
-
-        let sess = ssh_connect_with_ui(ssh_config, ui)?;
-        let proxy_bin = Self::wezterm_bin_path(&ssh_dom.remote_wezterm_path);
-
-        let cmd = if initial {
-            format!("{} cli --prefer-mux proxy", proxy_bin)
-        } else {
-            format!("{} cli --prefer-mux --no-auto-start proxy", proxy_bin)
-        };
-        ui.output_str(&format!("Running: {}\n", cmd));
-        log::debug!("going to run {}", cmd);
-
-        let exec = smol::block_on(sess.exec(&cmd, None))?;
-
-        let mut stderr = exec.stderr;
-        std::thread::spawn(move || {
-            let mut buf = [0u8; 1024];
-            while let Ok(len) = stderr.read(&mut buf) {
-                if len == 0 {
-                    break;
-                } else {
-                    let stderr = &buf[0..len];
-                    log::error!("ssh stderr: {}", String::from_utf8_lossy(stderr));
-                }
-            }
-        });
-
-        // This is a bit gross, but it helps to surface errors in running
-        // the proxy, and prevents us from hanging forever after the process
-        // has died
-        let mut child = exec.child;
-        std::thread::spawn(move || match child.wait() {
-            Err(err) => log::error!("waiting on {} failed: {:#}", cmd, err),
-            Ok(status) if !status.success() => log::error!("{}: {}", cmd, status),
-            _ => {}
-        });
-
-        let stream: Box<dyn AsyncReadAndWrite> = Box::new(Async::new(SshStream {
-            stdin: exec.stdin,
-            stdout: exec.stdout,
-        })?);
-        self.stream.replace(stream);
-        Ok(())
     }
 
     fn unix_connect(
