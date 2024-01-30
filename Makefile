@@ -6,13 +6,15 @@ analyze:
 
 debug:
 	cargo build
+	mkdir -p $(RUN_DIR)
 	rm -rf $(RUN_DIR)/*
 	cp ./target/debug/wezterm $(RUN_DIR)
 	cp ./target/debug/wezterm-gui $(RUN_DIR)
-	# open Alatty.app
+	open Alatty.app
 
 install:
 	cargo build --release
+	mkdir -p $(RUN_DIR)
 	rm -rf $(RUN_DIR)/*
 	cp ./target/release/wezterm $(RUN_DIR)
 	cp ./target/release/wezterm-gui $(RUN_DIR)

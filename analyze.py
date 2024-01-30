@@ -66,4 +66,4 @@ for i in n:
 
 for p in projects:
     if len(p.needed_by) == 0:
-        print(p.dir)
+        print("[x]", p.dir)
