@@ -378,9 +378,6 @@ pub struct Config {
     #[dynamic(default = "default_mux_output_parser_coalesce_delay_ms")]
     pub mux_output_parser_coalesce_delay_ms: u64,
 
-    #[dynamic(default = "default_mux_env_remove")]
-    pub mux_env_remove: Vec<String>,
-
     #[dynamic(default)]
     pub keys: Vec<Key>,
     #[dynamic(default)]
@@ -1698,14 +1695,6 @@ fn default_gui_startup_args() -> Vec<String> {
 // Coupled with term/src/config.rs:TerminalConfiguration::unicode_version
 fn default_unicode_version() -> u8 {
     9
-}
-
-fn default_mux_env_remove() -> Vec<String> {
-    vec![
-        "SSH_AUTH_SOCK".to_string(),
-        "SSH_CLIENT".to_string(),
-        "SSH_CONNECTION".to_string(),
-    ]
 }
 
 fn default_anim_fps() -> u8 {

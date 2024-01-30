@@ -906,12 +906,6 @@ pub(crate) struct WrappedSshPty {
     inner: RefCell<WrappedSshPtyInner>,
 }
 
-impl WrappedSshPty {
-    pub fn is_connecting(&mut self) -> bool {
-        self.inner.borrow_mut().is_connecting()
-    }
-}
-
 enum WrappedSshPtyInner {
     Connecting {
         reader: Option<PtyReader>,
@@ -955,14 +949,6 @@ impl WrappedSshPtyInner {
                 }
             }
             _ => Ok(()),
-        }
-    }
-
-    fn is_connecting(&mut self) -> bool {
-        self.check_connected().ok();
-        match self {
-            Self::Connecting { .. } => true,
-            Self::Connected { .. } => false,
         }
     }
 }
