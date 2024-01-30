@@ -64,7 +64,6 @@ mod readbuf;
 pub mod render;
 pub mod surface;
 pub mod terminal;
-pub mod tmux_cc;
 #[cfg(feature = "widgets")]
 pub mod widgets;
 

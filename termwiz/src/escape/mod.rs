@@ -6,7 +6,6 @@
 //! semantic meaning to them.  It can also encode the semantic values as
 //! escape sequences.  It provides encoding and decoding functionality
 //! only; it does not provide terminal emulation facilities itself.
-use crate::tmux_cc::Event;
 use num_derive::*;
 use std::fmt::{Display, Error as FmtError, Formatter, Write as FmtWrite};
 use wezterm_color_types::LinearRgba;
@@ -218,8 +217,6 @@ pub enum DeviceControlMode {
     Data(u8),
     /// A self contained (Enter, Data*, Exit) sequence
     ShortDeviceControl(Box<ShortDeviceControl>),
-    /// Tmux parsed events
-    TmuxEvents(Box<Vec<Event>>),
 }
 
 impl Display for DeviceControlMode {
@@ -243,7 +240,6 @@ impl Display for DeviceControlMode {
             Self::Exit => Ok(()),
             Self::Data(c) => f.write_char(*c as char),
             Self::ShortDeviceControl(s) => s.fmt(f),
-            Self::TmuxEvents(_) => write!(f, "tmux event"),
         }
     }
 }
@@ -255,7 +251,6 @@ impl std::fmt::Debug for DeviceControlMode {
             Self::Exit => write!(fmt, "Exit"),
             Self::Data(b) => write!(fmt, "Data({:?} 0x{:x})", *b as char, *b),
             Self::ShortDeviceControl(s) => write!(fmt, "ShortDeviceControl({:?})", s),
-            Self::TmuxEvents(_) => write!(fmt, "tmux event"),
         }
     }
 }
