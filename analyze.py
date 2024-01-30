@@ -75,5 +75,6 @@ for i in n:
 unneeded = list(filter(lambda v: len(v.needed_by) == 0, projects))
 
 
-for p in unneeded:
-    print(p.dir)
+for p in projects:
+    if p.needs("client"):
+        print(p.dir)
