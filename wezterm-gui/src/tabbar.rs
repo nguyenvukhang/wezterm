@@ -122,7 +122,7 @@ fn compute_tab_title(
                 } else {
                     tab.tab_title.clone()
                 };
-                let classic_spacing = if config.use_fancy_tab_bar { "" } else { " " };
+                let classic_spacing = " ";
                 if config.show_tab_index_in_tab_bar {
                     title = format!(
                         "{}{}: {}{}",
@@ -137,14 +137,8 @@ fn compute_tab_title(
                         classic_spacing,
                     );
                 }
-                // We have a preferred soft minimum on tab width to make it
-                // easier to click on tab titles, but we'll still go below
-                // this if there are too many tabs to fit the window at
-                // this width.
-                if !config.use_fancy_tab_bar {
-                    while unicode_column_width(&title, None) < 5 {
-                        title.push(' ');
-                    }
+                while unicode_column_width(&title, None) < 5 {
+                    title.push(' ');
                 }
                 title
             } else {
@@ -194,17 +188,9 @@ impl TabBarState {
         line: &mut Line,
         colors: &TabBarColors,
     ) {
-        let default_cell = if config.use_fancy_tab_bar {
-            CellAttributes::default()
-        } else {
-            colors.new_tab().as_cell_attributes()
-        };
+        let default_cell = colors.new_tab().as_cell_attributes();
 
-        let default_cell_hover = if config.use_fancy_tab_bar {
-            CellAttributes::default()
-        } else {
-            colors.new_tab_hover().as_cell_attributes()
-        };
+        let default_cell_hover = colors.new_tab_hover().as_cell_attributes();
 
         let window_hide =
             parse_status_text(&config.tab_bar_style.window_hide, default_cell.clone());
@@ -295,21 +281,10 @@ impl TabBarState {
         let new_tab_hover_attrs = colors.new_tab_hover().as_cell_attributes();
         let new_tab_attrs = colors.new_tab().as_cell_attributes();
 
-        let new_tab = parse_status_text(
-            &config.tab_bar_style.new_tab,
-            if config.use_fancy_tab_bar {
-                CellAttributes::default()
-            } else {
-                new_tab_attrs.clone()
-            },
-        );
+        let new_tab = parse_status_text(&config.tab_bar_style.new_tab, new_tab_attrs.clone());
         let new_tab_hover = parse_status_text(
             &config.tab_bar_style.new_tab_hover,
-            if config.use_fancy_tab_bar {
-                CellAttributes::default()
-            } else {
-                new_tab_hover_attrs.clone()
-            },
+            new_tab_hover_attrs.clone(),
         );
 
         let use_integrated_title_buttons = config
@@ -349,7 +324,7 @@ impl TabBarState {
 
         let available_cells =
             title_width.saturating_sub(number_of_tabs.saturating_sub(1) + new_tab.len());
-        let tab_width_max = if config.use_fancy_tab_bar || available_cells >= titles_len {
+        let tab_width_max = if available_cells >= titles_len {
             // We can render each title with its full width
             usize::max_value()
         } else {
@@ -371,7 +346,6 @@ impl TabBarState {
 
         if use_integrated_title_buttons
             && config.integrated_title_button_style == IntegratedTitleButtonStyle::MacOsNative
-            && config.use_fancy_tab_bar == false
             && config.tab_bar_at_bottom == false
         {
             for _ in 0..10 as usize {
@@ -426,14 +400,7 @@ impl TabBarState {
             let tab_start_idx = x;
 
             let esc = format_as_escapes(tab_title.items.clone()).expect("already parsed ok above");
-            let mut tab_line = parse_status_text(
-                &esc,
-                if config.use_fancy_tab_bar {
-                    CellAttributes::default()
-                } else {
-                    cell_attrs.clone()
-                },
-            );
+            let mut tab_line = parse_status_text(&esc, cell_attrs.clone());
 
             let title = tab_line.clone();
             if tab_line.len() > tab_width_max {

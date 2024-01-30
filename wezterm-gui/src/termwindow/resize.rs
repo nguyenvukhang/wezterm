@@ -100,7 +100,6 @@ impl super::TermWindow {
         if let Err(err) = self.recreate_texture_atlas(None) {
             log::error!("recreate_texture_atlas: {:#}", err);
         }
-        self.invalidate_fancy_tab_bar();
         self.invalidate_modal();
     }
 
@@ -275,7 +274,6 @@ impl super::TermWindow {
             }
         };
         self.resize_overlays();
-        self.invalidate_fancy_tab_bar();
         self.update_title();
 
         window.set_resize_increments(if self.config.use_resize_increments {

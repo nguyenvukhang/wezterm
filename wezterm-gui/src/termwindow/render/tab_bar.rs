@@ -1,24 +1,12 @@
 use crate::quad::TripleLayerQuadAllocator;
 use crate::termwindow::render::RenderScreenLineParams;
 use crate::utilsprites::RenderMetrics;
-use config::ConfigHandle;
 use mux::renderable::RenderableDimensions;
 use wezterm_term::color::ColorAttribute;
 use window::color::LinearRgba;
 
 impl crate::TermWindow {
     pub fn paint_tab_bar(&mut self, layers: &mut TripleLayerQuadAllocator) -> anyhow::Result<()> {
-        if self.config.use_fancy_tab_bar {
-            if self.fancy_tab_bar.is_none() {
-                let palette = self.palette().clone();
-                let tab_bar = self.build_fancy_tab_bar(&palette)?;
-                self.fancy_tab_bar.replace(tab_bar);
-            }
-
-            self.ui_items.append(&mut self.paint_fancy_tab_bar()?);
-            return Ok(());
-        }
-
         let border = self.get_os_border();
 
         let palette = self.palette().clone();
@@ -100,20 +88,11 @@ impl crate::TermWindow {
         Ok(())
     }
 
-    pub fn tab_bar_pixel_height_impl(
-        config: &ConfigHandle,
-        fontconfig: &wezterm_font::FontConfiguration,
-        render_metrics: &RenderMetrics,
-    ) -> anyhow::Result<f32> {
-        if config.use_fancy_tab_bar {
-            let font = fontconfig.title_font()?;
-            Ok((font.metrics().cell_height.get() as f32 * 1.75).ceil())
-        } else {
-            Ok(render_metrics.cell_size.height as f32)
-        }
+    pub fn tab_bar_pixel_height_impl(render_metrics: &RenderMetrics) -> anyhow::Result<f32> {
+        Ok(render_metrics.cell_size.height as f32)
     }
 
     pub fn tab_bar_pixel_height(&self) -> anyhow::Result<f32> {
-        Self::tab_bar_pixel_height_impl(&self.config, &self.fonts, &self.render_metrics)
+        Self::tab_bar_pixel_height_impl(&self.render_metrics)
     }
 }

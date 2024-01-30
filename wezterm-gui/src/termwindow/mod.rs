@@ -592,7 +592,7 @@ impl TermWindow {
         // for the tab bar state.
         let show_tab_bar = config.enable_tab_bar && !config.hide_tab_bar_if_only_one_tab;
         let tab_bar_height = if show_tab_bar {
-            Self::tab_bar_pixel_height_impl(&config, &fontconfig, &render_metrics)? as usize
+            Self::tab_bar_pixel_height_impl(&render_metrics)? as usize
         } else {
             0
         };
@@ -1268,7 +1268,6 @@ impl TermWindow {
 
                 self.clear_all_overlays();
                 self.current_highlight.take();
-                self.invalidate_fancy_tab_bar();
                 self.invalidate_modal();
 
                 let mux = Mux::get();
@@ -1687,7 +1686,6 @@ impl TermWindow {
             .borrow_mut()
             .update_config(&config);
         self.fancy_tab_bar.take();
-        self.invalidate_fancy_tab_bar();
         self.invalidate_modal();
         self.input_map = InputMap::new(&config);
         self.leader_is_down = None;
@@ -1899,7 +1897,6 @@ impl TermWindow {
         );
         if new_tab_bar != self.tab_bar {
             self.tab_bar = new_tab_bar;
-            self.invalidate_fancy_tab_bar();
             self.invalidate_modal();
             if let Some(window) = self.window.as_ref() {
                 window.invalidate();

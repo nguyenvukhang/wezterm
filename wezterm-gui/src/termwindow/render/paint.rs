@@ -41,7 +41,6 @@ impl crate::TermWindow {
                         if !allocated {
                             break 'pass;
                         }
-                        self.invalidate_fancy_tab_bar();
                         self.invalidate_modal();
                     }
                     Err(err) => {
@@ -64,7 +63,6 @@ impl crate::TermWindow {
                             log::trace!("grow texture atlas to {}", size);
                             self.recreate_texture_atlas(Some(size))
                         };
-                        self.invalidate_fancy_tab_bar();
                         self.invalidate_modal();
 
                         if let Err(err) = result {
@@ -91,7 +89,6 @@ impl crate::TermWindow {
                             );
                         }
                     } else if err.root_cause().downcast_ref::<ClearShapeCache>().is_some() {
-                        self.invalidate_fancy_tab_bar();
                         self.invalidate_modal();
                         self.shape_generation += 1;
                         self.shape_cache.borrow_mut().clear();
