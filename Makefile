@@ -27,6 +27,9 @@ d:
 i:
 	@make install
 
+o:
+	open Alatty.app
+
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIR  := $(dir $(MAKEFILE_PATH))
 APP_DIR := $(MAKEFILE_DIR)Alatty.app
