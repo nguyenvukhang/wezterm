@@ -1208,24 +1208,6 @@ mod test {
     }
 
     #[test]
-    fn test_pdu_ping_base91() {
-        let mut encoded = Vec::new();
-        {
-            let mut encoder = base91::Base91Encoder::new(&mut encoded);
-            Pdu::Ping(Ping {}).encode(&mut encoder, 0x41).unwrap();
-        }
-        assert_eq!(&encoded, &[60, 67, 75, 65]);
-        let decoded = base91::decode(&encoded);
-        assert_eq!(
-            DecodedPdu {
-                serial: 0x41,
-                pdu: Pdu::Ping(Ping {})
-            },
-            Pdu::decode(decoded.as_slice()).unwrap()
-        );
-    }
-
-    #[test]
     fn test_pdu_pong() {
         let mut encoded = Vec::new();
         Pdu::Pong(Pong {}).encode(&mut encoded, 0x42).unwrap();

@@ -74,6 +74,9 @@ for i in n:
 
 unneeded = list(filter(lambda v: len(v.needed_by) == 0, projects))
 
+def dirs(ps: list[Project]):
+    return list(map(lambda v: v.dir, ps))
 
-for p in unneeded:
-    print(p.dir)
+for p in projects:
+    if len(p.needed_by) == 1:
+        print(p.dir, dirs(p.needed_by))

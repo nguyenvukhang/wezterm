@@ -22,6 +22,3 @@ thiserror = "1.0"
 varbincode = "0.1"
 wezterm-term = { path = "../term", features=["use_serde"] }
 zstd = "0.11"
-
-[dev-dependencies]
-base91 = { path = "../base91" }
