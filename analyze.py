@@ -1,0 +1,69 @@
+import os
+from os import path
+import re
+
+path_regex = re.compile(r'.*path="([a-z0-9\/\.-]*)".*')
+
+
+class Project:
+    def __init__(self, fp: str) -> None:
+        self.path = fp
+        self.dir = path.normpath(path.dirname(fp))
+        self.deps: list[Project] = []
+        self.needed_by: list[Project] = []
+
+    def __str__(self) -> str:
+        return "Proj(%s) -> %s" % (self.dir, self.deps)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+def read_file(p: str) -> str:
+    with open(p, "r") as f:
+        return f.read()
+
+
+# gather projects (all directories with `Cargo.toml`)
+p = filter(lambda v: "Cargo.toml" in v[2], os.walk("."))
+p = map(lambda v: Project(path.join(v[0], "Cargo.toml")), p)
+projects = list(p)
+n = range(len(projects))
+
+
+def parse_cargo_toml(fp: str) -> list[str]:
+    lines = read_file(fp).splitlines()
+    lines = map(lambda v: v.strip(), lines)
+    lines = filter(lambda v: not v.startswith("#"), lines)
+    lines = map(lambda v: v.replace(" ", ""), lines)
+
+    def parse_path(line: str) -> str:
+        hit = path_regex.match(line)
+        if "path=" in line and hit is not None:
+            dep = hit.groups()[0]
+            return path.normpath(path.join(path.dirname(fp), dep))
+
+    lines = map(parse_path, lines)
+    lines = filter(lambda v: v is not None, lines)
+    lines = list(lines)
+
+    return lines
+
+
+# update projects such that i needs j.
+def update(projects: list[Project], i: int, dep: str):
+    for j in n:
+        if projects[j].dir == dep:
+            projects[i].deps.append(projects[j])
+            projects[j].needed_by.append(projects[i])
+            return
+    raise ("cannot find %s" % dep)
+
+
+for i in n:
+    for dep in parse_cargo_toml(projects[i].path):
+        update(projects, i, dep)
+
+for p in projects:
+    if len(p.needed_by) == 0:
+        print(p.dir)
