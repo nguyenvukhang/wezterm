@@ -614,12 +614,6 @@ impl Reconnectable {
             // the set of tabs and we'd have confusing and inconsistent state
             ClientDomainConfig::Unix(_) => false,
             ClientDomainConfig::Tls(_) => true,
-            // It *does* make sense to reconnect with an ssh session, but we
-            // need to grow some smarts about whether the disconnect was because
-            // we sent CTRL-D to close the last session, or whether it was a network
-            // level disconnect, because we will otherwise throw up authentication
-            // dialogs that would be annoying
-            ClientDomainConfig::Ssh(_) => false,
         }
     }
 
@@ -634,7 +628,6 @@ impl Reconnectable {
                 self.unix_connect(unix_dom, initial, ui, no_auto_start)
             }
             ClientDomainConfig::Tls(tls) => self.tls_connect(tls, initial, ui),
-            ClientDomainConfig::Ssh(ssh) => self.ssh_connect(ssh, initial, ui),
         }
     }
 
@@ -1251,17 +1244,6 @@ impl Client {
     ) -> anyhow::Result<Self> {
         let mut reconnectable =
             Reconnectable::new(ClientDomainConfig::Tls(tls_client.clone()), None);
-        let no_auto_start = true;
-        reconnectable.connect(true, ui, no_auto_start)?;
-        Ok(Self::new(Some(local_domain_id), reconnectable))
-    }
-
-    pub fn new_ssh(
-        local_domain_id: DomainId,
-        ssh_dom: &SshDomain,
-        ui: &mut ConnectionUI,
-    ) -> anyhow::Result<Self> {
-        let mut reconnectable = Reconnectable::new(ClientDomainConfig::Ssh(ssh_dom.clone()), None);
         let no_auto_start = true;
         reconnectable.connect(true, ui, no_auto_start)?;
         Ok(Self::new(Some(local_domain_id), reconnectable))

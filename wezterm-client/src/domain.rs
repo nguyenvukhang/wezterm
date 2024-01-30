@@ -180,7 +180,6 @@ impl ClientInner {
 pub enum ClientDomainConfig {
     Unix(UnixDomain),
     Tls(TlsDomainClient),
-    Ssh(SshDomain),
 }
 
 impl ClientDomainConfig {
@@ -188,7 +187,6 @@ impl ClientDomainConfig {
         match self {
             ClientDomainConfig::Unix(unix) => &unix.name,
             ClientDomainConfig::Tls(tls) => &tls.name,
-            ClientDomainConfig::Ssh(ssh) => &ssh.name,
         }
     }
 
@@ -196,7 +194,6 @@ impl ClientDomainConfig {
         match self {
             ClientDomainConfig::Unix(unix) => unix.local_echo_threshold_ms,
             ClientDomainConfig::Tls(tls) => tls.local_echo_threshold_ms,
-            ClientDomainConfig::Ssh(ssh) => ssh.local_echo_threshold_ms,
         }
     }
 
@@ -204,7 +201,6 @@ impl ClientDomainConfig {
         match self {
             ClientDomainConfig::Unix(unix) => unix.overlay_lag_indicator,
             ClientDomainConfig::Tls(tls) => tls.overlay_lag_indicator,
-            ClientDomainConfig::Ssh(ssh) => ssh.overlay_lag_indicator,
         }
     }
 
@@ -212,13 +208,6 @@ impl ClientDomainConfig {
         match self {
             ClientDomainConfig::Unix(unix) => format!("unix mux {}", unix.socket_path().display()),
             ClientDomainConfig::Tls(tls) => format!("TLS mux {}", tls.remote_address),
-            ClientDomainConfig::Ssh(ssh) => {
-                if let Some(user) = &ssh.username {
-                    format!("SSH mux {}@{}", user, ssh.remote_address)
-                } else {
-                    format!("SSH mux {}", ssh.remote_address)
-                }
-            }
         }
     }
 
@@ -226,7 +215,6 @@ impl ClientDomainConfig {
         match self {
             ClientDomainConfig::Unix(unix) => unix.connect_automatically,
             ClientDomainConfig::Tls(tls) => tls.connect_automatically,
-            ClientDomainConfig::Ssh(ssh) => ssh.connect_automatically,
         }
     }
 }
@@ -968,7 +956,6 @@ impl Domain for ClientDomain {
                         )
                     }
                     ClientDomainConfig::Tls(tls) => Client::new_tls(domain_id, tls, &mut cloned_ui),
-                    ClientDomainConfig::Ssh(ssh) => Client::new_ssh(domain_id, ssh, &mut cloned_ui),
                 })
                 .await?;
 
