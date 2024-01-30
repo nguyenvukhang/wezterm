@@ -1,37 +1,5 @@
 use std::io::{Read, Write};
 use std::sync::mpsc::Receiver;
-use termwiz::cell::unicode_column_width;
-use termwiz::lineedit::*;
-
-#[derive(Default)]
-struct PasswordPromptHost {
-    history: BasicHistory,
-    echo: bool,
-}
-impl LineEditorHost for PasswordPromptHost {
-    fn history(&mut self) -> &mut dyn History {
-        &mut self.history
-    }
-
-    fn highlight_line(&self, line: &str, cursor_position: usize) -> (Vec<OutputElement>, usize) {
-        if self.echo {
-            (vec![OutputElement::Text(line.to_string())], cursor_position)
-        } else {
-            // Rewrite the input so that we can obscure the password
-            // characters when output to the terminal widget
-            let placeholder = "🔑";
-            let grapheme_count = unicode_column_width(line, None);
-            let mut output = vec![];
-            for _ in 0..grapheme_count {
-                output.push(OutputElement::Text(placeholder.to_string()));
-            }
-            (
-                output,
-                unicode_column_width(placeholder, None) * cursor_position,
-            )
-        }
-    }
-}
 
 type BoxedReader = Box<(dyn Read + Send + 'static)>;
 type BoxedWriter = Box<(dyn Write + Send + 'static)>;
