@@ -1,3 +1,10 @@
+debug:
+	cargo build
+	rm -rf $(RUN_DIR)/*
+	cp ./target/debug/wezterm $(RUN_DIR)
+	cp ./target/debug/wezterm-gui $(RUN_DIR)
+	open Alatty.app
+
 install:
 	cargo build --release
 	rm -rf $(RUN_DIR)/*

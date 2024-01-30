@@ -29,7 +29,6 @@ use wezterm_bidi::Direction;
 use wezterm_client::domain::ClientDomain;
 use wezterm_font::shaper::PresentationWidth;
 use wezterm_gui_subcommands::*;
-use wezterm_mux_server_impl::update_mux_domains;
 use wezterm_toast_notification::*;
 
 mod colorease;
@@ -167,8 +166,7 @@ async fn async_run_ssh(opts: SshCommand) -> anyhow::Result<()> {
     mux.add_domain(&domain);
     mux.set_default_domain(&domain);
 
-    let should_publish = false;
-    async_run_terminal_gui(cmd, start_command, should_publish).await
+    async_run_terminal_gui(cmd, start_command).await
 }
 
 fn run_ssh(opts: SshCommand) -> anyhow::Result<()> {
@@ -218,8 +216,7 @@ async fn async_run_serial(opts: SerialCommand) -> anyhow::Result<()> {
     let mux = Mux::get();
     mux.add_domain(&domain);
 
-    let should_publish = false;
-    async_run_terminal_gui(cmd, start_command, should_publish).await
+    async_run_terminal_gui(cmd, start_command).await
 }
 
 fn run_serial(config: config::ConfigHandle, opts: SerialCommand) -> anyhow::Result<()> {
@@ -313,16 +310,6 @@ async fn spawn_tab_in_domain_if_mux_is_empty(
         return Ok(());
     }
 
-    let _config_subscription = config::subscribe_to_config_reload(move || {
-        promise::spawn::spawn_into_main_thread(async move {
-            if let Err(err) = update_mux_domains(&config::configuration()) {
-                log::error!("Error updating mux domains: {:#}", err);
-            }
-        })
-        .detach();
-        true
-    });
-
     let dpi = config.dpi.unwrap_or_else(|| ::window::default_dpi()) as u32;
     let _tab = domain
         .spawn(config.initial_size(dpi), cmd, None, window_id)
@@ -387,7 +374,6 @@ async fn trigger_and_log_gui_attached(domain: MuxDomain) {
 async fn async_run_terminal_gui(
     cmd: Option<CommandBuilder>,
     opts: StartCommand,
-    should_publish: bool,
 ) -> anyhow::Result<()> {
     let unix_socket_path =
         config::RUNTIME_DIR.join(format!("gui-sock-{}", unsafe { libc::getpid() }));
@@ -395,10 +381,6 @@ async fn async_run_terminal_gui(
     wezterm_blob_leases::register_storage(Arc::new(
         wezterm_blob_leases::simple_tempdir::SimpleTempDir::new()?,
     ))?;
-
-    if let Err(err) = spawn_mux_server(unix_socket_path, should_publish) {
-        log::warn!("{:#}", err);
-    }
 
     if !opts.no_auto_connect {
         connect_to_auto_connect_domains().await?;
@@ -500,13 +482,6 @@ impl Publish {
         }
     }
 
-    pub fn should_publish(&self) -> bool {
-        match self {
-            Self::TryPathOrPublish(_) | Self::NoConnectButPublish => true,
-            Self::NoConnectNoPublish => false,
-        }
-    }
-
     pub fn try_spawn(
         &mut self,
         cmd: Option<CommandBuilder>,
@@ -591,31 +566,6 @@ impl Publish {
     }
 }
 
-fn spawn_mux_server(unix_socket_path: PathBuf, should_publish: bool) -> anyhow::Result<()> {
-    let mut listener =
-        wezterm_mux_server_impl::local::LocalListener::with_domain(&config::UnixDomain {
-            socket_path: Some(unix_socket_path.clone()),
-            ..Default::default()
-        })?;
-    std::thread::spawn(move || {
-        let name_holder;
-        if should_publish {
-            name_holder = wezterm_client::discovery::publish_gui_sock_path(
-                &unix_socket_path,
-                &crate::termwindow::get_window_class(),
-            );
-            if let Err(err) = &name_holder {
-                log::warn!("{:#}", err);
-            }
-        }
-
-        listener.run();
-        std::fs::remove_file(unix_socket_path).ok();
-    });
-
-    Ok(())
-}
-
 fn setup_mux(
     local_domain: Arc<dyn Domain>,
     config: &ConfigHandle,
@@ -635,7 +585,6 @@ fn setup_mux(
     );
     mux.set_active_workspace(&default_workspace_name);
     crate::update::load_last_release_info_and_set_banner();
-    update_mux_domains(config)?;
 
     let default_name =
         default_domain_name.unwrap_or(config.default_domain.as_deref().unwrap_or("local"));
@@ -721,7 +670,7 @@ fn run_terminal_gui(opts: StartCommand, default_domain_name: Option<String>) -> 
     let activity = Activity::new();
 
     promise::spawn::spawn(async move {
-        if let Err(err) = async_run_terminal_gui(cmd, opts, publish.should_publish()).await {
+        if let Err(err) = async_run_terminal_gui(cmd, opts).await {
             terminate_with_error(err);
         }
         drop(activity);

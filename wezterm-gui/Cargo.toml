@@ -100,7 +100,6 @@ wezterm-client = { path = "../wezterm-client" }
 wezterm-dynamic = { path = "../wezterm-dynamic" }
 wezterm-font = { path = "../wezterm-font" }
 wezterm-gui-subcommands = { path = "../wezterm-gui-subcommands" }
-wezterm-mux-server-impl = { path = "../wezterm-mux-server-impl" }
 wezterm-open-url = { path = "../wezterm-open-url" }
 wezterm-ssh = { path = "../wezterm-ssh" }
 wezterm-term = { path = "../term", features=["use_serde"] }

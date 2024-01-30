@@ -9,7 +9,6 @@ members = [
   "wezterm-blob-leases",
   "wezterm-dynamic",
   "wezterm-gui",
-  "wezterm-mux-server",
   "wezterm-open-url",
   "wezterm-ssh"
 ]
