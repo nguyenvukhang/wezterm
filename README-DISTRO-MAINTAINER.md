@@ -66,7 +66,6 @@ recommended that you skip compiling in that font by disabling the associated
 feature:
 
 * `vendor-jetbrains-font` - causes `JetBrains Mono` to be compiled in
-* `vendor-roboto-font` - causes `Roboto` to be compiled in
 * `vendor-noto-emoji-font` - causes `Noto Color Emoji` to be compiled in.
 * `vendored-fonts` - causes all of the above `vendor-*-font` features to be enabled
 
@@ -75,7 +74,6 @@ on the system or built-in, in its default configuration, in order to start
 correctly:
 
 * `JetBrains Mono`
-* `Roboto`
 
 If there are other behaviors that you'd like to change from the default, please
 raise issue(s) for them so that we can figure out how to make it easier for you

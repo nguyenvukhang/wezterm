@@ -548,20 +548,8 @@ impl FontConfigInner {
         }
     }
 
-    fn compute_title_font(&self, config: &ConfigHandle, make_bold: bool) -> (TextStyle, f64) {
-        fn bold(family: &str) -> FontAttributes {
-            FontAttributes {
-                family: family.to_string(),
-                weight: FontWeight::BOLD,
-                ..Default::default()
-            }
-        }
-
-        let mut fonts = vec![if make_bold {
-            bold("Roboto")
-        } else {
-            FontAttributes::new("Roboto")
-        }];
+    fn compute_title_font(&self, config: &ConfigHandle) -> (TextStyle, f64) {
+        let mut fonts = vec![];
 
         // Fallback to their main font selection, so that we can pick up
         // any fallback fonts they might have configured in the main
@@ -588,10 +576,9 @@ impl FontConfigInner {
         &self,
         myself: &Rc<Self>,
         pref_size: Option<f64>,
-        make_bold: bool,
     ) -> anyhow::Result<Rc<LoadedFont>> {
         let config = self.config.borrow();
-        let (sys_font, sys_size) = self.compute_title_font(&config, make_bold);
+        let (sys_font, sys_size) = self.compute_title_font(&config);
 
         let font_size = pref_size.unwrap_or(sys_size);
 
@@ -639,7 +626,7 @@ impl FontConfigInner {
             return Ok(Rc::clone(entry));
         }
 
-        let loaded = self.make_title_font_impl(myself, config.window_frame.font_size, true)?;
+        let loaded = self.make_title_font_impl(myself, config.window_frame.font_size)?;
 
         title_font.replace(Rc::clone(&loaded));
 
@@ -655,8 +642,7 @@ impl FontConfigInner {
             return Ok(Rc::clone(entry));
         }
 
-        let loaded =
-            self.make_title_font_impl(myself, Some(config.command_palette_font_size), false)?;
+        let loaded = self.make_title_font_impl(myself, Some(config.command_palette_font_size))?;
 
         command_palette_font.replace(Rc::clone(&loaded));
 
@@ -672,7 +658,7 @@ impl FontConfigInner {
             return Ok(Rc::clone(entry));
         }
 
-        let loaded = self.make_title_font_impl(myself, Some(config.char_select_font_size), true)?;
+        let loaded = self.make_title_font_impl(myself, Some(config.char_select_font_size))?;
 
         char_select_font.replace(Rc::clone(&loaded));
 
@@ -688,7 +674,7 @@ impl FontConfigInner {
             return Ok(Rc::clone(entry));
         }
 
-        let loaded = self.make_title_font_impl(myself, Some(config.pane_select_font_size), true)?;
+        let loaded = self.make_title_font_impl(myself, Some(config.pane_select_font_size))?;
 
         pane_select_font.replace(Rc::clone(&loaded));
 

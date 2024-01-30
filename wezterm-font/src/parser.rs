@@ -846,21 +846,6 @@ pub(crate) fn load_built_in_fonts(font_info: &mut Vec<ParsedFont>) -> anyhow::Re
             font!("../../assets/fonts/JetBrainsMono-ThinItalic.ttf"),
             font!("../../assets/fonts/JetBrainsMono-Thin.ttf"),
         ],
-        #[cfg(any(test, feature = "vendor-roboto"))]
-        &[
-            font!("../../assets/fonts/Roboto-Black.ttf"),
-            font!("../../assets/fonts/Roboto-BlackItalic.ttf"),
-            font!("../../assets/fonts/Roboto-Bold.ttf"),
-            font!("../../assets/fonts/Roboto-BoldItalic.ttf"),
-            font!("../../assets/fonts/Roboto-Italic.ttf"),
-            font!("../../assets/fonts/Roboto-Light.ttf"),
-            font!("../../assets/fonts/Roboto-LightItalic.ttf"),
-            font!("../../assets/fonts/Roboto-Medium.ttf"),
-            font!("../../assets/fonts/Roboto-MediumItalic.ttf"),
-            font!("../../assets/fonts/Roboto-Regular.ttf"),
-            font!("../../assets/fonts/Roboto-Thin.ttf"),
-            font!("../../assets/fonts/Roboto-ThinItalic.ttf"),
-        ],
         #[cfg(any(test, feature = "vendor-noto-emoji"))]
         &[font!("../../assets/fonts/NotoColorEmoji.ttf")],
     ];
