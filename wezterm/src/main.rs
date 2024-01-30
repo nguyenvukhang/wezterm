@@ -95,9 +95,6 @@ enum SubCommand {
     )]
     Start(StartCommand),
 
-    #[command(name = "ssh", about = "Establish an ssh session")]
-    Ssh(SshCommand),
-
     #[command(name = "serial", about = "Open a serial port")]
     Serial(SerialCommand),
 
@@ -716,7 +713,6 @@ fn run() -> anyhow::Result<()> {
         SubCommand::Start(_)
         | SubCommand::LsFonts(_)
         | SubCommand::ShowKeys(_)
-        | SubCommand::Ssh(_)
         | SubCommand::Serial(_)
         | SubCommand::Connect(_) => delegate_to_gui(saver),
         SubCommand::ImageCat(cmd) => cmd.run(),

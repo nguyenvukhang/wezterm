@@ -8,7 +8,7 @@ use anyhow::{anyhow, Context};
 use clap::builder::ValueParser;
 use clap::{Parser, ValueHint};
 use config::keyassignment::{SpawnCommand, SpawnTabDomain};
-use config::{ConfigHandle, SerialDomain, SshDomain, SshMultiplexing};
+use config::{ConfigHandle, SerialDomain};
 use mux::activity::Activity;
 use mux::domain::{Domain, LocalDomain};
 use mux::Mux;
@@ -16,7 +16,6 @@ use mux_lua::MuxDomain;
 use portable_pty::cmdbuilder::CommandBuilder;
 use promise::spawn::block_on;
 use std::borrow::Cow;
-use std::collections::HashMap;
 use std::env::current_dir;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -109,9 +108,6 @@ enum SubCommand {
     )]
     Start(StartCommand),
 
-    #[command(name = "ssh", about = "Establish an ssh session")]
-    Ssh(SshCommand),
-
     #[command(name = "serial", about = "Open a serial port")]
     Serial(SerialCommand),
 
@@ -123,73 +119,6 @@ enum SubCommand {
 
     #[command(name = "show-keys", about = "Show key assignments")]
     ShowKeys(ShowKeysCommand),
-}
-
-async fn async_run_ssh(opts: SshCommand) -> anyhow::Result<()> {
-    let mut ssh_option = HashMap::new();
-    if opts.verbose {
-        ssh_option.insert("wezterm_ssh_verbose".to_string(), "true".to_string());
-    }
-    for (k, v) in opts.config_override {
-        ssh_option.insert(k.to_lowercase().to_string(), v);
-    }
-
-    let dom = SshDomain {
-        name: format!("SSH to {}", opts.user_at_host_and_port),
-        remote_address: opts.user_at_host_and_port.host_and_port.clone(),
-        username: opts.user_at_host_and_port.username.clone(),
-        multiplexing: SshMultiplexing::None,
-        ssh_option,
-        ..Default::default()
-    };
-
-    let start_command = StartCommand {
-        always_new_process: true,
-        class: opts.class,
-        cwd: None,
-        no_auto_connect: true,
-        position: opts.position,
-        workspace: None,
-        prog: opts.prog.clone(),
-        ..Default::default()
-    };
-
-    let cmd = if !opts.prog.is_empty() {
-        let builder = CommandBuilder::from_argv(opts.prog);
-        Some(builder)
-    } else {
-        None
-    };
-
-    let domain: Arc<dyn Domain> = Arc::new(mux::ssh::RemoteSshDomain::with_ssh_domain(&dom)?);
-    let mux = Mux::get();
-    mux.add_domain(&domain);
-    mux.set_default_domain(&domain);
-
-    async_run_terminal_gui(cmd, start_command).await
-}
-
-fn run_ssh(opts: SshCommand) -> anyhow::Result<()> {
-    if let Some(cls) = opts.class.as_ref() {
-        crate::set_window_class(cls);
-    }
-    if let Some(pos) = opts.position.as_ref() {
-        set_window_position(pos.clone());
-    }
-
-    build_initial_mux(&config::configuration(), None, None)?;
-
-    let gui = crate::frontend::try_new()?;
-
-    promise::spawn::spawn(async {
-        if let Err(err) = async_run_ssh(opts).await {
-            terminate_with_error(err);
-        }
-    })
-    .detach();
-
-    maybe_show_configuration_error_window();
-    gui.run_forever()
 }
 
 async fn async_run_serial(opts: SerialCommand) -> anyhow::Result<()> {
@@ -1134,7 +1063,6 @@ fn run() -> anyhow::Result<()> {
             wezterm_blob_leases::clear_storage();
             res
         }
-        SubCommand::Ssh(ssh) => run_ssh(ssh),
         SubCommand::Serial(serial) => run_serial(config, serial),
         SubCommand::Connect(connect) => run_terminal_gui(
             StartCommand {
