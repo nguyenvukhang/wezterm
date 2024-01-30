@@ -26,7 +26,6 @@ filesystem = { path = "../lua-api-crates/filesystem" }
 json = { path = "../lua-api-crates/json" }
 plugin = { path = "../lua-api-crates/plugin" }
 share-data = { path = "../lua-api-crates/share-data" }
-ssh-funcs = { path = "../lua-api-crates/ssh-funcs" }
 spawn-funcs = { path = "../lua-api-crates/spawn-funcs" }
 time-funcs = { path = "../lua-api-crates/time-funcs" }
 url-funcs = { path = "../lua-api-crates/url-funcs" }

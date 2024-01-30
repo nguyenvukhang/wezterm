@@ -201,7 +201,6 @@ fn register_lua_modules() {
         filesystem::register,
         json::register,
         plugin::register,
-        ssh_funcs::register,
         spawn_funcs::register,
         share_data::register,
         time_funcs::register,

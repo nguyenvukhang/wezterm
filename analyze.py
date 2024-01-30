@@ -18,6 +18,12 @@ class Project:
     def __repr__(self) -> str:
         return str(self)
 
+    def needs(self, other: str) -> bool:
+        return any(map(lambda v: other in v.dir, self.deps))
+
+    def is_needed_by(self, other: str) -> bool:
+        return any(map(lambda v: other in v.dir, self.needed_by))
+
 
 def read_file(p: str) -> str:
     with open(p, "r") as f:
@@ -66,6 +72,8 @@ for i in n:
     for dep in parse_cargo_toml(projects[i].path):
         update(projects, i, dep)
 
-for p in projects:
-    if len(p.needed_by) == 0:
-        print("[x]", p.dir)
+unneeded = list(filter(lambda v: len(v.needed_by) == 0, projects))
+
+
+for p in unneeded:
+    print(p.dir)
