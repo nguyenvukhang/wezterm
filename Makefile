@@ -1,5 +1,5 @@
 current:
-	make analyze
+	@make debug
 
 analyze:
 	python3 analyze.py
@@ -29,6 +29,9 @@ i:
 
 o:
 	open Alatty.app
+
+a:
+	@make analyze
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIR  := $(dir $(MAKEFILE_PATH))

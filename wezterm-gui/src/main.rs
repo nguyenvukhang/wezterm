@@ -8,7 +8,7 @@ use anyhow::{anyhow, Context};
 use clap::builder::ValueParser;
 use clap::{Parser, ValueHint};
 use config::keyassignment::{SpawnCommand, SpawnTabDomain};
-use config::{ConfigHandle, SerialDomain};
+use config::ConfigHandle;
 use mux::activity::Activity;
 use mux::domain::{Domain, LocalDomain};
 use mux::Mux;
@@ -108,9 +108,6 @@ enum SubCommand {
     )]
     Start(StartCommand),
 
-    #[command(name = "serial", about = "Open a serial port")]
-    Serial(SerialCommand),
-
     #[command(name = "connect", about = "Connect to wezterm multiplexer")]
     Connect(ConnectCommand),
 
@@ -119,56 +116,6 @@ enum SubCommand {
 
     #[command(name = "show-keys", about = "Show key assignments")]
     ShowKeys(ShowKeysCommand),
-}
-
-async fn async_run_serial(opts: SerialCommand) -> anyhow::Result<()> {
-    let serial_domain = SerialDomain {
-        name: format!("Serial Port {}", opts.port),
-        port: Some(opts.port.clone()),
-        baud: opts.baud,
-    };
-
-    let start_command = StartCommand {
-        always_new_process: true,
-        class: opts.class,
-        cwd: None,
-        no_auto_connect: true,
-        position: opts.position,
-        workspace: None,
-        domain: Some(serial_domain.name.clone()),
-        ..Default::default()
-    };
-
-    let cmd = None;
-
-    let domain: Arc<dyn Domain> = Arc::new(LocalDomain::new_serial_domain(serial_domain)?);
-    let mux = Mux::get();
-    mux.add_domain(&domain);
-
-    async_run_terminal_gui(cmd, start_command).await
-}
-
-fn run_serial(config: config::ConfigHandle, opts: SerialCommand) -> anyhow::Result<()> {
-    if let Some(cls) = opts.class.as_ref() {
-        crate::set_window_class(cls);
-    }
-    if let Some(pos) = opts.position.as_ref() {
-        set_window_position(pos.clone());
-    }
-
-    build_initial_mux(&config, None, None)?;
-
-    let gui = crate::frontend::try_new()?;
-
-    promise::spawn::spawn(async {
-        if let Err(err) = async_run_serial(opts).await {
-            terminate_with_error(err);
-        }
-    })
-    .detach();
-
-    maybe_show_configuration_error_window();
-    gui.run_forever()
 }
 
 fn have_panes_in_domain_and_ws(domain: &Arc<dyn Domain>, workspace: &Option<String>) -> bool {
@@ -1063,7 +1010,6 @@ fn run() -> anyhow::Result<()> {
             wezterm_blob_leases::clear_storage();
             res
         }
-        SubCommand::Serial(serial) => run_serial(config, serial),
         SubCommand::Connect(connect) => run_terminal_gui(
             StartCommand {
                 domain: Some(connect.domain_name.clone()),
