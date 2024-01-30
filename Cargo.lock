@@ -1499,7 +1499,6 @@ dependencies = [
  "plugin",
  "procinfo-funcs",
  "share-data",
- "spawn-funcs",
  "termwiz",
  "termwiz-funcs",
  "time-funcs",
@@ -4507,21 +4506,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab074195b3f78a133cd7b7998142cf39dfaac71f6e990eaeecd14f5524db009a"
 dependencies = [
  "chrono",
-]
-
-[[package]]
-name = "spawn-funcs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bstr 1.9.0",
- "config",
- "log",
- "luahelper",
- "smol",
- "wezterm-dynamic",
- "wezterm-open-url",
- "winapi",
 ]
 
 [[package]]
