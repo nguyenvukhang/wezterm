@@ -20,7 +20,6 @@ use std::cell::{Ref, RefCell};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use termwiz::nerdfonts::NERD_FONTS;
 use wezterm_dynamic::{FromDynamic, ToDynamic};
 use wezterm_term::{KeyCode, KeyModifiers, MouseEvent};
 use window::color::LinearRgba;
@@ -299,13 +298,7 @@ impl CommandPalette {
                 format!("{}: ", command.menubar.join(" | "))
             };
 
-            let icon = match &command.icon {
-                Some(nf) => NERD_FONTS.get(nf.as_ref()).unwrap_or_else(|| {
-                    log::error!("nerdfont {nf} not found in NERD_FONTS");
-                    &'?'
-                }),
-                None => &' ',
-            };
+            let icon = &' ';
 
             let solid_bg_color: InheritableColor = term_window
                 .config

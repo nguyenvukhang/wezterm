@@ -58,8 +58,6 @@ pub mod istty;
 pub mod keymap;
 pub mod lineedit;
 mod macros;
-pub mod nerdfonts;
-mod nerdfonts_data;
 mod readbuf;
 pub mod render;
 pub mod surface;

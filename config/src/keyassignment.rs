@@ -370,7 +370,6 @@ pub enum CharSelectGroup {
     Objects,
     Symbols,
     Flags,
-    NerdFonts,
     UnicodeNames,
     ShortCodes,
 }
@@ -404,8 +403,7 @@ char_select_group_impl_next_prev! (
     Activities => Objects,
     Objects => Symbols,
     Symbols => Flags,
-    Flags => NerdFonts,
-    NerdFonts => UnicodeNames,
+    Flags => UnicodeNames,
     UnicodeNames => ShortCodes,
     ShortCodes => RecentlyUsed,
 );

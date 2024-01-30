@@ -10,7 +10,6 @@ edition = "2021"
 vendor-jetbrains = []
 vendor-roboto = []
 vendor-noto-emoji = []
-vendor-nerd-font-symbols = []
 
 [dependencies]
 anyhow = "1.0"

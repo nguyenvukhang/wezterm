@@ -13,7 +13,6 @@ use wezterm_dynamic::{FromDynamic, ToDynamic};
 
 pub fn register(lua: &Lua) -> anyhow::Result<()> {
     let wezterm_mod = get_or_create_module(lua, "wezterm")?;
-    wezterm_mod.set("nerdfonts", NerdFonts {})?;
     wezterm_mod.set("format", lua.create_function(format)?)?;
     wezterm_mod.set(
         "column_width",
@@ -48,21 +47,6 @@ pub fn register(lua: &Lua) -> anyhow::Result<()> {
     )?;
 
     Ok(())
-}
-
-struct NerdFonts {}
-
-impl mlua::UserData for NerdFonts {
-    fn add_methods<'lua, M: mlua::UserDataMethods<'lua, Self>>(methods: &mut M) {
-        methods.add_meta_method(
-            mlua::MetaMethod::Index,
-            |_, _, key: String| -> mlua::Result<Option<String>> {
-                Ok(termwiz::nerdfonts::NERD_FONTS
-                    .get(key.as_str())
-                    .map(|c| c.to_string()))
-            },
-        );
-    }
 }
 
 #[derive(Debug, FromDynamic, ToDynamic, Clone, PartialEq, Eq)]

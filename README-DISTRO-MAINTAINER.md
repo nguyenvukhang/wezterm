@@ -65,9 +65,6 @@ If your distribution offers those fonts as installable packages, then it is
 recommended that you skip compiling in that font by disabling the associated
 feature:
 
-* `vendor-nerd-font-symbols-font` - causes [Symbols Nerd Font
-  Mono](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/NerdFontsSymbolsOnly/complete/Symbols-1000-em%20Nerd%20Font%20Complete%20Mono.ttf)
-  to be compiled in.
 * `vendor-jetbrains-font` - causes `JetBrains Mono` to be compiled in
 * `vendor-roboto-font` - causes `Roboto` to be compiled in
 * `vendor-noto-emoji-font` - causes `Noto Color Emoji` to be compiled in.

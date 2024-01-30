@@ -9,7 +9,6 @@
 * Adjusted Line clustering when bidi is disabled to improve perf when
   used in wezterm
 * Fix crash bug when using to TeenyString inside Cell with Rust 1.67
-* Updated nerdfonts metadata for v2.3.3
 
 ## termwiz-0.19.0:
 
