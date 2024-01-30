@@ -16,7 +16,6 @@ use crate::keyassignment::{
 use crate::keys::{Key, LeaderKey, Mouse};
 use crate::lua::make_lua_context;
 use crate::ssh::{SshBackend, SshDomain};
-use crate::tls::{TlsDomainClient, TlsDomainServer};
 use crate::units::Dimension;
 use crate::unix::UnixDomain;
 use crate::wsl::WslDomain;
@@ -346,15 +345,6 @@ pub struct Config {
 
     #[dynamic(default)]
     pub ssh_backend: SshBackend,
-
-    /// When running in server mode, defines configuration for
-    /// each of the endpoints that we'll listen for connections
-    #[dynamic(default)]
-    pub tls_servers: Vec<TlsDomainServer>,
-
-    /// The set of tls domains that we can connect to as a client
-    #[dynamic(default)]
-    pub tls_clients: Vec<TlsDomainClient>,
 
     /// Constrains the rate at which the multiplexer client will
     /// speculatively fetch line data.
@@ -1190,9 +1180,6 @@ impl Config {
             for d in domains {
                 check_domain(&d.name, "wsl domain")?;
             }
-        }
-        for d in &self.tls_clients {
-            check_domain(&d.name, "tls domain")?;
         }
         Ok(())
     }
