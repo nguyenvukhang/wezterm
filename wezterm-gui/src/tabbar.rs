@@ -176,10 +176,6 @@ impl TabBarState {
         &self.line
     }
 
-    pub fn items(&self) -> &[TabEntry] {
-        &self.items
-    }
-
     fn integrated_title_buttons(
         mouse_x: Option<usize>,
         x: &mut usize,

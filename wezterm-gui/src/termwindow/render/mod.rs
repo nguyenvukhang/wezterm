@@ -39,7 +39,6 @@ pub mod pane;
 pub mod screen_line;
 pub mod split;
 pub mod tab_bar;
-pub mod window_buttons;
 
 /// The data that we associate with a line; we use this to cache it shape hash
 #[derive(Debug)]
