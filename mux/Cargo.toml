@@ -44,7 +44,6 @@ termwiz-funcs = { path = "../lua-api-crates/termwiz-funcs" }
 textwrap = "0.16"
 thiserror = "1.0"
 url = "2"
-wezterm-ssh = { path = "../wezterm-ssh" }
 wezterm-dynamic = { path = "../wezterm-dynamic" }
 wezterm-term = { path = "../term", features=["use_serde"] }
 flume = "0.10"

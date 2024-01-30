@@ -15,7 +15,6 @@ use crate::keyassignment::{
 };
 use crate::keys::{Key, LeaderKey, Mouse};
 use crate::lua::make_lua_context;
-use crate::ssh::{SshBackend, SshDomain};
 use crate::units::Dimension;
 use crate::unix::UnixDomain;
 use crate::wsl::WslDomain;
@@ -339,12 +338,6 @@ pub struct Config {
     /// The set of unix domains
     #[dynamic(default = "UnixDomain::default_unix_domains")]
     pub unix_domains: Vec<UnixDomain>,
-
-    #[dynamic(default)]
-    pub ssh_domains: Option<Vec<SshDomain>>,
-
-    #[dynamic(default)]
-    pub ssh_backend: SshBackend,
 
     /// Constrains the rate at which the multiplexer client will
     /// speculatively fetch line data.
@@ -850,17 +843,6 @@ impl Config {
         Self::load_with_overrides(&wezterm_dynamic::Value::default())
     }
 
-    /// It is relatively expensive to parse all the ssh config files,
-    /// so we defer producing the default list until someone explicitly
-    /// asks for it
-    pub fn ssh_domains(&self) -> Vec<SshDomain> {
-        if let Some(domains) = &self.ssh_domains {
-            domains.clone()
-        } else {
-            SshDomain::default_domains()
-        }
-    }
-
     pub fn wsl_domains(&self) -> Vec<WslDomain> {
         if let Some(domains) = &self.wsl_domains {
             domains.clone()
@@ -1167,11 +1149,6 @@ impl Config {
 
         for d in &self.unix_domains {
             check_domain(&d.name, "unix domain")?;
-        }
-        if let Some(domains) = &self.ssh_domains {
-            for d in domains {
-                check_domain(&d.name, "ssh domain")?;
-            }
         }
         for d in &self.exec_domains {
             check_domain(&d.name, "exec domain")?;

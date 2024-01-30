@@ -418,7 +418,6 @@ TOC = [
             Gen("object: MuxTab", "config/lua/MuxTab"),
             Page("object: PaneInformation", "config/lua/PaneInformation.md"),
             Page("object: TabInformation", "config/lua/TabInformation.md"),
-            Page("object: SshDomain", "config/lua/SshDomain.md"),
             Page("object: SpawnCommand", "config/lua/SpawnCommand.md"),
             Gen("object: Time", "config/lua/wezterm.time/Time"),
             Gen(
