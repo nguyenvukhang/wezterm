@@ -57,7 +57,6 @@ pub struct ImageAttachParams {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ImageAttachStyle {
     Sixel,
-    Iterm,
 }
 
 impl TerminalState {
@@ -205,9 +204,7 @@ impl TerminalState {
                     params.placement_id,
                 ));
                 match params.style {
-                    ImageAttachStyle::Sixel | ImageAttachStyle::Iterm => {
-                        cell.attrs_mut().set_image(img)
-                    }
+                    ImageAttachStyle::Sixel => cell.attrs_mut().set_image(img),
                 };
 
                 self.screen_mut()
@@ -232,7 +229,6 @@ impl TerminalState {
             // unless sixel_scrolls_right is enabled.
             // iTerm places it after the bottom right corner.
             let bottom_right = match params.style {
-                ImageAttachStyle::Iterm => true,
                 ImageAttachStyle::Sixel => self.sixel_scrolls_right,
             };
 
@@ -285,26 +281,6 @@ pub(crate) fn check_image_dimensions(width: u32, height: u32) -> anyhow::Result<
         anyhow::bail!("Ignoring image with 0x0 dimensions");
     }
     Ok(())
-}
-
-#[derive(Debug)]
-pub(crate) struct ImageInfo {
-    pub width: u32,
-    pub height: u32,
-    pub format: image::ImageFormat,
-}
-
-pub(crate) fn dimensions(data: &[u8]) -> anyhow::Result<ImageInfo> {
-    let reader = image::io::Reader::new(std::io::Cursor::new(data)).with_guessed_format()?;
-    let format = reader
-        .format()
-        .ok_or_else(|| anyhow::anyhow!("unknown format!?"))?;
-    let (width, height) = reader.into_dimensions()?;
-    Ok(ImageInfo {
-        width,
-        height,
-        format,
-    })
 }
 
 /// Returns `1` if `b` is true, else `0`,

@@ -663,7 +663,6 @@ impl<'a> Performer<'a> {
                 self.top_and_bottom_margins = 0..self.screen().physical_rows as VisibleRowIndex;
                 self.left_and_right_margins = 0..self.screen().physical_cols;
                 self.unicode_version = self.config.unicode_version();
-                self.unicode_version_stack.clear();
                 self.suppress_initial_title_change = false;
                 self.accumulating_title.take();
 

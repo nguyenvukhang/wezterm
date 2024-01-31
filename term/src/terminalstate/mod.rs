@@ -363,7 +363,6 @@ pub struct TerminalState {
 
     /// The unicode version that is in effect
     unicode_version: UnicodeVersion,
-    unicode_version_stack: Vec<UnicodeVersionStackEntry>,
 
     enable_conpty_quirks: bool,
     /// On Windows, the ConPTY layer emits an OSC sequence to
@@ -568,7 +567,6 @@ impl TerminalState {
             user_vars: HashMap::new(),
             seqno,
             unicode_version,
-            unicode_version_stack: vec![],
             suppress_initial_title_change: false,
             enable_conpty_quirks: false,
             accumulating_title: None,
