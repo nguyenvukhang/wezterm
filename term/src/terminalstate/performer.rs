@@ -1,12 +1,9 @@
 use crate::terminal::Alert;
-use crate::terminalstate::{
-    default_color_map, CharSet, MouseEncoding, TabStop, UnicodeVersionStackEntry,
-};
+use crate::terminalstate::{default_color_map, CharSet, MouseEncoding, TabStop};
 use crate::{ClipboardSelection, Position, TerminalState, VisibleRowIndex, DCS, ST};
 use finl_unicode::grapheme_clusters::Graphemes;
 use log::{debug, error};
 use num_traits::FromPrimitive;
-use ordered_float::NotNan;
 use std::fmt::Write;
 use std::io::Write as _;
 use std::ops::{Deref, DerefMut};
@@ -14,10 +11,7 @@ use termwiz::cell::{grapheme_column_width, Cell, CellAttributes, SemanticType};
 use termwiz::escape::csi::{
     CharacterPath, EraseInDisplay, Keyboard, KittyKeyboardFlags, KittyKeyboardMode,
 };
-use termwiz::escape::osc::{
-    ChangeColorPair, ColorOrQuery, FinalTermSemanticPrompt, ITermProprietary,
-    ITermUnicodeVersionOp, Selection,
-};
+use termwiz::escape::osc::{ChangeColorPair, ColorOrQuery, FinalTermSemanticPrompt, Selection};
 use termwiz::escape::{
     Action, ControlCode, DeviceControlMode, Esc, EscCode, OperatingSystemCommand, CSI,
 };
@@ -750,73 +744,6 @@ impl<'a> Performer<'a> {
                     Err(err) => error!("failed to set clipboard in response to OSC 52: {:#?}", err),
                 }
             }
-            OperatingSystemCommand::ITermProprietary(iterm) => match iterm {
-                ITermProprietary::RequestCellSize => {
-                    let screen = self.screen();
-                    let height = screen.physical_rows;
-                    let width = screen.physical_cols;
-
-                    let scale = if screen.dpi == 0 {
-                        1.0
-                    } else {
-                        // Since iTerm2 is a macOS specific piece
-                        // of software, it uses the macOS default dpi
-                        // if 72 for the basis of its scale, regardless
-                        // of the host base dpi.
-                        screen.dpi as f32 / 72.
-                    };
-                    let width = (self.pixel_width as f32 / width as f32) / scale;
-                    let height = (self.pixel_height as f32 / height as f32) / scale;
-
-                    let response = OperatingSystemCommand::ITermProprietary(
-                        ITermProprietary::ReportCellSize {
-                            width_pixels: NotNan::new(width).unwrap(),
-                            height_pixels: NotNan::new(height).unwrap(),
-                            scale: if screen.dpi == 0 {
-                                None
-                            } else {
-                                Some(NotNan::new(scale).unwrap())
-                            },
-                        },
-                    );
-                    write!(self.writer, "{}", response).ok();
-                    self.writer.flush().ok();
-                }
-                ITermProprietary::File(image) => self.set_image(*image),
-                ITermProprietary::SetUserVar { name, value } => {
-                    self.user_vars.insert(name.clone(), value.clone());
-                    if let Some(handler) = self.alert_handler.as_mut() {
-                        handler.alert(Alert::SetUserVar { name, value });
-                    }
-                }
-                ITermProprietary::UnicodeVersion(ITermUnicodeVersionOp::Set(n)) => {
-                    self.unicode_version.version = n;
-                }
-                ITermProprietary::UnicodeVersion(ITermUnicodeVersionOp::Push(label)) => {
-                    let vers = self.unicode_version;
-                    self.unicode_version_stack
-                        .push(UnicodeVersionStackEntry { vers, label });
-                }
-                ITermProprietary::UnicodeVersion(ITermUnicodeVersionOp::Pop(None)) => {
-                    if let Some(entry) = self.unicode_version_stack.pop() {
-                        self.unicode_version = entry.vers;
-                    }
-                }
-                ITermProprietary::UnicodeVersion(ITermUnicodeVersionOp::Pop(Some(label))) => {
-                    while let Some(entry) = self.unicode_version_stack.pop() {
-                        self.unicode_version = entry.vers;
-                        if entry.label.as_deref() == Some(&label) {
-                            break;
-                        }
-                    }
-                }
-                _ => {
-                    if self.config.log_unknown_escape_sequences() {
-                        log::warn!("unhandled iterm2: {:?}", iterm);
-                    }
-                }
-            },
-
             OperatingSystemCommand::FinalTermSemanticPrompt(FinalTermSemanticPrompt::FreshLine) => {
                 self.fresh_line();
             }

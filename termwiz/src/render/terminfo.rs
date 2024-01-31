@@ -4,7 +4,7 @@ use crate::cell::{AttributeChange, Blink, CellAttributes, Intensity, Underline};
 use crate::color::{ColorAttribute, ColorSpec};
 use crate::escape::csi::{Cursor, Edit, EraseInDisplay, EraseInLine, Sgr, CSI};
 use crate::escape::esc::EscCode;
-use crate::escape::osc::{ITermDimension, ITermFileData, ITermProprietary, OperatingSystemCommand};
+use crate::escape::osc::{ITermDimension, ITermFileData, OperatingSystemCommand};
 use crate::escape::{Esc, OneBased};
 use crate::image::{ImageDataType, TextureCoordinate};
 use crate::render::RenderTty;

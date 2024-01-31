@@ -1,4 +1,3 @@
-use crate::ICON_DATA;
 use anyhow::anyhow;
 use config::{configuration, wezterm_version};
 use http_req::request::{HttpVersion, Request};
@@ -14,7 +13,6 @@ use std::time::Duration;
 use termwiz::cell::{AttributeChange, Hyperlink, Underline};
 use termwiz::color::AnsiColor;
 use termwiz::escape::csi::{Cursor, Sgr};
-use termwiz::escape::osc::{ITermDimension, ITermFileData, ITermProprietary};
 use termwiz::escape::{OneBased, OperatingSystemCommand, CSI};
 use termwiz::surface::{Change, CursorVisibility};
 use wezterm_term::TerminalSize;
@@ -288,18 +286,6 @@ fn set_banner_from_release_info(latest: &Release) {
         "https://wezfurlong.org/wezterm/changelog.html#{}",
         latest.tag_name
     );
-
-    let icon = ITermFileData {
-        name: None,
-        size: Some(ICON_DATA.len()),
-        width: ITermDimension::Automatic,
-        height: ITermDimension::Cells(2),
-        preserve_aspect_ratio: true,
-        inline: true,
-        do_not_move_cursor: false,
-        data: ICON_DATA.to_vec(),
-    };
-    let icon = OperatingSystemCommand::ITermProprietary(ITermProprietary::File(Box::new(icon)));
     let top_line_pos = CSI::Cursor(Cursor::CharacterAndLinePosition {
         line: OneBased::new(1),
         col: OneBased::new(6),
@@ -315,14 +301,7 @@ fn set_banner_from_release_info(latest: &Release) {
     let link_off = OperatingSystemCommand::SetHyperlink(None);
     mux.set_banner(Some(format!(
         "{}{}WezTerm Update Available\r\n{}{}{}{}Click to see what's new{}{}\r\n",
-        icon,
-        top_line_pos,
-        second_line_pos,
-        link_on,
-        underline_color,
-        underline_on,
-        link_off,
-        reset,
+        top_line_pos, second_line_pos, link_on, underline_color, underline_on, link_off, reset,
     )));
 }
 
