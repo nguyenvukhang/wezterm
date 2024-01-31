@@ -10,7 +10,6 @@ use num_derive::*;
 use std::fmt::{Display, Error as FmtError, Formatter, Write as FmtWrite};
 use wezterm_color_types::LinearRgba;
 
-pub mod apc;
 pub mod csi;
 pub mod esc;
 pub mod osc;
