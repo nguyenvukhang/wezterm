@@ -102,13 +102,6 @@ enum SubCommand {
     #[command(name = "cli", about = "Interact with experimental mux server")]
     Cli(cli::CliCommand),
 
-    #[command(
-        name = "set-working-directory",
-        about = "Advise the terminal of the current working directory by \
-                 emitting an OSC 7 escape sequence"
-    )]
-    SetCwd(SetCwdCommand),
-
     #[command(name = "record", about = "Record a terminal session as an asciicast")]
     Record(asciicast::RecordCommand),
 
@@ -123,8 +116,6 @@ enum SubCommand {
         shell: Shell,
     },
 }
-
-use termwiz::escape::osc::OperatingSystemCommand;
 
 #[derive(Copy, Clone, Debug, ValueEnum, Default)]
 enum ResampleFilter {
@@ -142,80 +133,6 @@ enum ResampleImageFormat {
     Jpeg,
     #[default]
     Input,
-}
-
-#[derive(Debug, Parser, Clone)]
-struct SetCwdCommand {
-    /// The directory to specify.
-    /// If omitted, will use the current directory of the process itself.
-    #[arg(value_parser, value_hint=ValueHint::DirPath)]
-    cwd: Option<OsString>,
-
-    /// How to manage passing the escape through to tmux
-    #[arg(long, value_parser)]
-    tmux_passthru: Option<TmuxPassthru>,
-
-    /// The hostname to use in the constructed file:// URL.
-    /// If omitted, the system hostname will be used.
-    #[arg(value_parser, value_hint=ValueHint::Hostname)]
-    host: Option<OsString>,
-}
-
-impl SetCwdCommand {
-    fn run(&self) -> anyhow::Result<()> {
-        let mut cwd = std::env::current_dir()?;
-        if let Some(dir) = &self.cwd {
-            cwd.push(dir);
-        }
-
-        let mut url = url::Url::from_directory_path(&cwd)
-            .map_err(|_| anyhow::anyhow!("cwd {} is not an absolute path", cwd.display()))?;
-        let host = match self.host.as_ref() {
-            Some(h) => h.clone(),
-            None => hostname::get()?,
-        };
-        let host = host.to_str().unwrap_or("localhost");
-        url.set_host(Some(host))?;
-
-        let (begin, end) = self.tmux_passthru.unwrap_or_default().get();
-
-        let osc = OperatingSystemCommand::CurrentWorkingDirectory(url.into());
-        print!("{begin}{osc}{end}");
-        if !begin.is_empty() {
-            // Tmux understands OSC 7 but won't automatically pass it through.
-            // <https://github.com/tmux/tmux/issues/3127#issuecomment-1076300455>
-            // Let's do it again explicitly now.
-            print!("{osc}");
-        }
-        Ok(())
-    }
-}
-
-#[derive(Copy, Clone, Debug, ValueEnum, Default)]
-enum TmuxPassthru {
-    Disable,
-    Enable,
-    #[default]
-    Detect,
-}
-
-impl TmuxPassthru {
-    fn is_tmux() -> bool {
-        std::env::var_os("TMUX").is_some()
-    }
-
-    fn get(&self) -> (&'static str, &'static str) {
-        let enabled = match self {
-            Self::Enable => true,
-            Self::Detect => Self::is_tmux(),
-            Self::Disable => false,
-        };
-        if enabled {
-            ("\u{1b}Ptmux;\u{1b}", "\u{1b}\\")
-        } else {
-            ("", "")
-        }
-    }
 }
 
 fn terminate_with_error_message(err: &str) -> ! {
@@ -266,7 +183,6 @@ fn run() -> anyhow::Result<()> {
         | SubCommand::ShowKeys(_)
         | SubCommand::Serial(_)
         | SubCommand::Connect(_) => delegate_to_gui(saver),
-        SubCommand::SetCwd(cmd) => cmd.run(),
         SubCommand::Cli(cli) => cli::run_cli(&opts, cli),
         SubCommand::Record(cmd) => cmd.run(init_config(&opts)?),
         SubCommand::Replay(cmd) => cmd.run(),
