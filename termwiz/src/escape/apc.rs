@@ -1,25 +1,6 @@
-use crate::escape::osc::{base64_decode, base64_encode};
-use std::collections::BTreeMap;
-use std::fmt::{Display, Error as FmtError, Formatter};
+use crate::escape::osc::base64_decode;
+use std::fmt::Formatter;
 use std::io::{Read, Seek};
-
-fn get<'a>(keys: &BTreeMap<&str, &'a str>, k: &str) -> Option<&'a str> {
-    keys.get(k).map(|&s| s)
-}
-
-fn geti<T: std::str::FromStr>(keys: &BTreeMap<&str, &str>, k: &str) -> Option<T> {
-    get(keys, k).and_then(|s| s.parse().ok())
-}
-
-fn set<T: std::string::ToString>(
-    keys: &mut BTreeMap<&'static str, String>,
-    k: &'static str,
-    v: &Option<T>,
-) {
-    if let Some(v) = v {
-        keys.insert(k, v.to_string());
-    }
-}
 
 #[derive(Clone, PartialEq, Eq)]
 pub enum KittyImageData {
@@ -601,46 +582,4 @@ pub struct KittyImageFrame {
     /// If omitted, use a black, fully-transparent pixel (0)
     /// Y=...
     pub background_pixel: Option<u32>,
-}
-
-impl KittyImageFrame {
-    fn from_keys(keys: &BTreeMap<&str, &str>) -> Option<Self> {
-        Some(Self {
-            x: geti(keys, "x"),
-            y: geti(keys, "y"),
-            base_frame: match geti(keys, "c") {
-                None | Some(0) => None,
-                n => n,
-            },
-            frame_number: match geti(keys, "r") {
-                None | Some(0) => None,
-                n => n,
-            },
-            duration_ms: match geti(keys, "Z") {
-                None | Some(0) => None,
-                n => n,
-            },
-            composition_mode: match geti(keys, "X") {
-                None | Some(0) => KittyFrameCompositionMode::AlphaBlending,
-                Some(1) => KittyFrameCompositionMode::Overwrite,
-                _ => return None,
-            },
-            background_pixel: geti(keys, "Y"),
-        })
-    }
-
-    fn to_keys(&self, keys: &mut BTreeMap<&'static str, String>) {
-        set(keys, "x", &self.x);
-        set(keys, "y", &self.y);
-        set(keys, "c", &self.base_frame);
-        set(keys, "r", &self.frame_number);
-        set(keys, "Z", &self.duration_ms);
-        match &self.composition_mode {
-            KittyFrameCompositionMode::AlphaBlending => {}
-            KittyFrameCompositionMode::Overwrite => {
-                keys.insert("X", "1".to_string());
-            }
-        }
-        set(keys, "Y", &self.background_pixel);
-    }
 }
