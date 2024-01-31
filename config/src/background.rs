@@ -48,7 +48,6 @@ impl FromDynamic for ImageFileSourceWrap {
 #[derive(Debug, Clone, FromDynamic, ToDynamic)]
 pub enum BackgroundSource {
     Gradient(Gradient),
-    File(ImageFileSourceWrap),
     Color(RgbaColor),
 }
 
@@ -102,13 +101,6 @@ impl BackgroundLayer {
     pub fn with_legacy(cfg: &Config) -> Option<Self> {
         let source = if let Some(gradient) = &cfg.window_background_gradient {
             BackgroundSource::Gradient(gradient.clone())
-        } else if let Some(path) = &cfg.window_background_image {
-            BackgroundSource::File(ImageFileSourceWrap {
-                inner: ImageFileSource {
-                    path: path.to_string_lossy().to_string(),
-                    speed: 1.0,
-                },
-            })
         } else {
             return None;
         };

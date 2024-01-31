@@ -6,7 +6,7 @@ use bitflags::bitflags;
 use num_derive::*;
 use num_traits::FromPrimitive;
 use std::collections::HashMap;
-use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
+use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str;
 use std::str::FromStr;
 

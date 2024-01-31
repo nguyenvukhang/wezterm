@@ -12,12 +12,10 @@ use config::{
 };
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::time::SystemTime;
 use termwiz::image::{ImageData, ImageDataType};
 use wezterm_term::StableRowIndex;
 
 lazy_static::lazy_static! {
-    static ref IMAGE_CACHE: Mutex<HashMap<String, CachedImage>> = Mutex::new(HashMap::new());
     static ref GRADIENT_CACHE: Mutex<Vec<CachedGradient>> = Mutex::new(vec![]);
 }
 
@@ -184,64 +182,6 @@ impl CachedGradient {
     }
 }
 
-struct CachedImage {
-    modified: SystemTime,
-    image: Arc<ImageData>,
-    marked: bool,
-    speed: f32,
-}
-
-impl CachedImage {
-    fn load(path: &str, speed: f32) -> anyhow::Result<Arc<ImageData>> {
-        let modified = std::fs::metadata(path)
-            .and_then(|m| m.modified())
-            .with_context(|| format!("getting metadata for {}", path))?;
-        let mut cache = IMAGE_CACHE.lock().unwrap();
-        if let Some(cached) = cache.get_mut(path) {
-            if cached.modified == modified && cached.speed == speed {
-                cached.marked = false;
-                return Ok(Arc::clone(&cached.image));
-            }
-        }
-
-        let data = std::fs::read(path)
-            .with_context(|| format!("Failed to load window_background_image {}", path))?;
-        log::trace!("loaded {}", path);
-        let mut data = ImageDataType::EncodedFile(data);
-        data.adjust_speed(speed);
-        let image = Arc::new(ImageData::with_data(data));
-
-        cache.insert(
-            path.to_string(),
-            Self {
-                modified,
-                image: Arc::clone(&image),
-                marked: false,
-                speed,
-            },
-        );
-
-        Ok(image)
-    }
-
-    fn mark() {
-        let mut cache = IMAGE_CACHE.lock().unwrap();
-        for entry in cache.values_mut() {
-            entry.marked = true;
-        }
-    }
-
-    fn sweep() {
-        let mut cache = IMAGE_CACHE.lock().unwrap();
-        cache.retain(|k, entry| {
-            if entry.marked {
-                log::trace!("Unloading {} from cache", k);
-            }
-            !entry.marked
-        });
-    }
-}
-
 pub struct LoadedBackgroundLayer {
     pub source: Arc<ImageData>,
     pub def: BackgroundLayer,
@@ -327,7 +267,6 @@ fn load_background_layer(
                 size, size, data,
             )))
         }
-        BackgroundSource::File(source) => CachedImage::load(&source.path, source.speed)?,
     };
 
     Ok(LoadedBackgroundLayer {
@@ -371,7 +310,6 @@ pub fn reload_background_image(
         .map(|layer| (layer.source.hash(), &layer.source))
         .collect();
 
-    CachedImage::mark();
     CachedGradient::mark();
 
     let result = load_background_image(config, dimensions, render_metrics)
@@ -387,7 +325,6 @@ pub fn reload_background_image(
         })
         .collect();
 
-    CachedImage::sweep();
     CachedGradient::sweep();
 
     result
