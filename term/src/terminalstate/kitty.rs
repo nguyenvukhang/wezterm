@@ -69,65 +69,6 @@ impl KittyImageState {
 }
 
 impl TerminalState {
-    fn kitty_remove_placement_from_model(
-        &mut self,
-        image_id: u32,
-        placement_id: Option<u32>,
-        info: PlacementInfo,
-    ) {
-        let seqno = self.seqno;
-        let screen = self.screen_mut();
-        let range =
-            screen.stable_range(&(info.first_row..info.first_row + info.rows as StableRowIndex));
-        for idx in range {
-            let line = screen.line_mut(idx);
-            for c in line.cells_mut() {
-                c.attrs_mut()
-                    .detach_image_with_placement(image_id, placement_id);
-            }
-            line.update_last_change_seqno(seqno);
-        }
-    }
-
-    fn kitty_remove_placement(&mut self, image_id: u32, placement_id: Option<u32>) {
-        if placement_id.is_some() {
-            if let Some(info) = self.kitty_img.placements.remove(&(image_id, placement_id)) {
-                log::trace!("removed placement {} {:?}", image_id, placement_id);
-                self.kitty_remove_placement_from_model(image_id, placement_id, info);
-            }
-        } else {
-            let mut to_clear = vec![];
-            for (id, p) in self.kitty_img.placements.keys() {
-                if *id == image_id {
-                    to_clear.push(*p);
-                }
-            }
-            for p in to_clear.into_iter() {
-                if let Some(info) = self.kitty_img.placements.remove(&(image_id, p)) {
-                    self.kitty_remove_placement_from_model(image_id, p, info);
-                }
-            }
-        }
-
-        log::trace!(
-            "after remove: there are {} placements, {} images, {} memory",
-            self.kitty_img.placements.len(),
-            self.kitty_img.id_to_data.len(),
-            self.kitty_img.used_memory,
-        );
-    }
-
-    pub(crate) fn kitty_remove_all_placements(&mut self, delete: bool) {
-        for ((image_id, p), info) in std::mem::take(&mut self.kitty_img.placements).into_iter() {
-            self.kitty_remove_placement_from_model(image_id, p, info);
-        }
-        if delete {
-            self.kitty_img.id_to_data.clear();
-            self.kitty_img.used_memory = 0;
-            self.kitty_img.number_to_id.clear();
-        }
-    }
-
     fn kitty_send_response(
         &mut self,
         verbosity: KittyImageVerbosity,
