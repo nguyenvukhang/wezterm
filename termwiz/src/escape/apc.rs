@@ -377,29 +377,6 @@ pub enum KittyImageCompression {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct KittyImageTransmit {
-    /// f=...
-    pub format: Option<KittyImageFormat>,
-    /// combination of t=... and d=...
-    pub data: KittyImageData,
-    /// s=...
-    pub width: Option<u32>,
-    /// v=...
-    pub height: Option<u32>,
-    /// The image id.
-    /// i=...
-    pub image_id: Option<u32>,
-    /// The image number
-    /// I=...
-    pub image_number: Option<u32>,
-    /// o=...
-    pub compression: KittyImageCompression,
-
-    /// m=0 or m=1
-    pub more_data_follows: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KittyImagePlacement {
     /// source rectangle bounds.
     /// Default is whole image.
