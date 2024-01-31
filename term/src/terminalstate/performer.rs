@@ -247,12 +247,6 @@ impl<'a> Performer<'a> {
             Action::CSI(csi) => self.csi_dispatch(csi),
             Action::Sixel(sixel) => self.sixel(sixel),
             Action::XtGetTcap(names) => self.xt_get_tcap(names),
-            Action::KittyImage(img) => {
-                self.flush_print();
-                if let Err(err) = self.kitty_img(*img) {
-                    log::error!("kitty_img: {:#}", err);
-                }
-            }
         }
     }
 

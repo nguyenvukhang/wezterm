@@ -180,11 +180,7 @@ impl<'a, F: FnMut(Action)> VTActor for Performer<'a, F> {
     }
 
     fn apc_dispatch(&mut self, data: Vec<u8>) {
-        if let Some(img) = super::KittyImage::parse_apc(&data) {
-            (self.callback)(Action::KittyImage(Box::new(img)))
-        } else {
-            log::trace!("Ignoring APC data: {:?}", String::from_utf8_lossy(&data));
-        }
+        log::trace!("Ignoring APC data: {:?}", String::from_utf8_lossy(&data));
     }
 
     fn dcs_hook(

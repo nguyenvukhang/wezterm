@@ -43,7 +43,6 @@ pub enum Action {
     /// A list of termcap, terminfo names for which the application
     /// wants information
     XtGetTcap(Vec<String>),
-    KittyImage(Box<KittyImage>),
 }
 
 impl Action {
@@ -108,7 +107,6 @@ impl Display for Action {
 
                 Ok(())
             }
-            Action::KittyImage(img) => img.fmt(f),
         }
     }
 }
