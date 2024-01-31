@@ -27,12 +27,10 @@ use wezterm_bidi::ParagraphDirectionHint;
 mod image;
 mod iterm;
 mod keyboard;
-mod kitty;
 mod mouse;
 pub(crate) mod performer;
 mod sixel;
 use crate::terminalstate::image::*;
-use crate::terminalstate::kitty::*;
 
 lazy_static::lazy_static! {
     static ref DB: Database = {
@@ -362,7 +360,6 @@ pub struct TerminalState {
 
     user_vars: HashMap<String, String>,
 
-    kitty_img: KittyImageState,
     seqno: SequenceNo,
 
     /// The unicode version that is in effect
@@ -570,7 +567,6 @@ impl TerminalState {
             writer,
             image_cache: lru::LruCache::new(16),
             user_vars: HashMap::new(),
-            kitty_img: Default::default(),
             seqno,
             unicode_version,
             unicode_version_stack: vec![],
