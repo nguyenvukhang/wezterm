@@ -18,7 +18,6 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
-use wezterm_blob_leases::BlobLease;
 
 #[cfg(feature = "use_serde")]
 fn deserialize_notnan<'de, D>(deserializer: D) -> Result<NotNan<f32>, D::Error>
@@ -197,16 +196,6 @@ impl ImageCell {
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
 #[derive(Clone, PartialEq, Eq)]
 pub enum ImageDataType {
-    /// Data is in the native image file format,
-    /// (best for file formats that have animated content)
-    /// and is stored as a blob via the blob manager.
-    EncodedLease(
-        #[cfg_attr(
-            feature = "use_serde",
-            serde(with = "wezterm_blob_leases::lease_bytes")
-        )]
-        BlobLease,
-    ),
     /// Data is RGBA u8 data
     Rgba8 {
         data: Vec<u8>,
@@ -227,7 +216,6 @@ pub enum ImageDataType {
 impl std::fmt::Debug for ImageDataType {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::EncodedLease(lease) => lease.fmt(fmt),
             Self::Rgba8 {
                 data,
                 width,
@@ -298,7 +286,6 @@ impl ImageDataType {
         use sha2::Digest;
         let mut hasher = sha2::Sha256::new();
         match self {
-            ImageDataType::EncodedLease(lease) => return lease.content_id().as_hash_bytes(),
             ImageDataType::Rgba8 { data, .. } => hasher.update(data),
             ImageDataType::AnimRgba8 {
                 frames, durations, ..
@@ -343,7 +330,6 @@ impl ImageDataType {
         }
 
         match self {
-            ImageDataType::EncodedLease(lease) => Ok(dimensions_for_data(&lease.get_data()?)?),
             ImageDataType::AnimRgba8 { width, height, .. }
             | ImageDataType::Rgba8 { width, height, .. } => Ok((*width, *height)),
         }
@@ -404,7 +390,6 @@ impl ImageData {
     /// Returns the in-memory footprint
     pub fn len(&self) -> usize {
         match &*self.data() {
-            ImageDataType::EncodedLease(_) => 0,
             ImageDataType::Rgba8 { data, .. } => data.len(),
             ImageDataType::AnimRgba8 { frames, .. } => frames.len() * frames[0].len(),
         }

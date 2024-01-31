@@ -192,7 +192,6 @@ impl<'a> BitmapImage for DecodedImageHandle<'a> {
         match &*self.h {
             ImageDataType::Rgba8 { data, .. } => data.as_ptr(),
             ImageDataType::AnimRgba8 { frames, .. } => frames[self.current_frame].as_ptr(),
-            ImageDataType::EncodedLease(_) => unreachable!(),
         }
     }
 
@@ -204,7 +203,6 @@ impl<'a> BitmapImage for DecodedImageHandle<'a> {
         match &*self.h {
             ImageDataType::Rgba8 { width, height, .. }
             | ImageDataType::AnimRgba8 { width, height, .. } => (*width as usize, *height as usize),
-            ImageDataType::EncodedLease(_) => unreachable!(),
         }
     }
 }
@@ -507,9 +505,6 @@ impl DecodedImage {
 
     fn load(image_data: &Arc<ImageData>) -> Self {
         match &*image_data.data() {
-            ImageDataType::EncodedLease(lease) => {
-                Self::start_frame_decoder(lease.clone(), image_data)
-            }
             ImageDataType::AnimRgba8 { durations, .. } => {
                 let current_frame = if durations.len() > 1 && durations[0].as_millis() == 0 {
                     // Skip possible 0-duration root frame
@@ -969,73 +964,6 @@ impl GlyphCache {
                     ),
                     LoadState::Loaded,
                 ));
-            }
-            ImageDataType::EncodedLease(_) => {
-                let mut frames = decoded.frames.borrow_mut();
-                let frames = frames.as_mut().expect("to have frames");
-
-                let mut next = None;
-                let mut decoded_frame_start = decoded.frame_start.borrow_mut();
-                let mut decoded_current_frame = decoded.current_frame.borrow_mut();
-
-                // Wait up to the approx limit of human tolerable delay for
-                // the first frame to be decoded, so that we can avoid showing
-                // a flash of the black frame in the common case
-                let max_duration = Duration::from_millis(125).max(min_frame_duration);
-                if let Some(remain) = max_duration.checked_sub(decoded_frame_start.elapsed()) {
-                    frames.wait_for_first_frame(remain);
-                }
-
-                let now = Instant::now();
-                // We round up the frame duration to at least the minimum
-                // frame duration that wezterm can use when rendering.
-                // There's no point trying to deal with smaller intervals
-                // because we simply cannot render them without dropping
-                // frames.
-                // In addition, with a 1ms frame delay, there's a good chance
-                // that any given cell may switch to a different frame from
-                // its neighbor while we are rendering the entire terminal
-                // frame, so we want to avoid that.
-                // <https://github.com/wez/wezterm/issues/3260>
-                let mut next_due =
-                    *decoded_frame_start + frames.frame_duration().max(min_frame_duration);
-                if now >= next_due {
-                    // Advance to next frame
-                    if frames.load_next_frame() {
-                        *decoded_current_frame = *decoded_current_frame + 1;
-                        *decoded_frame_start = now;
-                        next_due =
-                            *decoded_frame_start + frames.frame_duration().max(min_frame_duration);
-                        handle.current_frame = *decoded_current_frame;
-                    }
-                }
-
-                next.replace(next_due);
-
-                let hash = frames.frame_hash();
-
-                if let Some(sprite) = frame_cache.get(&hash) {
-                    return Ok((sprite.clone(), next, frames.load_state));
-                }
-
-                let frame = Image::from_raw(
-                    frames.current_frame.width,
-                    frames.current_frame.height,
-                    frames
-                        .current_frame
-                        .lease
-                        .get_data()
-                        .context("frames.current_frame.lease.get_data")?,
-                );
-                let sprite = atlas.allocate_with_padding(&frame, padding, scale_down)?;
-
-                frame_cache.insert(hash, sprite.clone());
-
-                Ok((
-                    sprite,
-                    Some(*decoded_frame_start + frames.frame_duration().max(min_frame_duration)),
-                    frames.load_state,
-                ))
             }
         }
     }
