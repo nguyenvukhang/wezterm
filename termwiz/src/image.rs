@@ -18,7 +18,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
-use wezterm_blob_leases::{BlobLease, BlobManager};
+use wezterm_blob_leases::BlobLease;
 
 #[cfg(feature = "use_serde")]
 fn deserialize_notnan<'de, D>(deserializer: D) -> Result<NotNan<f32>, D::Error>
@@ -197,9 +197,6 @@ impl ImageCell {
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
 #[derive(Clone, PartialEq, Eq)]
 pub enum ImageDataType {
-    /// Data is in the native image file format
-    /// (best for file formats that have animated content)
-    EncodedFile(Vec<u8>),
     /// Data is in the native image file format,
     /// (best for file formats that have animated content)
     /// and is stored as a blob via the blob manager.
@@ -230,10 +227,6 @@ pub enum ImageDataType {
 impl std::fmt::Debug for ImageDataType {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::EncodedFile(data) => fmt
-                .debug_struct("EncodedFile")
-                .field("data_of_len", &data.len())
-                .finish(),
             Self::EncodedLease(lease) => lease.fmt(fmt),
             Self::Rgba8 {
                 data,
@@ -305,7 +298,6 @@ impl ImageDataType {
         use sha2::Digest;
         let mut hasher = sha2::Sha256::new();
         match self {
-            ImageDataType::EncodedFile(data) => hasher.update(data),
             ImageDataType::EncodedLease(lease) => return lease.content_id().as_hash_bytes(),
             ImageDataType::Rgba8 { data, .. } => hasher.update(data),
             ImageDataType::AnimRgba8 {
@@ -351,7 +343,6 @@ impl ImageDataType {
         }
 
         match self {
-            ImageDataType::EncodedFile(data) => Ok(dimensions_for_data(data)?),
             ImageDataType::EncodedLease(lease) => Ok(dimensions_for_data(&lease.get_data()?)?),
             ImageDataType::AnimRgba8 { width, height, .. }
             | ImageDataType::Rgba8 { width, height, .. } => Ok((*width, *height)),
@@ -361,138 +352,11 @@ impl ImageDataType {
     /// Migrate an in-memory encoded image blob to on-disk to reduce
     /// the memory footprint
     pub fn swap_out(self) -> Result<Self, InternalError> {
-        match self {
-            Self::EncodedFile(data) => match BlobManager::store(&data) {
-                Ok(lease) => Ok(Self::EncodedLease(lease)),
-                Err(wezterm_blob_leases::Error::StorageNotInit) => Ok(Self::EncodedFile(data)),
-                Err(err) => Err(err.into()),
-            },
-            other => Ok(other),
-        }
+        Ok(self)
     }
 
-    /// Decode an encoded file into either an Rgba8 or AnimRgba8 variant
-    /// if we recognize the file format, otherwise the EncodedFile data
-    /// is preserved as is.
-    #[cfg(feature = "use_image")]
-    pub fn decode(self) -> Self {
-        use image::{AnimationDecoder, ImageFormat};
-
-        match self {
-            Self::EncodedFile(data) => {
-                let format = match image::guess_format(&data) {
-                    Ok(format) => format,
-                    Err(err) => {
-                        log::warn!("Unable to decode raw image data: {:#}", err);
-                        return Self::EncodedFile(data);
-                    }
-                };
-                match format {
-                    ImageFormat::Gif => image::codecs::gif::GifDecoder::new(&*data)
-                        .and_then(|decoder| decoder.into_frames().collect_frames())
-                        .and_then(|frames| {
-                            if frames.is_empty() {
-                                log::error!("decoded image has 0 frames, using placeholder");
-                                Ok(Self::placeholder())
-                            } else {
-                                Ok(Self::decode_frames(frames))
-                            }
-                        })
-                        .unwrap_or_else(|err| {
-                            log::error!(
-                                "Unable to parse animated gif: {:#}, trying as single frame",
-                                err
-                            );
-                            Self::decode_single(data)
-                        }),
-                    ImageFormat::Png => {
-                        let decoder = match image::codecs::png::PngDecoder::new(&*data) {
-                            Ok(d) => d,
-                            _ => return Self::EncodedFile(data),
-                        };
-                        if decoder.is_apng() {
-                            match decoder.apng().into_frames().collect_frames() {
-                                Ok(frames) if frames.is_empty() => {
-                                    log::error!("decoded image has 0 frames, using placeholder");
-                                    Self::placeholder()
-                                }
-                                Ok(frames) => Self::decode_frames(frames),
-                                _ => Self::EncodedFile(data),
-                            }
-                        } else {
-                            Self::decode_single(data)
-                        }
-                    }
-                    ImageFormat::WebP => {
-                        let decoder = match image::codecs::webp::WebPDecoder::new(&*data) {
-                            Ok(d) => d,
-                            _ => return Self::EncodedFile(data),
-                        };
-                        match decoder.into_frames().collect_frames() {
-                            Ok(frames) if frames.is_empty() => {
-                                log::error!("decoded image has 0 frames, using placeholder");
-                                Self::placeholder()
-                            }
-                            Ok(frames) => Self::decode_frames(frames),
-                            _ => Self::EncodedFile(data),
-                        }
-                    }
-                    _ => Self::decode_single(data),
-                }
-            }
-            data => data,
-        }
-    }
-
-    #[cfg(not(feature = "use_image"))]
     pub fn decode(self) -> Self {
         self
-    }
-
-    #[cfg(feature = "use_image")]
-    fn decode_frames(img_frames: Vec<image::Frame>) -> Self {
-        let mut width = 0;
-        let mut height = 0;
-        let mut frames = vec![];
-        let mut durations = vec![];
-        let mut hashes = vec![];
-        for frame in img_frames.into_iter() {
-            let duration: Duration = frame.delay().into();
-            durations.push(duration);
-            let image = image::DynamicImage::ImageRgba8(frame.into_buffer()).to_rgba8();
-            let (w, h) = image.dimensions();
-            width = w;
-            height = h;
-            let data = image.into_vec();
-            hashes.push(Self::hash_bytes(&data));
-            frames.push(data);
-        }
-        Self::AnimRgba8 {
-            width,
-            height,
-            frames,
-            durations,
-            hashes,
-        }
-    }
-
-    #[cfg(feature = "use_image")]
-    fn decode_single(data: Vec<u8>) -> Self {
-        match image::load_from_memory(&data) {
-            Ok(image) => {
-                let image = image.to_rgba8();
-                let (width, height) = image.dimensions();
-                let data = image.into_vec();
-                let hash = Self::hash_bytes(&data);
-                Self::Rgba8 {
-                    width,
-                    height,
-                    data,
-                    hash,
-                }
-            }
-            _ => Self::EncodedFile(data),
-        }
     }
 }
 
@@ -529,19 +393,6 @@ impl PartialEq for ImageData {
 }
 
 impl ImageData {
-    /// Create a new ImageData struct with the provided raw data.
-    pub fn with_raw_data(data: Vec<u8>) -> Self {
-        let hash = ImageDataType::hash_bytes(&data);
-        Self::with_data_and_hash(ImageDataType::EncodedFile(data).decode(), hash)
-    }
-
-    fn with_data_and_hash(data: ImageDataType, hash: [u8; 32]) -> Self {
-        Self {
-            data: Mutex::new(data),
-            hash,
-        }
-    }
-
     pub fn with_data(data: ImageDataType) -> Self {
         let hash = data.compute_hash();
         Self {
@@ -553,7 +404,6 @@ impl ImageData {
     /// Returns the in-memory footprint
     pub fn len(&self) -> usize {
         match &*self.data() {
-            ImageDataType::EncodedFile(d) => d.len(),
             ImageDataType::EncodedLease(_) => 0,
             ImageDataType::Rgba8 { data, .. } => data.len(),
             ImageDataType::AnimRgba8 { frames, .. } => frames.len() * frames[0].len(),

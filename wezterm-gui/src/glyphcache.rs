@@ -192,7 +192,7 @@ impl<'a> BitmapImage for DecodedImageHandle<'a> {
         match &*self.h {
             ImageDataType::Rgba8 { data, .. } => data.as_ptr(),
             ImageDataType::AnimRgba8 { frames, .. } => frames[self.current_frame].as_ptr(),
-            ImageDataType::EncodedLease(_) | ImageDataType::EncodedFile(_) => unreachable!(),
+            ImageDataType::EncodedLease(_) => unreachable!(),
         }
     }
 
@@ -204,7 +204,7 @@ impl<'a> BitmapImage for DecodedImageHandle<'a> {
         match &*self.h {
             ImageDataType::Rgba8 { width, height, .. }
             | ImageDataType::AnimRgba8 { width, height, .. } => (*width as usize, *height as usize),
-            ImageDataType::EncodedLease(_) | ImageDataType::EncodedFile(_) => unreachable!(),
+            ImageDataType::EncodedLease(_) => unreachable!(),
         }
     }
 }
@@ -510,13 +510,6 @@ impl DecodedImage {
             ImageDataType::EncodedLease(lease) => {
                 Self::start_frame_decoder(lease.clone(), image_data)
             }
-            ImageDataType::EncodedFile(data) => match BlobManager::store(&data) {
-                Ok(lease) => Self::start_frame_decoder(lease, image_data),
-                Err(err) => {
-                    log::error!("Unable to move file data to blob manager: {err:#}");
-                    Self::placeholder()
-                }
-            },
             ImageDataType::AnimRgba8 { durations, .. } => {
                 let current_frame = if durations.len() > 1 && durations[0].as_millis() == 0 {
                     // Skip possible 0-duration root frame
@@ -977,7 +970,7 @@ impl GlyphCache {
                     LoadState::Loaded,
                 ));
             }
-            ImageDataType::EncodedLease(_) | ImageDataType::EncodedFile(_) => {
+            ImageDataType::EncodedLease(_) => {
                 let mut frames = decoded.frames.borrow_mut();
                 let frames = frames.as_mut().expect("to have frames");
 
