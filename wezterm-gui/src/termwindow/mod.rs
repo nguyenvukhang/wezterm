@@ -873,7 +873,6 @@ impl TermWindow {
             myself.emit_status_event();
         }
 
-        crate::update::start_update_checker();
         front_end().record_known_window(window, mux_window_id);
 
         Ok(())

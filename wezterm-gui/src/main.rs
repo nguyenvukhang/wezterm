@@ -52,7 +52,6 @@ mod tabbar;
 mod termwindow;
 mod unicode_names;
 mod uniforms;
-mod update;
 mod utilsprites;
 
 #[cfg(feature = "dhat-heap")]
@@ -457,7 +456,6 @@ fn setup_mux(
             .unwrap_or(mux::DEFAULT_WORKSPACE),
     );
     mux.set_active_workspace(&default_workspace_name);
-    crate::update::load_last_release_info_and_set_banner();
 
     let default_name =
         default_domain_name.unwrap_or(config.default_domain.as_deref().unwrap_or("local"));
