@@ -58,7 +58,6 @@ pub struct ImageAttachParams {
 pub enum ImageAttachStyle {
     Sixel,
     Iterm,
-    Kitty,
 }
 
 impl TerminalState {
@@ -206,7 +205,6 @@ impl TerminalState {
                     params.placement_id,
                 ));
                 match params.style {
-                    ImageAttachStyle::Kitty => cell.attrs_mut().attach_image(img),
                     ImageAttachStyle::Sixel | ImageAttachStyle::Iterm => {
                         cell.attrs_mut().set_image(img)
                     }
@@ -234,7 +232,7 @@ impl TerminalState {
             // unless sixel_scrolls_right is enabled.
             // iTerm places it after the bottom right corner.
             let bottom_right = match params.style {
-                ImageAttachStyle::Kitty | ImageAttachStyle::Iterm => true,
+                ImageAttachStyle::Iterm => true,
                 ImageAttachStyle::Sixel => self.sixel_scrolls_right,
             };
 
