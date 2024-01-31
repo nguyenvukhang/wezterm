@@ -580,57 +580,18 @@ impl TerminfoRenderer {
                     }
                 },
                 Change::Image(image) => {
-                    if self.caps.iterm2_image() {
-                        let data = if image.top_left == TextureCoordinate::new_f32(0.0, 0.0)
-                            && image.bottom_right == TextureCoordinate::new_f32(1.0, 1.0)
-                        {
-                            // The whole image is requested, so we can send the
-                            // original image bytes over
-                            match &*image.image.data() {
-                                ImageDataType::EncodedFile(data) => data.to_vec(),
-                                ImageDataType::EncodedLease(lease) => lease.get_data()?,
-                                ImageDataType::AnimRgba8 { .. } | ImageDataType::Rgba8 { .. } => {
-                                    unimplemented!()
-                                }
-                            }
-                        } else {
-                            // TODO: slice out the requested region of the image,
-                            // and encode as a PNG.
-                            unimplemented!();
-                        };
-
-                        let file = ITermFileData {
-                            name: None,
-                            size: Some(data.len()),
-                            width: ITermDimension::Cells(image.width as i64),
-                            height: ITermDimension::Cells(image.height as i64),
-                            preserve_aspect_ratio: true,
-                            inline: true,
-                            do_not_move_cursor: false,
-                            data,
-                        };
-
-                        let osc = OperatingSystemCommand::ITermProprietary(ITermProprietary::File(
-                            Box::new(file),
-                        ));
-
-                        write!(out, "{}", osc)?;
-
-                    // TODO: } else if self.caps.sixel() {
-                    } else {
-                        // Blank out the cells and move the cursor to the right spot
-                        for y in 0..image.height {
-                            for _ in 0..image.width {
-                                write!(out, " ")?;
-                            }
-
-                            if y != image.height - 1 {
-                                writeln!(out)?;
-                                self.cursor_left(image.width as u32, out)?;
-                            }
+                    // Blank out the cells and move the cursor to the right spot
+                    for y in 0..image.height {
+                        for _ in 0..image.width {
+                            write!(out, " ")?;
                         }
-                        self.cursor_up(image.height as u32, out)?;
+
+                        if y != image.height - 1 {
+                            writeln!(out)?;
+                            self.cursor_left(image.width as u32, out)?;
+                        }
                     }
+                    self.cursor_up(image.height as u32, out)?;
                 }
                 Change::ScrollRegionUp {
                     first_row,
