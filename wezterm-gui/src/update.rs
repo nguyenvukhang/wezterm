@@ -300,7 +300,7 @@ fn set_banner_from_release_info(latest: &Release) {
     let reset = CSI::Sgr(Sgr::Reset);
     let link_off = OperatingSystemCommand::SetHyperlink(None);
     mux.set_banner(Some(format!(
-        "{}{}WezTerm Update Available\r\n{}{}{}{}Click to see what's new{}{}\r\n",
+        "{}WezTerm Update Available\r\n{}{}{}{}Click to see what's new{}{}\r\n",
         top_line_pos, second_line_pos, link_on, underline_color, underline_on, link_off, reset,
     )));
 }

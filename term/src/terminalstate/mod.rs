@@ -25,7 +25,6 @@ use url::Url;
 use wezterm_bidi::ParagraphDirectionHint;
 
 mod image;
-mod iterm;
 mod keyboard;
 mod mouse;
 pub(crate) mod performer;
