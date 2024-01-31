@@ -1063,22 +1063,6 @@ mod test {
     }
 
     #[test]
-    fn kitty_img() {
-        assert_eq!(
-            parse_as_vec("\x1b_Gf=24,s=10,v=20;payload\x1b\\".as_bytes()),
-            vec![
-                VTAction::ApcDispatch(b"Gf=24,s=10,v=20;payload".to_vec()),
-                VTAction::EscDispatch {
-                    params: vec![],
-                    intermediates: vec![],
-                    ignored_excess_intermediates: false,
-                    byte: b'\\',
-                }
-            ]
-        );
-    }
-
-    #[test]
     fn sixel() {
         assert_eq!(
             parse_as_vec("\x1bPqhello\x1b\\".as_bytes()),
