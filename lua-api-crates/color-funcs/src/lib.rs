@@ -1,11 +1,8 @@
-use crate::schemes::base16::Base16Scheme;
-use crate::schemes::sexy::Sexy;
 use config::lua::mlua::{self, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef};
 use config::lua::{get_or_create_module, get_or_create_sub_module};
 use config::{ColorSchemeFile, ColorSchemeMetaData, Gradient, Palette, RgbaColor, SrgbaTuple};
 
 mod image_colors;
-pub mod schemes;
 
 #[derive(Clone)]
 pub struct ColorWrap(RgbaColor);
@@ -147,23 +144,6 @@ pub fn register(lua: &Lua) -> anyhow::Result<()> {
                     .map_err(|err| mlua::Error::external(format!("{err:#}")))
             },
         )?,
-    )?;
-
-    color.set(
-        "load_terminal_sexy_scheme",
-        lua.create_function(|_, file_name: String| {
-            let scheme = Sexy::load_file(file_name)
-                .map_err(|err| mlua::Error::external(format!("{err:#}")))?;
-            Ok((scheme.colors, scheme.metadata))
-        })?,
-    )?;
-    color.set(
-        "load_base16_scheme",
-        lua.create_function(|_, file_name: String| {
-            let scheme = Base16Scheme::load_file(file_name)
-                .map_err(|err| mlua::Error::external(format!("{err:#}")))?;
-            Ok((scheme.colors, scheme.metadata))
-        })?,
     )?;
 
     let wezterm_mod = get_or_create_module(lua, "wezterm")?;
