@@ -161,13 +161,6 @@ pub trait VTActor {
     /// for more information on control functions.
     fn csi_dispatch(&mut self, params: &[CsiParam], parameters_truncated: bool, byte: u8);
 
-    /// Called when an OSC string is terminated by ST, CAN, SUB or ESC.
-    ///
-    /// `params` is an array of byte strings (which may also be valid utf-8)
-    /// that were passed as semicolon separated parameters to the operating
-    /// system command.
-    fn osc_dispatch(&mut self, params: &[&[u8]]);
-
     /// Called when an APC string is terminated by ST
     /// `data` is the data contained within the APC sequence.
     fn apc_dispatch(&mut self, data: Vec<u8>);
@@ -280,12 +273,6 @@ impl VTActor for CollectingVTActor {
             parameters_truncated,
             byte,
         });
-    }
-
-    fn osc_dispatch(&mut self, params: &[&[u8]]) {
-        self.actions.push(VTAction::OscDispatch(
-            params.iter().map(|i| i.to_vec()).collect(),
-        ));
     }
 
     fn apc_dispatch(&mut self, data: Vec<u8>) {
@@ -570,25 +557,7 @@ impl VTParser {
             }
             Action::OscPut => self.osc.put(param as char),
 
-            Action::OscEnd => {
-                if self.osc.num_params == 0 {
-                    actor.osc_dispatch(&[]);
-                } else {
-                    let mut params: [&[u8]; MAX_OSC] = [b""; MAX_OSC];
-                    let mut offset = 0usize;
-                    let mut slice = self.osc.buffer.as_slice();
-                    let limit = self.osc.num_params.min(MAX_OSC);
-                    #[allow(clippy::needless_range_loop)]
-                    for i in 0..limit - 1 {
-                        let (a, b) = slice.split_at(self.osc.param_indices[i] - offset);
-                        params[i] = a;
-                        slice = b;
-                        offset = self.osc.param_indices[i];
-                    }
-                    params[limit - 1] = slice;
-                    actor.osc_dispatch(&params[0..limit]);
-                }
-            }
+            Action::OscEnd => {}
 
             Action::ApcStart => {
                 self.apc_data.clear();

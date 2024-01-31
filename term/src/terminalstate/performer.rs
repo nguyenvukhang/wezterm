@@ -1,23 +1,17 @@
 use crate::terminal::Alert;
 use crate::terminalstate::{default_color_map, CharSet, MouseEncoding, TabStop};
-use crate::{ClipboardSelection, Position, TerminalState, VisibleRowIndex, DCS, ST};
+use crate::{Position, TerminalState, VisibleRowIndex, DCS, ST};
 use finl_unicode::grapheme_clusters::Graphemes;
 use log::{debug, error};
-use num_traits::FromPrimitive;
-use std::fmt::Write;
 use std::io::Write as _;
 use std::ops::{Deref, DerefMut};
-use termwiz::cell::{grapheme_column_width, Cell, CellAttributes, SemanticType};
+use termwiz::cell::{grapheme_column_width, Cell, CellAttributes};
 use termwiz::escape::csi::{
     CharacterPath, EraseInDisplay, Keyboard, KittyKeyboardFlags, KittyKeyboardMode,
 };
-use termwiz::escape::osc::{ChangeColorPair, ColorOrQuery, FinalTermSemanticPrompt, Selection};
-use termwiz::escape::{
-    Action, ControlCode, DeviceControlMode, Esc, EscCode, OperatingSystemCommand, CSI,
-};
+use termwiz::escape::{Action, ControlCode, DeviceControlMode, Esc, EscCode, CSI};
 use termwiz::input::KeyboardEncoding;
 use unicode_normalization::{is_nfc_quick, IsNormalized, UnicodeNormalization};
-use url::Url;
 use wezterm_bidi::ParagraphDirectionHint;
 
 /// A helper struct for implementing `vtparse::VTActor` while compartmentalizing
@@ -214,19 +208,6 @@ impl<'a> Performer<'a> {
 
     pub fn perform(&mut self, action: Action) {
         debug!("perform {:?}", action);
-        if self.suppress_initial_title_change {
-            match &action {
-                Action::OperatingSystemCommand(osc) => match **osc {
-                    OperatingSystemCommand::SetIconNameAndWindowTitle(_) => {
-                        debug!("suppressed {:?}", osc);
-                        self.suppress_initial_title_change = false;
-                        return;
-                    }
-                    _ => {}
-                },
-                _ => {}
-            }
-        }
         match action {
             Action::Print(c) => self.print(c),
             Action::PrintString(s) => {
@@ -236,7 +217,6 @@ impl<'a> Performer<'a> {
             }
             Action::Control(code) => self.control(code),
             Action::DeviceControl(ctrl) => self.device_control(ctrl),
-            Action::OperatingSystemCommand(osc) => self.osc_dispatch(*osc),
             Action::Esc(esc) => self.esc_dispatch(esc),
             Action::CSI(csi) => self.csi_dispatch(csi),
             Action::Sixel(sixel) => self.sixel(sixel),
@@ -540,13 +520,7 @@ impl<'a> Performer<'a> {
         let seqno = self.seqno;
         self.flush_print();
         match esc {
-            Esc::Code(EscCode::StringTerminator) => {
-                // String Terminator (ST); for the most part has nothing to do here, as its purpose is
-                // handled implicitly through a state transition in the vtparse state tables.
-                if let Some(title) = self.accumulating_title.take() {
-                    self.osc_dispatch(OperatingSystemCommand::SetIconNameAndWindowTitle(title));
-                }
-            }
+            Esc::Code(EscCode::StringTerminator) => {}
             Esc::Code(EscCode::TmuxTitle) => {
                 self.accumulating_title.replace(String::new());
             }
@@ -683,305 +657,5 @@ impl<'a> Performer<'a> {
                 }
             }
         }
-    }
-
-    fn osc_dispatch(&mut self, osc: OperatingSystemCommand) {
-        self.flush_print();
-        match osc {
-            OperatingSystemCommand::SetIconNameSun(title)
-            | OperatingSystemCommand::SetIconName(title) => {
-                if title.is_empty() {
-                    self.icon_title = None;
-                } else {
-                    self.icon_title = Some(title);
-                }
-                let title = self.icon_title.clone();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::IconTitleChanged(title));
-                }
-            }
-            OperatingSystemCommand::SetIconNameAndWindowTitle(title) => {
-                self.icon_title.take();
-                self.title = title.clone();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::WindowTitleChanged(title.clone()));
-                    handler.alert(Alert::IconTitleChanged(Some(title)));
-                }
-            }
-
-            OperatingSystemCommand::SetWindowTitleSun(title)
-            | OperatingSystemCommand::SetWindowTitle(title) => {
-                self.title = title.clone();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::WindowTitleChanged(title));
-                }
-            }
-            OperatingSystemCommand::SetHyperlink(link) => {
-                self.set_hyperlink(link);
-            }
-            OperatingSystemCommand::Unspecified(unspec) => {
-                if self.config.log_unknown_escape_sequences() {
-                    let mut output = String::new();
-                    write!(&mut output, "Unhandled OSC ").ok();
-
-                    for item in unspec {
-                        write!(&mut output, " {}", String::from_utf8_lossy(&item)).ok();
-                    }
-                    log::warn!("{}", output);
-                }
-            }
-
-            OperatingSystemCommand::ClearSelection(selection) => {
-                let selection = selection_to_selection(selection);
-                self.set_clipboard_contents(selection, None).ok();
-            }
-            OperatingSystemCommand::QuerySelection(_) => {}
-            OperatingSystemCommand::SetSelection(selection, selection_data) => {
-                let selection = selection_to_selection(selection);
-                match self.set_clipboard_contents(selection, Some(selection_data)) {
-                    Ok(_) => (),
-                    Err(err) => error!("failed to set clipboard in response to OSC 52: {:#?}", err),
-                }
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(FinalTermSemanticPrompt::FreshLine) => {
-                self.fresh_line();
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::FreshLineAndStartPrompt { .. },
-            ) => {
-                self.fresh_line();
-                self.pen.set_semantic_type(SemanticType::Prompt);
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::StartPrompt(_),
-            ) => {
-                self.pen.set_semantic_type(SemanticType::Prompt);
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::MarkEndOfCommandWithFreshLine { .. },
-            ) => {
-                self.fresh_line();
-                self.pen.set_semantic_type(SemanticType::Prompt);
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::MarkEndOfPromptAndStartOfInputUntilNextMarker { .. },
-            ) => {
-                self.pen.set_semantic_type(SemanticType::Input);
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::MarkEndOfPromptAndStartOfInputUntilEndOfLine { .. },
-            ) => {
-                self.pen.set_semantic_type(SemanticType::Input);
-                self.clear_semantic_attribute_on_newline = true;
-            }
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::MarkEndOfInputAndStartOfOutput { .. },
-            ) => {
-                self.pen.set_semantic_type(SemanticType::Output);
-            }
-
-            OperatingSystemCommand::FinalTermSemanticPrompt(
-                FinalTermSemanticPrompt::CommandStatus { .. },
-            ) => {}
-
-            OperatingSystemCommand::SystemNotification(message) => {
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::ToastNotification {
-                        title: None,
-                        body: message,
-                        focus: true,
-                    });
-                } else {
-                    log::info!("Application sends SystemNotification: {}", message);
-                }
-            }
-            OperatingSystemCommand::RxvtExtension(params) => {
-                if let Some("notify") = params.get(0).map(String::as_str) {
-                    let title = params.get(1);
-                    let body = params.get(2);
-                    let (title, body) = match (title.cloned(), body.cloned()) {
-                        (Some(title), None) => (None, title),
-                        (Some(title), Some(body)) => (Some(title), body),
-                        _ => {
-                            log::warn!("malformed rxvt notify escape: {:?}", params);
-                            return;
-                        }
-                    };
-                    if let Some(handler) = self.alert_handler.as_mut() {
-                        handler.alert(Alert::ToastNotification {
-                            title,
-                            body,
-                            focus: true,
-                        });
-                    }
-                }
-            }
-            OperatingSystemCommand::CurrentWorkingDirectory(url) => {
-                self.current_dir = Url::parse(&url).ok();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::CurrentWorkingDirectoryChanged);
-                }
-            }
-            OperatingSystemCommand::ChangeColorNumber(specs) => {
-                log::trace!("ChangeColorNumber: {:?}", specs);
-                for pair in specs {
-                    match pair.color {
-                        ColorOrQuery::Query => {
-                            let response =
-                                OperatingSystemCommand::ChangeColorNumber(vec![ChangeColorPair {
-                                    palette_index: pair.palette_index,
-                                    color: ColorOrQuery::Color(
-                                        self.palette().colors.0[pair.palette_index as usize],
-                                    ),
-                                }]);
-                            write!(self.writer, "{}", response).ok();
-                            self.writer.flush().ok();
-                        }
-                        ColorOrQuery::Color(c) => {
-                            self.palette_mut().colors.0[pair.palette_index as usize] = c;
-                        }
-                    }
-                }
-                self.implicit_palette_reset_if_same_as_configured();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::PaletteChanged);
-                }
-                self.make_all_lines_dirty();
-            }
-
-            OperatingSystemCommand::ResetColors(colors) => {
-                log::trace!("ResetColors: {:?}", colors);
-                if colors.is_empty() {
-                    // Reset all colors
-                    self.palette.take();
-                } else {
-                    // Reset individual colors
-                    if self.palette.is_none() {
-                        // Already at the defaults
-                    } else {
-                        let base = self.config.color_palette();
-                        for c in colors {
-                            let c = c as usize;
-                            self.palette_mut().colors.0[c] = base.colors.0[c];
-                        }
-                    }
-                }
-                self.implicit_palette_reset_if_same_as_configured();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::PaletteChanged);
-                }
-            }
-
-            OperatingSystemCommand::ChangeDynamicColors(first_color, colors) => {
-                log::trace!("ChangeDynamicColors: {:?} {:?}", first_color, colors);
-                use termwiz::escape::osc::DynamicColorNumber;
-                let mut idx: u8 = first_color as u8;
-                for color in colors {
-                    let which_color: Option<DynamicColorNumber> = FromPrimitive::from_u8(idx);
-                    log::trace!("ChangeDynamicColors item: {:?}", which_color);
-                    if let Some(which_color) = which_color {
-                        macro_rules! set_or_query {
-                            ($name:ident) => {
-                                match color {
-                                    ColorOrQuery::Query => {
-                                        let response = OperatingSystemCommand::ChangeDynamicColors(
-                                            which_color,
-                                            vec![ColorOrQuery::Color(self.palette().$name.into())],
-                                        );
-                                        log::trace!("Color Query response {:?}", response);
-                                        write!(self.writer, "{}", response).ok();
-                                        self.writer.flush().ok();
-                                    }
-                                    ColorOrQuery::Color(c) => self.palette_mut().$name = c.into(),
-                                }
-                            };
-                        }
-                        match which_color {
-                            DynamicColorNumber::TextForegroundColor => set_or_query!(foreground),
-                            DynamicColorNumber::TextBackgroundColor => set_or_query!(background),
-                            DynamicColorNumber::TextCursorColor => {
-                                if let ColorOrQuery::Color(c) = color {
-                                    // We set the border to the background color; we don't
-                                    // have an escape that sets that independently, and this
-                                    // way just looks better.
-                                    self.palette_mut().cursor_border = c.into();
-                                }
-                                set_or_query!(cursor_bg)
-                            }
-                            DynamicColorNumber::HighlightForegroundColor => {
-                                set_or_query!(selection_fg)
-                            }
-                            DynamicColorNumber::HighlightBackgroundColor => {
-                                set_or_query!(selection_bg)
-                            }
-                            DynamicColorNumber::MouseForegroundColor
-                            | DynamicColorNumber::MouseBackgroundColor
-                            | DynamicColorNumber::TektronixForegroundColor
-                            | DynamicColorNumber::TektronixBackgroundColor
-                            | DynamicColorNumber::TektronixCursorColor => {}
-                        }
-                    }
-                    idx += 1;
-                }
-                self.implicit_palette_reset_if_same_as_configured();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::PaletteChanged);
-                }
-                self.make_all_lines_dirty();
-            }
-
-            OperatingSystemCommand::ResetDynamicColor(color) => {
-                log::trace!("ResetDynamicColor: {:?}", color);
-                use termwiz::escape::osc::DynamicColorNumber;
-                let which_color: Option<DynamicColorNumber> = FromPrimitive::from_u8(color as u8);
-                if let Some(which_color) = which_color {
-                    macro_rules! reset {
-                        ($name:ident) => {
-                            if self.palette.is_none() {
-                                // Already at the defaults
-                            } else {
-                                let base = self.config.color_palette();
-                                self.palette_mut().$name = base.$name;
-                            }
-                        };
-                    }
-                    match which_color {
-                        DynamicColorNumber::TextForegroundColor => reset!(foreground),
-                        DynamicColorNumber::TextBackgroundColor => reset!(background),
-                        DynamicColorNumber::TextCursorColor => {
-                            reset!(cursor_bg);
-                            // Since we set the border to the bg, we consider it reset
-                            // by resetting the bg too!
-                            reset!(cursor_border);
-                        }
-                        DynamicColorNumber::HighlightForegroundColor => reset!(selection_fg),
-                        DynamicColorNumber::HighlightBackgroundColor => reset!(selection_bg),
-                        DynamicColorNumber::MouseForegroundColor
-                        | DynamicColorNumber::MouseBackgroundColor
-                        | DynamicColorNumber::TektronixForegroundColor
-                        | DynamicColorNumber::TektronixBackgroundColor
-                        | DynamicColorNumber::TektronixCursorColor => {}
-                    }
-                }
-                self.implicit_palette_reset_if_same_as_configured();
-                if let Some(handler) = self.alert_handler.as_mut() {
-                    handler.alert(Alert::PaletteChanged);
-                }
-                self.make_all_lines_dirty();
-            }
-        }
-    }
-}
-
-fn selection_to_selection(sel: Selection) -> ClipboardSelection {
-    match sel {
-        Selection::CLIPBOARD => ClipboardSelection::Clipboard,
-        Selection::PRIMARY => ClipboardSelection::PrimarySelection,
-        // xterm will use a configurable selection in the NONE case
-        Selection::NONE => ClipboardSelection::Clipboard,
-        // otherwise we just use clipboard.  Could potentially
-        // also use the same fallback configuration as NONE,
-        // if/when we add it
-        _ => ClipboardSelection::Clipboard,
     }
 }

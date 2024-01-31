@@ -31,10 +31,6 @@ pub enum Action {
     Control(ControlCode),
     /// Device control.  This is uncommon wrt. terminal emulation.
     DeviceControl(DeviceControlMode),
-    /// A command that typically doesn't change the contents of the
-    /// terminal, but rather influences how it displays or otherwise
-    /// interacts with the rest of the system
-    OperatingSystemCommand(Box<OperatingSystemCommand>),
     CSI(CSI),
     Esc(Esc),
     Sixel(Box<Sixel>),
@@ -88,7 +84,6 @@ impl Display for Action {
             Action::PrintString(s) => write!(f, "{}", s),
             Action::Control(c) => f.write_char(*c as u8 as char),
             Action::DeviceControl(c) => c.fmt(f),
-            Action::OperatingSystemCommand(osc) => osc.fmt(f),
             Action::CSI(csi) => csi.fmt(f),
             Action::Esc(esc) => esc.fmt(f),
             Action::Sixel(sixel) => sixel.fmt(f),

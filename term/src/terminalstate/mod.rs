@@ -17,7 +17,7 @@ use termwiz::escape::csi::{
     EraseInLine, Mode, Sgr, TabulationClear, TerminalMode, TerminalModeCode, Window, XtSmGraphics,
     XtSmGraphicsAction, XtSmGraphicsItem, XtSmGraphicsStatus, XtermKeyModifierResource,
 };
-use termwiz::escape::{OneBased, OperatingSystemCommand, CSI};
+use termwiz::escape::{OneBased, CSI};
 use termwiz::image::ImageData;
 use termwiz::input::KeyboardEncoding;
 use termwiz::surface::{CursorShape, CursorVisibility, SequenceNo};
@@ -688,17 +688,6 @@ impl TerminalState {
         &mut self.screen
     }
 
-    fn set_clipboard_contents(
-        &self,
-        selection: ClipboardSelection,
-        text: Option<String>,
-    ) -> anyhow::Result<()> {
-        if let Some(clip) = self.clipboard.as_ref() {
-            clip.set_contents(selection, text)?;
-        }
-        Ok(())
-    }
-
     pub fn erase_scrollback_and_viewport(&mut self) {
         // Since we may be called outside of perform_actions,
         // we need to ensure that we increment the seqno in
@@ -1052,16 +1041,6 @@ impl TerminalState {
         )
     }
 
-    /// Defined by FinalTermSemanticPrompt; a fresh-line is a NOP if the
-    /// cursor is already at the left margin, otherwise it is the same as
-    /// a new line.
-    fn fresh_line(&mut self) {
-        if self.cursor.x == self.left_and_right_margins.start {
-            return;
-        }
-        self.new_line(true);
-    }
-
     fn new_line(&mut self, move_to_first_column: bool) {
         let x = if move_to_first_column {
             self.left_and_right_margins.start
@@ -1150,13 +1129,6 @@ impl TerminalState {
                 self.set_cursor_pos(&Position::Relative(0), &Position::Relative(-1));
             }
         }
-    }
-
-    fn set_hyperlink(&mut self, link: Option<Hyperlink>) {
-        self.pen.set_hyperlink(match link {
-            Some(hyperlink) => Some(Arc::new(hyperlink)),
-            None => None,
-        });
     }
 
     /// <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h4-Device-Control-functions:DCS-plus-q-Pt-ST.F95>
@@ -2026,17 +1998,7 @@ impl TerminalState {
                 self.writer.flush().ok();
             }
 
-            Window::ReportWindowTitle => {
-                if self.config.enable_title_reporting() {
-                    write!(
-                        self.writer,
-                        "{}",
-                        OperatingSystemCommand::SetWindowTitleSun(self.title.clone())
-                    )
-                    .ok();
-                    self.writer.flush().ok();
-                }
-            }
+            Window::ReportWindowTitle => {}
 
             Window::ChecksumRectangularArea {
                 request_id,

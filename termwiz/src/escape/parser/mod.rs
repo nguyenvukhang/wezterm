@@ -1,7 +1,6 @@
 #![allow(clippy::many_single_char_names)]
 use crate::escape::{
-    Action, DeviceControlMode, EnterDeviceControlMode, Esc, OperatingSystemCommand,
-    ShortDeviceControl, CSI,
+    Action, DeviceControlMode, EnterDeviceControlMode, Esc, ShortDeviceControl, CSI,
 };
 use log::error;
 use num_traits::FromPrimitive;
@@ -241,11 +240,6 @@ impl<'a, F: FnMut(Action)> VTActor for Performer<'a, F> {
         } else {
             (self.callback)(Action::DeviceControl(DeviceControlMode::Exit));
         }
-    }
-
-    fn osc_dispatch(&mut self, osc: &[&[u8]]) {
-        let osc = OperatingSystemCommand::parse(osc);
-        (self.callback)(Action::OperatingSystemCommand(Box::new(osc)));
     }
 
     fn csi_dispatch(&mut self, params: &[CsiParam], parameters_truncated: bool, control: u8) {
