@@ -5,7 +5,6 @@ use base64::Engine;
 use bitflags::bitflags;
 use num_derive::*;
 use num_traits::FromPrimitive;
-use ordered_float::NotNan;
 use std::collections::HashMap;
 use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
 use std::str;
@@ -822,97 +821,6 @@ pub struct ITermFileData {
     pub do_not_move_cursor: bool,
     /// The data to transfer
     pub data: Vec<u8>,
-}
-
-impl ITermFileData {
-    fn parse(osc: &[&[u8]]) -> Result<Self> {
-        let mut params = HashMap::new();
-
-        // Unfortunately, the encoding for the file download data is
-        // awkward to fit in the conventional OSC data that our parser
-        // expects at a higher level.
-        // We have a mix of '=', ';' and ':' separated keys and values,
-        // and a number of them are optional.
-        // ESC ] 1337 ; File = [optional arguments] : base-64 encoded file contents ^G
-
-        let mut data = None;
-
-        let last = osc.len() - 1;
-        for (idx, s) in osc.iter().enumerate().skip(1) {
-            let param = if idx == 1 {
-                if s.len() >= 5 {
-                    // skip over File=
-                    &s[5..]
-                } else {
-                    bail!("failed to parse file data; File= not found");
-                }
-            } else {
-                s
-            };
-
-            let param = if idx == last {
-                // The final argument contains `:base64`, so look for that
-                if let Some(colon) = param.iter().position(|c| *c == b':') {
-                    data = Some(base64_decode(&param[colon + 1..])?);
-                    &param[..colon]
-                } else {
-                    // If we don't find the colon in the last piece, we've
-                    // got nothing useful
-                    bail!("failed to parse file data; no colon found");
-                }
-            } else {
-                param
-            };
-
-            // eg: `File=;size=1234` case. <https://github.com/wez/wezterm/issues/1291>
-            if param.is_empty() {
-                continue;
-            }
-
-            // look for k=v in param
-            if let Some(equal) = param.iter().position(|c| *c == b'=') {
-                let key = &param[..equal];
-                let value = &param[equal + 1..];
-                params.insert(str::from_utf8(key)?, str::from_utf8(value)?);
-            } else if idx != last {
-                bail!("failed to parse file data; no equals found");
-            }
-        }
-
-        let name = params
-            .get("name")
-            .and_then(|s| base64_decode(s).ok())
-            .and_then(|b| String::from_utf8(b).ok());
-        let size = params.get("size").and_then(|s| s.parse().ok());
-        let width = params
-            .get("width")
-            .and_then(|s| ITermDimension::parse(s).ok())
-            .unwrap_or(ITermDimension::Automatic);
-        let height = params
-            .get("height")
-            .and_then(|s| ITermDimension::parse(s).ok())
-            .unwrap_or(ITermDimension::Automatic);
-        let preserve_aspect_ratio = params
-            .get("preserveAspectRatio")
-            .map(|s| *s != "0")
-            .unwrap_or(true);
-        let inline = params.get("inline").map(|s| *s != "0").unwrap_or(false);
-        let do_not_move_cursor = params
-            .get("doNotMoveCursor")
-            .map(|s| *s != "0")
-            .unwrap_or(false);
-        let data = data.ok_or_else(|| format!("didn't set data"))?;
-        Ok(Self {
-            name,
-            size,
-            width,
-            height,
-            preserve_aspect_ratio,
-            inline,
-            do_not_move_cursor,
-            data,
-        })
-    }
 }
 
 impl Display for ITermFileData {

@@ -391,12 +391,6 @@ pub struct TerminalState {
     bidi_hint: Option<ParagraphDirectionHint>,
 }
 
-#[derive(Debug)]
-struct UnicodeVersionStackEntry {
-    vers: UnicodeVersion,
-    label: Option<String>,
-}
-
 fn default_color_map() -> HashMap<u16, RgbColor> {
     let mut color_map = HashMap::new();
     // Match colors to the VT340 color table:

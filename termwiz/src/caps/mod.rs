@@ -55,7 +55,6 @@
 //! the terminal capabilities, but also offers a `ProbeHints`
 //! that can be used by the embedding application to override those choices.
 use crate::{builder, Result};
-use semver::Version;
 use std::env::var;
 use terminfo::{self, capability as cap};
 
