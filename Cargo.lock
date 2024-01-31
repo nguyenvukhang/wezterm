@@ -359,12 +359,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "atomic"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c59bdb34bc650a32731b31bd8f0829cc15d24a708ee31559e0bb34f2bc320cba"
-
-[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2807,16 +2801,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mac_address"
-version = "1.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4863ee94f19ed315bf3bc00299338d857d4b5bc856af375cc97d237382ad3856"
-dependencies = [
- "nix 0.23.2",
- "winapi",
-]
-
-[[package]]
 name = "mach"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4729,7 +4713,6 @@ dependencies = [
  "varbincode",
  "vtparse",
  "wezterm-bidi",
- "wezterm-blob-leases",
  "wezterm-color-types",
  "wezterm-dynamic",
  "wezterm-input-types",
@@ -5129,17 +5112,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
-name = "uuid"
-version = "1.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f00cc9702ca12d3c81455259621e676d0f7251cec66a21e98fe2e9a37db93b2a"
-dependencies = [
- "atomic",
- "getrandom",
- "serde",
-]
-
-[[package]]
 name = "varbincode"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5427,20 +5399,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wezterm-blob-leases"
-version = "0.1.0"
-dependencies = [
- "getrandom",
- "mac_address",
- "once_cell",
- "serde",
- "sha2",
- "tempfile",
- "thiserror",
- "uuid",
-]
-
-[[package]]
 name = "wezterm-client"
 version = "0.1.0"
 dependencies = [
@@ -5629,7 +5587,6 @@ dependencies = [
  "url-funcs",
  "walkdir",
  "wezterm-bidi",
- "wezterm-blob-leases",
  "wezterm-client",
  "wezterm-dynamic",
  "wezterm-font",

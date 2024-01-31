@@ -3,7 +3,6 @@ members = [
   "bidi",
   "deps/cairo",
   "wezterm",
-  "wezterm-blob-leases",
   "wezterm-dynamic",
   "wezterm-gui",
   "wezterm-open-url",

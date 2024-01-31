@@ -249,9 +249,6 @@ async fn async_run_terminal_gui(
     let unix_socket_path =
         config::RUNTIME_DIR.join(format!("gui-sock-{}", unsafe { libc::getpid() }));
     std::env::set_var("WEZTERM_UNIX_SOCKET", unix_socket_path.clone());
-    wezterm_blob_leases::register_storage(Arc::new(
-        wezterm_blob_leases::simple_tempdir::SimpleTempDir::new()?,
-    ))?;
 
     if !opts.no_auto_connect {
         connect_to_auto_connect_domains().await?;
@@ -1000,9 +997,7 @@ fn run() -> anyhow::Result<()> {
     match sub {
         SubCommand::Start(start) => {
             log::trace!("Using configuration: {:#?}\nopts: {:#?}", config, opts);
-            let res = run_terminal_gui(start, None);
-            wezterm_blob_leases::clear_storage();
-            res
+            run_terminal_gui(start, None)
         }
         SubCommand::LsFonts(cmd) => run_ls_fonts(config, &cmd),
         SubCommand::ShowKeys(cmd) => run_show_keys(config, &cmd),
