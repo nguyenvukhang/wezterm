@@ -5,14 +5,6 @@ use clap_complete::{generate as generate_completion, shells, Generator as Comple
 use config::{wezterm_version, ConfigHandle};
 use mux::Mux;
 use std::ffi::OsString;
-use std::io::Read;
-use termwiz::caps::Capabilities;
-use termwiz::escape::esc::{Esc, EscCode};
-use termwiz::escape::OneBased;
-use termwiz::input::{InputEvent, KeyCode, KeyEvent};
-use termwiz::surface::change::Change;
-use termwiz::surface::Position;
-use termwiz::terminal::{ScreenSize, Terminal};
 use umask::UmaskSaver;
 use wezterm_gui_subcommands::*;
 
@@ -132,51 +124,7 @@ enum SubCommand {
     },
 }
 
-use termwiz::escape::osc::{
-    ITermDimension, ITermFileData, ITermProprietary, OperatingSystemCommand,
-};
-
-#[derive(Clone, Copy, Debug)]
-struct ImagePosition {
-    x: u32,
-    y: u32,
-}
-
-fn x_comma_y(arg: &str) -> Result<ImagePosition, String> {
-    if let Some(eq) = arg.find(',') {
-        let (left, right) = arg.split_at(eq);
-        let x = left.parse().map_err(|err| {
-            format!("Expected x,y to be integer values, got {arg}. '{left}': {err:#}")
-        })?;
-        let y = right[1..].parse().map_err(|err| {
-            format!("Expected x,y to be integer values, got {arg}. '{right}': {err:#}")
-        })?;
-        Ok(ImagePosition { x, y })
-    } else {
-        Err(format!("Expected x,y, but got {}", arg))
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-struct ImageDimension {
-    width: u32,
-    height: u32,
-}
-
-fn width_x_height(arg: &str) -> Result<ImageDimension, String> {
-    if let Some(eq) = arg.find('x') {
-        let (left, right) = arg.split_at(eq);
-        let width = left.parse().map_err(|err| {
-            format!("Expected WxH to be integer values, got {arg}. '{left}': {err:#}")
-        })?;
-        let height = right[1..].parse().map_err(|err| {
-            format!("Expected WxH to be integer values, got {arg}. '{right}': {err:#}")
-        })?;
-        Ok(ImageDimension { width, height })
-    } else {
-        Err(format!("Expected WxH, but got {}", arg))
-    }
-}
+use termwiz::escape::osc::OperatingSystemCommand;
 
 #[derive(Copy, Clone, Debug, ValueEnum, Default)]
 enum ResampleFilter {
@@ -194,13 +142,6 @@ enum ResampleImageFormat {
     Jpeg,
     #[default]
     Input,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct ImageInfo {
-    pub width: u32,
-    pub height: u32,
-    pub format: image::ImageFormat,
 }
 
 #[derive(Debug, Parser, Clone)]
