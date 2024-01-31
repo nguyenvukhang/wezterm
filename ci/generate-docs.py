@@ -331,7 +331,6 @@ TOC = [
             Page("Copy Mode", "copymode.md"),
             Page("Hyperlinks", "hyperlinks.md"),
             Page("Shell Integration", "shell-integration.md"),
-            Page("iTerm Image Protocol", "imgcat.md"),
             Page("SSH", "ssh.md"),
             Page("Serial Ports & Arduino", "serial.md"),
             Page("Multiplexing", "multiplexing.md"),
@@ -449,7 +448,6 @@ TOC = [
         children=[
             Gen("wezterm cli", "cli/cli"),
             Page("wezterm connect", "cli/connect.md"),
-            Page("wezterm imgcat", "cli/imgcat.md"),
             Page("wezterm ls-fonts", "cli/ls-fonts.md"),
             Page("wezterm record", "cli/record.md"),
             Page("wezterm replay", "cli/replay.md"),
