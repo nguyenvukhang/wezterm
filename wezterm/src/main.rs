@@ -8,7 +8,6 @@ use std::ffi::OsString;
 use umask::UmaskSaver;
 use wezterm_gui_subcommands::*;
 
-mod asciicast;
 mod cli;
 
 //    let message = "; ❤ 😍🤢\n\x1b[91;mw00t\n\x1b[37;104;m bleet\x1b[0;m.";
