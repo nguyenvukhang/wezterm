@@ -82,6 +82,23 @@ def dirs(ps: list[Project]):
 for p in projects:
     if len(p.needed_by) == 1:
         print("[1]", p.dir, dirs(p.needed_by))
+#
+# for p in unneeded:
+#     print("[x]", p.dir)
 
-for p in unneeded:
-    print("[x]", p.dir)
+for i, p in enumerate(projects):
+    if p.dir == "wezterm":
+        if i > 0:
+            projects[i], projects[0] = projects[0], projects[i]
+
+ht = {p.dir: p for p in projects}
+
+
+def walk(p_dir: str, depth=0):
+    p = ht[p_dir]
+    print(" " * depth * 2, "*", p.dir)
+    for p in p.deps:
+        walk(p.dir, depth + 1)
+
+
+walk("term")
