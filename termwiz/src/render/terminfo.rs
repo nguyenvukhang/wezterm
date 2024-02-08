@@ -455,11 +455,6 @@ impl TerminfoRenderer {
                         attr.set_background(*col);
                     });
                 }
-                Change::Attribute(AttributeChange::Hyperlink(link)) => {
-                    self.attr_apply(|attr| {
-                        attr.set_hyperlink(link.clone());
-                    });
-                }
                 Change::AllAttributes(all) => {
                     self.pending_attr = Some(all.clone());
                 }

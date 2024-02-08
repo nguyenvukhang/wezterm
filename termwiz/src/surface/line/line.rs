@@ -484,11 +484,9 @@ impl Line {
         let cells = self.coerce_vec_storage();
         for cell in cells.iter_mut() {
             let replace = match cell.attrs().hyperlink() {
-                Some(ref link) if link.is_implicit() => Some(Cell::new_grapheme(
-                    cell.str(),
-                    cell.attrs().clone().set_hyperlink(None).clone(),
-                    None,
-                )),
+                Some(ref link) if link.is_implicit() => {
+                    Some(Cell::new_grapheme(cell.str(), cell.attrs().clone(), None))
+                }
                 _ => None,
             };
             if let Some(replace) = replace {

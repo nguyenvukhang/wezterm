@@ -2581,10 +2581,8 @@ impl TerminalState {
         debug!("{:?}", sgr);
         match sgr {
             Sgr::Reset => {
-                let link = self.pen.hyperlink().map(Arc::clone);
                 let semantic_type = self.pen.semantic_type();
                 self.pen = CellAttributes::default();
-                self.pen.set_hyperlink(link);
                 self.pen.set_semantic_type(semantic_type);
             }
             Sgr::Intensity(intensity) => {

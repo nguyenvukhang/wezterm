@@ -35,16 +35,6 @@ impl VecStorage {
         for (byte_idx, _grapheme) in line.grapheme_indices(true) {
             let cell = &mut self.cells[cell_idx];
             let mut matched = false;
-            for m in &matches {
-                if m.range.contains(&byte_idx) {
-                    let attrs = cell.attrs_mut();
-                    // Don't replace existing links
-                    if attrs.hyperlink().is_none() {
-                        attrs.set_hyperlink(Some(Arc::clone(&m.link)));
-                        matched = true;
-                    }
-                }
-            }
             cell_idx += cell.width();
             if matched {
                 has_implicit_hyperlinks = true;

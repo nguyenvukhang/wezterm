@@ -28,7 +28,6 @@ use std::convert::TryInto;
 use std::io::Cursor;
 use std::ops::Range;
 use std::path::PathBuf;
-use std::sync::Arc;
 use termwiz::hyperlink::Hyperlink;
 use termwiz::image::TextureCoordinate;
 use termwiz::surface::{Line, SequenceNo};
@@ -972,69 +971,7 @@ impl SerializedLines {
 }
 
 impl From<Vec<(StableRowIndex, Line)>> for SerializedLines {
-    fn from(mut lines: Vec<(StableRowIndex, Line)>) -> Self {
-        let mut hyperlinks = vec![];
-
-        for (line_idx, (_stable_row_idx, line)) in lines.iter_mut().enumerate() {
-            let mut current_link: Option<Arc<Hyperlink>> = None;
-            let mut current_range = 0..0;
-
-            for (x, cell) in line
-                .cells_mut_for_attr_changes_only()
-                .iter_mut()
-                .enumerate()
-            {
-                // Unset the hyperlink on the cell, if any, and record that
-                // in the hyperlinks data for later restoration.
-                if let Some(link) = cell.attrs_mut().hyperlink().map(Arc::clone) {
-                    cell.attrs_mut().set_hyperlink(None);
-                    match current_link.as_ref() {
-                        Some(current) if Arc::ptr_eq(&current, &link) => {
-                            // Continue the current streak
-                            current_range = range_union(current_range, x..x + 1);
-                        }
-                        Some(prior) => {
-                            // It's a different URL, push the current data and start a new one
-                            hyperlinks.push(LineHyperlink {
-                                link: (**prior).clone(),
-                                coords: vec![CellCoordinates {
-                                    line_idx,
-                                    cols: current_range,
-                                }],
-                            });
-                            current_range = x..x + 1;
-                            current_link = Some(link);
-                        }
-                        None => {
-                            // Starting a new streak
-                            current_range = x..x + 1;
-                            current_link = Some(link);
-                        }
-                    }
-                } else if let Some(link) = current_link.take() {
-                    // Wrap up a prior streak
-                    hyperlinks.push(LineHyperlink {
-                        link: (*link).clone(),
-                        coords: vec![CellCoordinates {
-                            line_idx,
-                            cols: current_range,
-                        }],
-                    });
-                    current_range = 0..0;
-                }
-            }
-            if let Some(link) = current_link.take() {
-                // Wrap up final streak
-                hyperlinks.push(LineHyperlink {
-                    link: (*link).clone(),
-                    coords: vec![CellCoordinates {
-                        line_idx,
-                        cols: current_range,
-                    }],
-                });
-            }
-        }
-
+    fn from(lines: Vec<(StableRowIndex, Line)>) -> Self {
         Self { lines }
     }
 }

@@ -390,17 +390,6 @@ impl CellAttributes {
         }
     }
 
-    // TODO: Delete me!
-    pub fn set_hyperlink(&mut self, link: Option<Arc<Hyperlink>>) -> &mut Self {
-        if link.is_none() && self.fat.is_none() {
-            self
-        } else {
-            self.allocate_fat_attributes();
-            self.deallocate_fat_attributes_if_none();
-            self
-        }
-    }
-
     pub fn set_underline_color<C: Into<ColorAttribute>>(
         &mut self,
         underline_color: C,
@@ -504,9 +493,6 @@ impl CellAttributes {
             }
             Background(value) => {
                 self.set_background(*value);
-            }
-            Hyperlink(value) => {
-                self.set_hyperlink(value.clone());
             }
         }
     }
@@ -963,7 +949,6 @@ pub enum AttributeChange {
     Invisible(bool),
     Foreground(ColorAttribute),
     Background(ColorAttribute),
-    Hyperlink(Option<Arc<Hyperlink>>),
 }
 
 #[cfg(test)]
