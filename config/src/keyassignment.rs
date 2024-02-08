@@ -609,7 +609,6 @@ pub enum KeyAssignment {
     ActivateWindowRelative(isize),
     ActivateWindowRelativeNoWrap(isize),
     PromptInputLine(PromptInputLine),
-    InputSelector(InputSelector),
 }
 impl_lua_conversion_dynamic!(KeyAssignment);
 
