@@ -147,9 +147,6 @@ pub enum TermWindowNotif {
 pub enum UIItemType {
     TabBar(TabBarItem),
     CloseTab(usize),
-    AboveScrollThumb,
-    ScrollThumb,
-    BelowScrollThumb,
     Split(PositionedSplit),
 }
 

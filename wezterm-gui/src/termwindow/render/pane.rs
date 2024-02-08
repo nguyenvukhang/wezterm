@@ -250,30 +250,6 @@ impl crate::TermWindow {
             let thumb_x = self.dimensions.pixel_width - padding as usize - border.right.get();
 
             // Register the scroll bar location
-            self.ui_items.push(UIItem {
-                x: thumb_x,
-                width: padding as usize,
-                y: thumb_y_offset,
-                height: info.top,
-                item_type: UIItemType::AboveScrollThumb,
-            });
-            self.ui_items.push(UIItem {
-                x: thumb_x,
-                width: padding as usize,
-                y: abs_thumb_top,
-                height: thumb_size,
-                item_type: UIItemType::ScrollThumb,
-            });
-            self.ui_items.push(UIItem {
-                x: thumb_x,
-                width: padding as usize,
-                y: abs_thumb_top + thumb_size,
-                height: self
-                    .dimensions
-                    .pixel_height
-                    .saturating_sub(abs_thumb_top + thumb_size),
-                item_type: UIItemType::BelowScrollThumb,
-            });
 
             self.filled_rectangle(
                 layers,

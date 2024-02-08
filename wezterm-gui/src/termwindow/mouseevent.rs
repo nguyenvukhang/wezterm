@@ -40,9 +40,6 @@ impl super::TermWindow {
                 self.update_title_post_status();
             }
             UIItemType::CloseTab(_)
-            | UIItemType::AboveScrollThumb
-            | UIItemType::BelowScrollThumb
-            | UIItemType::ScrollThumb
             | UIItemType::Split(_) => {}
         }
     }
@@ -51,9 +48,6 @@ impl super::TermWindow {
         match item.item_type {
             UIItemType::TabBar(_) => {}
             UIItemType::CloseTab(_)
-            | UIItemType::AboveScrollThumb
-            | UIItemType::BelowScrollThumb
-            | UIItemType::ScrollThumb
             | UIItemType::Split(_) => {}
         }
     }
@@ -343,9 +337,6 @@ impl super::TermWindow {
             UIItemType::Split(split) => {
                 self.drag_split(item, split, start_event, x, y, context);
             }
-            UIItemType::ScrollThumb => {
-                self.drag_scroll_thumb(item, start_event, event, context);
-            }
             _ => {
                 log::error!("drag not implemented for {:?}", item);
             }
@@ -364,15 +355,6 @@ impl super::TermWindow {
         match item.item_type {
             UIItemType::TabBar(item) => {
                 self.mouse_event_tab_bar(item, event, context);
-            }
-            UIItemType::AboveScrollThumb => {
-                self.mouse_event_above_scroll_thumb(item, pane, event, context);
-            }
-            UIItemType::ScrollThumb => {
-                self.mouse_event_scroll_thumb(item, pane, event, context);
-            }
-            UIItemType::BelowScrollThumb => {
-                self.mouse_event_below_scroll_thumb(item, pane, event, context);
             }
             UIItemType::Split(split) => {
                 self.mouse_event_split(item, split, event, context);
