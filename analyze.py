@@ -83,6 +83,5 @@ for p in projects:
     if len(p.needed_by) == 1:
         print("[1]", p.dir, dirs(p.needed_by))
 
-for p in projects:
-    if p.needs("open-url"):
-        print("*", p.dir)
+for p in unneeded:
+    print("[x]", p.dir)
