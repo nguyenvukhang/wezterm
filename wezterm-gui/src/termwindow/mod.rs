@@ -2213,25 +2213,6 @@ impl TermWindow {
         promise::spawn::spawn(future).detach();
     }
 
-    fn show_debug_overlay(&mut self) {
-        let mux = Mux::get();
-        let tab = match mux.get_active_tab_for_window(self.mux_window_id) {
-            Some(tab) => tab,
-            None => return,
-        };
-
-        let gui_win = GuiWin::new(self);
-
-        let opengl_info = self.opengl_info.as_deref().unwrap_or("Unknown").to_string();
-        let connection_info = self.connection_name.clone();
-
-        let (overlay, future) = start_overlay(self, &tab, move |_tab_id, term| {
-            crate::overlay::show_debug_overlay(term, gui_win, opengl_info, connection_info)
-        });
-        self.assign_overlay(tab.tab_id(), overlay);
-        promise::spawn::spawn(future).detach();
-    }
-
     fn show_tab_navigator(&mut self) {
         self.show_launcher_impl("Tab Navigator", LauncherFlags::TABS);
     }
