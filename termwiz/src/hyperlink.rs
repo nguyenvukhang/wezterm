@@ -5,7 +5,7 @@
 //! plan is to then implicitly enable the hyperlink attribute for a cell
 //! as we recognize linkable input text during print() processing.
 use crate::{ensure, format_err, Result};
-use fancy_regex::{Captures, Regex};
+use fancy_regex::Regex;
 #[cfg(feature = "use_serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
@@ -224,48 +224,6 @@ pub struct RuleMatch {
     pub link: Arc<Hyperlink>,
 }
 
-/// An internal intermediate match result
-#[derive(Debug)]
-struct Match<'t> {
-    rule: &'t Rule,
-    captures: Captures<'t>,
-}
-
-impl<'t> Match<'t> {
-    /// Returns the length of the matched text in bytes (not cells!)
-    fn len(&self) -> usize {
-        let c0 = self.highlight().unwrap();
-        c0.end() - c0.start()
-    }
-
-    /// Returns the span of the matched text, measured in bytes (not cells!)
-    fn range(&self) -> Range<usize> {
-        let c0 = self.highlight().unwrap();
-        c0.start()..c0.end()
-    }
-
-    fn highlight(&self) -> Option<fancy_regex::Match> {
-        self.captures.get(self.rule.highlight)
-    }
-
-    /// Expand replacements in the format string to yield the URL
-    /// The replacement is as described on Rule::format.
-    fn expand(&self) -> String {
-        let mut result = self.rule.format.clone();
-        // Start with the highest numbered capture and decrement.
-        // This avoids ambiguity when replacing $11 vs $1.
-        for n in (0..self.captures.len()).rev() {
-            let search = format!("${}", n);
-            if let Some(rep) = self.captures.get(n) {
-                result = result.replace(&search, rep.as_str());
-            } else {
-                result = result.replace(&search, "");
-            }
-        }
-        result
-    }
-}
-
 impl Rule {
     /// Construct a new rule.  It may fail if the regex is invalid.
     pub fn new(regex: &str, format: &str) -> Result<Self> {
@@ -278,73 +236,5 @@ impl Rule {
             format: format.to_owned(),
             highlight,
         })
-    }
-
-    /// Given a line of text from the terminal screen, and a set of
-    /// rules, return the set of RuleMatches.
-    pub fn match_hyperlinks(line: &str, rules: &[Rule]) -> Vec<RuleMatch> {
-        let mut matches = Vec::new();
-        for rule in rules.iter() {
-            for capture_result in rule.regex.captures_iter(line) {
-                if let Ok(captures) = capture_result {
-                    let m = Match { rule, captures };
-                    if m.highlight().is_some() {
-                        matches.push(m);
-                    }
-                }
-            }
-        }
-        // Sort the matches by descending match length.
-        // This is to avoid confusion if multiple rules match the
-        // same sections of text.
-        matches.sort_by(|a, b| b.len().cmp(&a.len()));
-
-        matches
-            .into_iter()
-            .map(|m| {
-                let url = m.expand();
-                let link = Arc::new(Hyperlink::new_implicit(url));
-                RuleMatch {
-                    link,
-                    range: m.range(),
-                }
-            })
-            .collect()
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn parse_implicit() {
-        let rules = vec![
-            Rule::new(r"\b\w+://(?:[\w.-]+)\.[a-z]{2,15}\S*\b", "$0").unwrap(),
-            Rule::new(r"\b\w+@[\w-]+(\.[\w-]+)+\b", "mailto:$0").unwrap(),
-        ];
-
-        assert_eq!(
-            Rule::match_hyperlinks("  http://example.com", &rules),
-            vec![RuleMatch {
-                range: 2..20,
-                link: Arc::new(Hyperlink::new_implicit("http://example.com")),
-            }]
-        );
-
-        assert_eq!(
-            Rule::match_hyperlinks("  foo@example.com woot@example.com", &rules),
-            vec![
-                // Longest match first
-                RuleMatch {
-                    range: 18..34,
-                    link: Arc::new(Hyperlink::new_implicit("mailto:woot@example.com")),
-                },
-                RuleMatch {
-                    range: 2..17,
-                    link: Arc::new(Hyperlink::new_implicit("mailto:foo@example.com")),
-                },
-            ]
-        );
     }
 }

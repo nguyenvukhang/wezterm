@@ -1,6 +1,5 @@
 use crate::cell::{Cell, CellAttributes, SemanticType, UnicodeVersion};
 use crate::cellcluster::CellCluster;
-use crate::hyperlink::Rule;
 use crate::surface::line::cellref::CellRef;
 use crate::surface::line::clusterline::ClusteredLine;
 use crate::surface::line::linebits::LineBits;
