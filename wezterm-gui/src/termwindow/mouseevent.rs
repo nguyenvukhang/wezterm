@@ -36,19 +36,13 @@ impl super::TermWindow {
 
     fn leave_ui_item(&mut self, item: &UIItem) {
         match item.item_type {
-            UIItemType::TabBar(_) => {
-                self.update_title_post_status();
-            }
-            UIItemType::CloseTab(_)
-            | UIItemType::Split(_) => {}
+            UIItemType::Split(_) => {}
         }
     }
 
     fn enter_ui_item(&mut self, item: &UIItem) {
         match item.item_type {
-            UIItemType::TabBar(_) => {}
-            UIItemType::CloseTab(_)
-            | UIItemType::Split(_) => {}
+            UIItemType::Split(_) => {}
         }
     }
 
@@ -353,14 +347,8 @@ impl super::TermWindow {
     ) {
         self.last_ui_item.replace(item.clone());
         match item.item_type {
-            UIItemType::TabBar(item) => {
-                self.mouse_event_tab_bar(item, event, context);
-            }
             UIItemType::Split(split) => {
                 self.mouse_event_split(item, split, event, context);
-            }
-            UIItemType::CloseTab(idx) => {
-                self.mouse_event_close_tab(idx, event, context);
             }
         }
     }

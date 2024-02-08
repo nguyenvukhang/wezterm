@@ -145,8 +145,6 @@ pub enum TermWindowNotif {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum UIItemType {
-    TabBar(TabBarItem),
-    CloseTab(usize),
     Split(PositionedSplit),
 }
 
