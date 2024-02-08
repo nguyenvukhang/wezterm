@@ -1,14 +1,12 @@
-use anyhow::{anyhow, Context};
+use anyhow::anyhow;
 use clap::builder::ValueParser;
 use clap::{Parser, ValueEnum, ValueHint};
 use clap_complete::{generate as generate_completion, shells, Generator as CompletionGenerator};
-use config::{wezterm_version, ConfigHandle};
+use config::wezterm_version;
 use mux::Mux;
 use std::ffi::OsString;
 use umask::UmaskSaver;
 use wezterm_gui_subcommands::*;
-
-mod cli;
 
 //    let message = "; ❤ 😍🤢\n\x1b[91;mw00t\n\x1b[37;104;m bleet\x1b[0;m.";
 
@@ -86,9 +84,6 @@ enum SubCommand {
     )]
     Start(StartCommand),
 
-    #[command(name = "cli", about = "Interact with experimental mux server")]
-    Cli(cli::CliCommand),
-
     /// Generate shell completion information
     #[command(name = "shell-completion")]
     ShellCompletion {
@@ -96,24 +91,6 @@ enum SubCommand {
         #[arg(long, value_parser)]
         shell: Shell,
     },
-}
-
-#[derive(Copy, Clone, Debug, ValueEnum, Default)]
-enum ResampleFilter {
-    Nearest,
-    Triangle,
-    #[default]
-    CatmullRom,
-    Gaussian,
-    Lanczos3,
-}
-
-#[derive(Copy, Clone, Debug, ValueEnum, Default)]
-enum ResampleImageFormat {
-    Png,
-    Jpeg,
-    #[default]
-    Input,
 }
 
 fn terminate_with_error_message(err: &str) -> ! {
@@ -134,18 +111,6 @@ fn main() {
     Mux::shutdown();
 }
 
-fn init_config(opts: &Opt) -> anyhow::Result<ConfigHandle> {
-    config::common_init(
-        opts.config_file.as_ref(),
-        &opts.config_override,
-        opts.skip_config,
-    )
-    .context("config::common_init")?;
-    let config = config::configuration();
-    config.update_ulimit()?;
-    Ok(config)
-}
-
 fn run() -> anyhow::Result<()> {
     env_bootstrap::bootstrap();
 
@@ -160,7 +125,6 @@ fn run() -> anyhow::Result<()> {
         .unwrap_or_else(|| SubCommand::Start(StartCommand::default()))
     {
         SubCommand::Start(_) => delegate_to_gui(saver),
-        SubCommand::Cli(cli) => cli::run_cli(&opts, cli),
         SubCommand::ShellCompletion { shell } => {
             use clap::CommandFactory;
             let mut cmd = Opt::command();
