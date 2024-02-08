@@ -7,9 +7,6 @@ use num_traits::FromPrimitive;
 use std::cell::RefCell;
 use vtparse::{CsiParam, VTActor, VTParser};
 
-mod sixel;
-use sixel::SixelBuilder;
-
 #[derive(Default)]
 struct GetTcapBuilder {
     current: Vec<u8>,
@@ -41,7 +38,6 @@ impl GetTcapBuilder {
 
 #[derive(Default)]
 struct ParseState {
-    sixel: Option<SixelBuilder>,
     dcs: Option<ShortDeviceControl>,
     get_tcap: Option<GetTcapBuilder>,
 }
@@ -189,12 +185,9 @@ impl<'a, F: FnMut(Action)> VTActor for Performer<'a, F> {
         intermediates: &[u8],
         ignored_extra_intermediates: bool,
     ) {
-        self.state.sixel.take();
         self.state.get_tcap.take();
         self.state.dcs.take();
-        if byte == b'q' && intermediates.is_empty() && !ignored_extra_intermediates {
-            self.state.sixel.replace(SixelBuilder::new(params));
-        } else if byte == b'q' && intermediates == [b'+'] {
+        if byte == b'q' && intermediates == [b'+'] {
             self.state.get_tcap.replace(GetTcapBuilder::default());
         } else if !ignored_extra_intermediates && is_short_dcs(intermediates, byte) {
             self.state.dcs.replace(ShortDeviceControl {
@@ -218,8 +211,6 @@ impl<'a, F: FnMut(Action)> VTActor for Performer<'a, F> {
     fn dcs_put(&mut self, data: u8) {
         if let Some(dcs) = self.state.dcs.as_mut() {
             dcs.data.push(data);
-        } else if let Some(sixel) = self.state.sixel.as_mut() {
-            sixel.push(data);
         } else if let Some(tcap) = self.state.get_tcap.as_mut() {
             tcap.push(data);
         } else {

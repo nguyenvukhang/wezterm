@@ -18,13 +18,11 @@ use termwiz::escape::csi::{
     XtSmGraphicsAction, XtSmGraphicsItem, XtSmGraphicsStatus, XtermKeyModifierResource,
 };
 use termwiz::escape::{OneBased, CSI};
-use termwiz::image::ImageData;
 use termwiz::input::KeyboardEncoding;
 use termwiz::surface::{CursorShape, CursorVisibility, SequenceNo};
 use url::Url;
 use wezterm_bidi::ParagraphDirectionHint;
 
-mod image;
 mod keyboard;
 mod mouse;
 pub(crate) mod performer;
