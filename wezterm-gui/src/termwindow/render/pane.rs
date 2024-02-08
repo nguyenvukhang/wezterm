@@ -5,7 +5,7 @@ use crate::termwindow::render::{
     same_hyperlink, CursorProperties, LineQuadCacheKey, LineQuadCacheValue, LineToEleShapeCacheKey,
     RenderScreenLineParams,
 };
-use crate::termwindow::{ScrollHit, UIItem, UIItemType};
+use crate::termwindow::ScrollHit;
 use ::window::bitmaps::TextureRect;
 use ::window::DeadKeyStatus;
 use anyhow::Context;

@@ -1,4 +1,4 @@
-use crate::termwindow::{PaneInformation, TabInformation, UIItem, UIItemType};
+use crate::termwindow::{PaneInformation, TabInformation};
 use config::{ConfigHandle, TabBarColors};
 use finl_unicode::grapheme_clusters::Graphemes;
 use mlua::FromLua;
@@ -514,10 +514,6 @@ impl TabBarState {
         }
 
         Self { line, items }
-    }
-
-    pub fn compute_ui_items(&self, y: usize, cell_height: usize, cell_width: usize) -> Vec<UIItem> {
-        vec![]
     }
 }
 

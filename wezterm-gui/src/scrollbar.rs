@@ -46,25 +46,4 @@ impl ScrollHit {
             height: thumb_size,
         }
     }
-
-    /// Given a new thumb top coordinate (produced by dragging the thumb),
-    /// compute the equivalent viewport offset.
-    pub fn thumb_top_to_scroll_top(
-        thumb_top: usize,
-        pane: &dyn Pane,
-        viewport: Option<StableRowIndex>,
-        max_thumb_height: usize,
-        min_thumb_size: usize,
-    ) -> StableRowIndex {
-        let thumb = Self::thumb(pane, viewport, max_thumb_height, min_thumb_size);
-        let available_height = max_thumb_height - thumb.height;
-        let scroll_percent = thumb_top.min(available_height) as f32 / available_height as f32;
-
-        let render_dims = pane.get_dimensions();
-
-        render_dims.scrollback_top.saturating_add(
-            ((render_dims.physical_top - render_dims.scrollback_top) as f32 * scroll_percent)
-                as StableRowIndex,
-        )
-    }
 }
