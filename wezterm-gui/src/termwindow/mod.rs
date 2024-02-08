@@ -2903,10 +2903,6 @@ impl TermWindow {
                     }),
                 );
             }
-            CharSelect(args) => {
-                let modal = crate::termwindow::charselect::CharSelector::new(self, args);
-                self.set_modal(Rc::new(modal));
-            }
             ResetTerminal => {
                 pane.perform_actions(vec![termwiz::escape::Action::Esc(
                     termwiz::escape::Esc::Code(termwiz::escape::EscCode::FullReset),

@@ -799,14 +799,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &[],
             icon: None,
         },
-        CharSelect(_) => CommandDef {
-            brief: "Enter Emoji / Character selection mode".into(),
-            doc: "Activates the character selection UI for the current pane".into(),
-            keys: vec![(Modifiers::CTRL.union(Modifiers::SHIFT), "u".into())],
-            args: &[ArgType::ActivePane],
-            menubar: &["Edit"],
-            icon: Some("md_sticker_emoji"),
-        },
         DecreaseFontSize => CommandDef {
             brief: "Decrease font size".into(),
             doc: "Scales the font size smaller by 10%".into(),
@@ -1913,7 +1905,6 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         PasteFrom(ClipboardPasteSource::Clipboard),
         ClearScrollback(ScrollbackEraseMode::ScrollbackOnly),
         ClearScrollback(ScrollbackEraseMode::ScrollbackAndViewport),
-        CharSelect(CharSelectArguments::default()),
         ActivateCopyMode,
         ClearKeyTableStack,
         ActivateCommandPalette,
