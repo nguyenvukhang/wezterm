@@ -219,7 +219,6 @@ impl<'a> Performer<'a> {
             Action::DeviceControl(ctrl) => self.device_control(ctrl),
             Action::Esc(esc) => self.esc_dispatch(esc),
             Action::CSI(csi) => self.csi_dispatch(csi),
-            Action::Sixel(sixel) => self.sixel(sixel),
             Action::XtGetTcap(names) => self.xt_get_tcap(names),
         }
     }

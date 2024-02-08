@@ -33,7 +33,6 @@ pub enum Action {
     DeviceControl(DeviceControlMode),
     CSI(CSI),
     Esc(Esc),
-    Sixel(Box<Sixel>),
     /// A list of termcap, terminfo names for which the application
     /// wants information
     XtGetTcap(Vec<String>),
@@ -86,7 +85,6 @@ impl Display for Action {
             Action::DeviceControl(c) => c.fmt(f),
             Action::CSI(csi) => csi.fmt(f),
             Action::Esc(esc) => esc.fmt(f),
-            Action::Sixel(sixel) => sixel.fmt(f),
             Action::XtGetTcap(names) => {
                 write!(f, "\x1bP+q")?;
                 for (i, name) in names.iter().enumerate() {
