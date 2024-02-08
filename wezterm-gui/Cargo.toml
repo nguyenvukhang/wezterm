@@ -50,7 +50,6 @@ finl_unicode = "1.2"
 frecency = { path = "../frecency" }
 futures = "0.3"
 fuzzy-matcher = "0.3"
-hdrhistogram = "7.1"
 image = "0.24.6"
 lazy_static = "1.4"
 libc = "0.2"
@@ -74,7 +73,6 @@ serde = {version="1.0", features = ["rc", "derive"]}
 serde_json = "1.0"
 shlex = "1.1"
 smol = "1.2"
-tabout = { path = "../tabout" }
 tempfile = "3.4"
 terminfo = "0.8"
 termwiz = { path = "../termwiz" }
@@ -98,7 +96,6 @@ wezterm-term = { path = "../term", features=["use_serde"] }
 wezterm-toast-notification = { path = "../wezterm-toast-notification" }
 wgpu = "0.18"
 window = { path = "../window" }
-window-funcs = { path = "../lua-api-crates/window-funcs" }
 
 [target."cfg(windows)".dependencies]
 shared_library = "0.1"
