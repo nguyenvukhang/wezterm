@@ -87,26 +87,8 @@ enum SubCommand {
     )]
     Start(StartCommand),
 
-    #[command(name = "serial", about = "Open a serial port")]
-    Serial(SerialCommand),
-
-    #[command(name = "connect", about = "Connect to wezterm multiplexer")]
-    Connect(ConnectCommand),
-
-    #[command(name = "ls-fonts", about = "Display information about fonts")]
-    LsFonts(LsFontsCommand),
-
-    #[command(name = "show-keys", about = "Show key assignments")]
-    ShowKeys(ShowKeysCommand),
-
     #[command(name = "cli", about = "Interact with experimental mux server")]
     Cli(cli::CliCommand),
-
-    #[command(name = "record", about = "Record a terminal session as an asciicast")]
-    Record(asciicast::RecordCommand),
-
-    #[command(name = "replay", about = "Replay an asciicast terminal session")]
-    Replay(asciicast::PlayCommand),
 
     /// Generate shell completion information
     #[command(name = "shell-completion")]
@@ -178,14 +160,8 @@ fn run() -> anyhow::Result<()> {
         .cloned()
         .unwrap_or_else(|| SubCommand::Start(StartCommand::default()))
     {
-        SubCommand::Start(_)
-        | SubCommand::LsFonts(_)
-        | SubCommand::ShowKeys(_)
-        | SubCommand::Serial(_)
-        | SubCommand::Connect(_) => delegate_to_gui(saver),
+        SubCommand::Start(_) => delegate_to_gui(saver),
         SubCommand::Cli(cli) => cli::run_cli(&opts, cli),
-        SubCommand::Record(cmd) => cmd.run(init_config(&opts)?),
-        SubCommand::Replay(cmd) => cmd.run(),
         SubCommand::ShellCompletion { shell } => {
             use clap::CommandFactory;
             let mut cmd = Opt::command();
