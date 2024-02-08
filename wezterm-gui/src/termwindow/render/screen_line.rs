@@ -435,7 +435,6 @@ impl crate::TermWindow {
         for item in shaped.iter() {
             let cluster = &item.cluster;
             let glyph_info = &item.glyph_info;
-            let images = cluster.attrs.images().unwrap_or_else(|| vec![]);
             let valign_adjust = match cluster.attrs.vertical_align() {
                 termwiz::cell::VerticalAlign::BaseLine => 0.,
                 termwiz::cell::VerticalAlign::SuperScript => {
@@ -468,23 +467,6 @@ impl crate::TermWindow {
                         >= params.left_pixel_x + params.pixel_width
                 {
                     break;
-                }
-
-                for glyph_idx in 0..info.pos.num_cells as usize {
-                    for img in &images {
-                        if img.z_index() < 0 {
-                            self.populate_image_quad(
-                                &img,
-                                gl_state,
-                                layers,
-                                0,
-                                visual_cell_idx + glyph_idx,
-                                &params,
-                                hsv,
-                                item.fg_color,
-                            )?;
-                        }
-                    }
                 }
 
                 {
@@ -665,17 +647,6 @@ impl crate::TermWindow {
                     }
                 }
 
-                for glyph_idx in 0..info.pos.num_cells as usize {
-                    for img in &images {
-                        if img.z_index() >= 0 {
-                            overlay_images.push((
-                                visual_cell_idx + glyph_idx,
-                                img.clone(),
-                                item.fg_color,
-                            ));
-                        }
-                    }
-                }
                 phys_cell_idx += info.pos.num_cells as usize;
                 visual_cell_idx += info.pos.num_cells as usize;
                 cluster_x_pos += if params.use_pixel_positioning {
