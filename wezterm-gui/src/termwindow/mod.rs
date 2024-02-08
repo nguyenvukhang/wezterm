@@ -74,7 +74,6 @@ pub mod keyevent;
 pub mod modal;
 mod mouseevent;
 pub mod palette;
-pub mod paneselect;
 mod prevcursor;
 pub mod render;
 pub mod resize;
@@ -2903,10 +2902,6 @@ impl TermWindow {
                         top_level: split.top_level,
                     }),
                 );
-            }
-            PaneSelect(args) => {
-                let modal = crate::termwindow::paneselect::PaneSelector::new(self, args);
-                self.set_modal(Rc::new(modal));
             }
             CharSelect(args) => {
                 let modal = crate::termwindow::charselect::CharSelector::new(self, args);

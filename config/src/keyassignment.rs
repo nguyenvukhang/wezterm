@@ -598,7 +598,6 @@ pub enum KeyAssignment {
     CopyMode(CopyModeAssignment),
     RotatePanes(RotationDirection),
     SplitPane(SplitPane),
-    PaneSelect(PaneSelectArguments),
     CharSelect(CharSelectArguments),
 
     ResetTerminal,
