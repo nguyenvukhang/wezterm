@@ -578,20 +578,6 @@ impl TerminfoRenderer {
                         }
                     }
                 },
-                Change::Image(image) => {
-                    // Blank out the cells and move the cursor to the right spot
-                    for y in 0..image.height {
-                        for _ in 0..image.width {
-                            write!(out, " ")?;
-                        }
-
-                        if y != image.height - 1 {
-                            writeln!(out)?;
-                            self.cursor_left(image.width as u32, out)?;
-                        }
-                    }
-                    self.cursor_up(image.height as u32, out)?;
-                }
                 Change::ScrollRegionUp {
                     first_row,
                     region_size,

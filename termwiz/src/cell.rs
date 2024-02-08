@@ -401,32 +401,6 @@ impl CellAttributes {
         }
     }
 
-    // TODO: Delete me!
-    pub fn set_image(&mut self, image: Box<ImageCell>) -> &mut Self {
-        self.allocate_fat_attributes();
-        self
-    }
-
-    /// Clear all images from a cell
-    pub fn clear_images(&mut self) -> &mut Self {
-        self.deallocate_fat_attributes_if_none();
-        self
-    }
-
-    // TODO: DELETE
-    pub fn detach_image_with_placement(&mut self, image_id: u32, placement_id: Option<u32>) {
-        self.deallocate_fat_attributes_if_none();
-    }
-
-    /// Add an image attachement, preserving any existing attachments.
-    /// The list of images is maintained in z-index order
-    pub fn attach_image(&mut self, image: Box<ImageCell>) -> &mut Self {
-        self.allocate_fat_attributes();
-        let fat = self.fat.as_mut().unwrap();
-        let z_index = image.z_index();
-        self
-    }
-
     pub fn set_underline_color<C: Into<ColorAttribute>>(
         &mut self,
         underline_color: C,

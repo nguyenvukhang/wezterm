@@ -56,14 +56,6 @@ pub enum Change {
     CursorShape(CursorShape),
     /// Change the cursor visibility
     CursorVisibility(CursorVisibility),
-    /// Place an image at the current cursor position.
-    /// The image defines the dimensions in cells.
-    /// TODO: check iterm rendering behavior when the image is larger than the width of the screen.
-    /// If the image is taller than the remaining space at the bottom
-    /// of the screen, the screen will scroll up.
-    /// The cursor Y position is unchanged by rendering the Image.
-    /// The cursor X position will be incremented by `Image::width` cells.
-    Image(Image),
     /// Scroll the `region_size` lines starting at `first_row` upwards
     /// by `scroll_count` lines.  The `scroll_count` lines at the top of
     /// the region are overwritten.  The `scroll_count` lines at the
@@ -227,10 +219,6 @@ impl ChangeSequence {
                     }
                 }
                 self.update_render_height();
-            }
-            Change::Image(im) => {
-                self.cursor_x += im.width;
-                self.render_y_max = self.render_y_max.max(self.cursor_y + im.height as isize);
             }
             Change::ClearScreen(_) => {
                 self.cursor_x = 0;

@@ -961,47 +961,21 @@ pub struct SerializedImageCell {
 #[derive(Deserialize, Serialize, PartialEq, Debug, Default)]
 pub struct SerializedLines {
     lines: Vec<(StableRowIndex, Line)>,
-    hyperlinks: Vec<LineHyperlink>,
-    images: Vec<SerializedImageCell>,
 }
 
 impl SerializedLines {
     /// Reconsitute hyperlinks or other attributes that were decomposed for
     /// serialization, and return the line data.
-    pub fn extract_data(self) -> (Vec<(StableRowIndex, Line)>, Vec<SerializedImageCell>) {
-        let lines = if self.hyperlinks.is_empty() {
-            self.lines
-        } else {
-            let mut lines = self.lines;
-
-            for link in self.hyperlinks {
-                let url = Arc::new(link.link);
-
-                for coord in link.coords {
-                    if let Some((_, line)) = lines.get_mut(coord.line_idx) {
-                        if let Some(cells) =
-                            line.cells_mut_for_attr_changes_only().get_mut(coord.cols)
-                        {
-                            for cell in cells {
-                                cell.attrs_mut().set_hyperlink(Some(Arc::clone(&url)));
-                            }
-                        }
-                    }
-                }
-            }
-
-            lines
-        };
-        (lines, self.images)
+    pub fn extract_data(self) -> Vec<(StableRowIndex, Line)> {
+        self.lines
     }
 }
 
 impl From<Vec<(StableRowIndex, Line)>> for SerializedLines {
     fn from(mut lines: Vec<(StableRowIndex, Line)>) -> Self {
         let mut hyperlinks = vec![];
-        let mut images = vec![];
 
-        for (line_idx, (stable_row_idx, line)) in lines.iter_mut().enumerate() {
+        for (line_idx, (_stable_row_idx, line)) in lines.iter_mut().enumerate() {
             let mut current_link: Option<Arc<Hyperlink>> = None;
             let mut current_range = 0..0;
 
@@ -1048,28 +1022,6 @@ impl From<Vec<(StableRowIndex, Line)>> for SerializedLines {
                     });
                     current_range = 0..0;
                 }
-
-                if let Some(cell_images) = cell.attrs().images() {
-                    for imcell in cell_images {
-                        let (padding_left, padding_top, padding_right, padding_bottom) =
-                            imcell.padding();
-                        images.push(SerializedImageCell {
-                            line_idx: *stable_row_idx,
-                            cell_idx: x,
-                            top_left: imcell.top_left(),
-                            bottom_right: imcell.bottom_right(),
-                            z_index: imcell.z_index(),
-                            padding_left,
-                            padding_top,
-                            padding_right,
-                            padding_bottom,
-                            image_id: imcell.image_id(),
-                            placement_id: imcell.placement_id(),
-                            data_hash: imcell.image_data().hash(),
-                        });
-                    }
-                }
-                cell.attrs_mut().clear_images();
             }
             if let Some(link) = current_link.take() {
                 // Wrap up final streak
@@ -1083,11 +1035,7 @@ impl From<Vec<(StableRowIndex, Line)>> for SerializedLines {
             }
         }
 
-        Self {
-            lines,
-            hyperlinks,
-            images,
-        }
+        Self { lines }
     }
 }
 

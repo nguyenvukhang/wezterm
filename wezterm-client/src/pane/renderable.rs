@@ -11,7 +11,6 @@ use promise::BrokenPromise;
 use rangeset::*;
 use ratelim::RateLimiter;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::ops::Range;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -639,18 +638,7 @@ lazy_static::lazy_static! {
 pub(crate) async fn hydrate_lines(
     serialized_lines: SerializedLines,
 ) -> Vec<(StableRowIndex, Line)> {
-    let (lines, image_cells) = serialized_lines.extract_data();
-
-    if image_cells.is_empty() {
-        return lines;
-    }
-
-    let mut line_by_idx = HashMap::new();
-    for (line_idx, line) in lines {
-        line_by_idx.insert(line_idx, line);
-    }
-
-    line_by_idx.into_iter().collect()
+    return serialized_lines.extract_data();
 }
 
 impl RenderableState {

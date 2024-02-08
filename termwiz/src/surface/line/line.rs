@@ -725,7 +725,7 @@ impl Line {
     /// Similarly, when we assign a cell, we need to blank out those
     /// occluded successor cells.
     pub fn set_cell(&mut self, idx: usize, cell: Cell, seqno: SequenceNo) {
-        self.set_cell_impl(idx, cell, false, seqno);
+        self.set_cell_impl(idx, cell, seqno);
     }
 
     /// Assign a cell using grapheme text with a known width and attributes.
@@ -774,7 +774,7 @@ impl Line {
         cell: Cell,
         seqno: SequenceNo,
     ) {
-        self.set_cell_impl(idx, cell, true, seqno)
+        self.set_cell_impl(idx, cell, seqno)
     }
 
     fn raw_set_cell(&mut self, idx: usize, cell: Cell) {
@@ -782,7 +782,7 @@ impl Line {
         cells.set_cell(idx, cell);
     }
 
-    fn set_cell_impl(&mut self, idx: usize, cell: Cell, clear: bool, seqno: SequenceNo) {
+    fn set_cell_impl(&mut self, idx: usize, cell: Cell, seqno: SequenceNo) {
         // The .max(1) stuff is here in case we get called with a
         // zero-width cell.  That shouldn't happen: those sequences
         // should get filtered out in the terminal parsing layer,
@@ -980,7 +980,7 @@ impl Line {
         }
         for x in cols {
             // FIXME: we can skip the look-back for second and subsequent iterations
-            self.set_cell_impl(x, cell.clone(), true, seqno);
+            self.set_cell_impl(x, cell.clone(), seqno);
         }
         self.prune_trailing_blanks(seqno);
     }
