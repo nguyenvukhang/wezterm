@@ -10,6 +10,7 @@ debug:
 	rm -rf $(RUN_DIR)/*
 	cp ./target/debug/wezterm $(RUN_DIR)
 	cp ./target/debug/wezterm-gui $(RUN_DIR)
+	@make size
 	# open Alatty.app
 
 install:
@@ -20,6 +21,11 @@ install:
 	cp ./target/release/wezterm-gui $(RUN_DIR)
 	rm -rf /Applications/Alatty.app
 	cp -a $(APP_DIR) /Applications/Alatty.app
+	@make size
+
+size:
+	du -sh $(APP_DIR)
+	du -s $(APP_DIR)
 
 d:
 	@make debug

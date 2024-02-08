@@ -791,14 +791,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &[],
             icon: Some("oct_search"),
         },
-        ShowDebugOverlay => CommandDef {
-            brief: "Show debug overlay".into(),
-            doc: "Activates the debug overlay and Lua REPL".into(),
-            keys: vec![(Modifiers::CTRL.union(Modifiers::SHIFT), "l".into())],
-            args: &[ArgType::ActiveWindow],
-            menubar: &["Help"],
-            icon: Some("cod_debug"),
-        },
         InputSelector(_) => CommandDef {
             brief: "Prompt the user to choose from a list".into(),
             doc: "Activates the selector overlay and wait for input".into(),
@@ -1607,14 +1599,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Edit"],
             icon: None,
         },
-        OpenLinkAtMouseCursor => CommandDef {
-            brief: "Open link at mouse cursor".into(),
-            doc: "If there is no link under the mouse cursor, has no effect.".into(),
-            keys: vec![],
-            args: &[ArgType::ActivePane],
-            menubar: &["Shell"],
-            icon: None,
-        },
         ShowLauncherArgs(_) | ShowLauncher => CommandDef {
             brief: "Show the launcher".into(),
             doc: "Shows the launcher menu".into(),
@@ -2095,9 +2079,5 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         ActivateLastTab,
         ShowLauncher,
         ShowTabNavigator,
-        // ----------------- Help
-        ShowDebugOverlay,
-        // ----------------- Misc
-        OpenLinkAtMouseCursor,
     ];
 }

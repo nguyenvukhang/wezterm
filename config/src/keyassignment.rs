@@ -540,7 +540,6 @@ pub enum KeyAssignment {
     ScrollToTop,
     ScrollToBottom,
     ShowTabNavigator,
-    ShowDebugOverlay,
     HideApplication,
     QuitApplication,
     SpawnCommandInNewTab(SpawnCommand),
@@ -555,7 +554,6 @@ pub enum KeyAssignment {
 
     SelectTextAtMouseCursor(SelectionMode),
     ExtendSelectionToMouseCursor(SelectionMode),
-    OpenLinkAtMouseCursor,
     ClearSelection,
     CompleteSelection(ClipboardCopyDestination),
     CompleteSelectionOrOpenLinkAtMouseCursor(ClipboardCopyDestination),

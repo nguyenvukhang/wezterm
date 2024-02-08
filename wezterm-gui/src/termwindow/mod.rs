@@ -2620,7 +2620,6 @@ impl TermWindow {
             ScrollToTop => self.scroll_to_top(pane),
             ScrollToBottom => self.scroll_to_bottom(pane),
             ShowTabNavigator => self.show_tab_navigator(),
-            ShowDebugOverlay => self.show_debug_overlay(),
             ShowLauncher => self.show_launcher(),
             ShowLauncherArgs(args) => {
                 self.show_launcher_impl(args.title.as_deref().unwrap_or("Launcher"), args.flags)
@@ -2663,9 +2662,6 @@ impl TermWindow {
             }
             StartWindowDrag => {
                 self.window_drag_position = self.current_mouse_event.clone();
-            }
-            OpenLinkAtMouseCursor => {
-                self.do_open_link_at_mouse_cursor(pane);
             }
             EmitEvent(name) => {
                 self.emit_window_event(name, None);
