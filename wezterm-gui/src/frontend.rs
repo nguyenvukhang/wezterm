@@ -160,17 +160,6 @@ impl GuiFrontEnd {
                         .detach();
                     }
                 }
-                MuxNotification::SaveToDownloads { name, data } => {
-                    if !config::configuration().allow_download_protocols {
-                        log::error!(
-                            "Ignoring download request for {:?}, \
-                                 as allow_download_protocols=false",
-                            name
-                        );
-                    } else if let Err(err) = crate::download::save_to_downloads(name, &*data) {
-                        log::error!("save_to_downloads: {:#}", err);
-                    }
-                }
                 MuxNotification::AssignClipboard {
                     pane_id,
                     selection,

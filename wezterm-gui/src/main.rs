@@ -26,7 +26,6 @@ use wezterm_toast_notification::*;
 mod colorease;
 mod commands;
 mod customglyph;
-mod download;
 mod frontend;
 mod glyphcache;
 mod inputmap;

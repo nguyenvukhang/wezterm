@@ -1222,9 +1222,6 @@ impl TermWindow {
                 MuxNotification::AssignClipboard { .. } => {
                     // Handled by frontend
                 }
-                MuxNotification::SaveToDownloads { .. } => {
-                    // Handled by frontend
-                }
                 MuxNotification::PaneFocused(_) => {
                     // Also handled by clientpane
                     self.update_title_post_status();
@@ -1418,7 +1415,6 @@ impl TermWindow {
                 ..
             }
             | MuxNotification::AssignClipboard { .. }
-            | MuxNotification::SaveToDownloads { .. }
             | MuxNotification::PaneFocused(_)
             | MuxNotification::TabResized(_)
             | MuxNotification::TabTitleChanged { .. }
