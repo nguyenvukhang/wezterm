@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::ops::Range;
 use std::sync::Arc;
-use termwiz::hyperlink::Rule;
 use termwiz::input::KeyboardEncoding;
 use termwiz::surface::{Line, SequenceNo};
 use url::Url;
@@ -191,25 +190,6 @@ pub trait Pane: Downcast + Send + Sync {
     );
 
     fn get_logical_lines(&self, lines: Range<StableRowIndex>) -> Vec<LogicalLine>;
-
-    fn apply_hyperlinks(&self, lines: Range<StableRowIndex>, rules: &[Rule]) {
-        struct ApplyHyperLinks<'a> {
-            rules: &'a [Rule],
-        }
-        impl<'a> ForEachPaneLogicalLine for ApplyHyperLinks<'a> {
-            fn with_logical_line_mut(
-                &mut self,
-                _: Range<StableRowIndex>,
-                lines: &mut [&mut Line],
-            ) -> bool {
-                Line::apply_hyperlink_rules(self.rules, lines);
-
-                true
-            }
-        }
-
-        self.for_each_logical_line_in_stable_range_mut(lines, &mut ApplyHyperLinks { rules });
-    }
 
     /// Returns render related dimensions
     fn get_dimensions(&self) -> RenderableDimensions;

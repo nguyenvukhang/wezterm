@@ -2,7 +2,7 @@ use crate::domain::ClientInner;
 use crate::pane::clientpane::ClientPane;
 use anyhow::anyhow;
 use codec::*;
-use config::{configuration, ConfigHandle};
+use config::configuration;
 use lru::LruCache;
 use mux::pane::PaneId;
 use mux::renderable::{RenderableDimensions, StableCursorPosition};
@@ -356,10 +356,9 @@ impl RenderableInner {
         );
         self.seqno = delta.seqno;
 
-        let config = configuration();
         for (stable_row, line) in bonus_lines {
             log::trace!("bonus line {} seqno={}", stable_row, line.current_seqno());
-            self.put_line(stable_row, line, &config, None);
+            self.put_line(stable_row, line, None);
             dirty.remove(stable_row);
         }
 
@@ -445,11 +444,8 @@ impl RenderableInner {
         &mut self,
         stable_row: StableRowIndex,
         mut line: Line,
-        config: &ConfigHandle,
         fetch_start: Option<Instant>,
     ) {
-        line.scan_and_create_hyperlinks(&config.hyperlink_rules);
-
         let entry = if let Some(fetch_start) = fetch_start {
             // If we're completing a fetch, only replace entries that were
             // set to fetching as part of our fetch.  If they are now longer
@@ -541,11 +537,9 @@ impl RenderableInner {
 
             match result {
                 Ok(lines) => {
-                    let config = configuration();
-
                     log::trace!("fetch complete for {:?} at {:?}", to_fetch, now);
                     for (stable_row, line) in lines.into_iter() {
-                        inner.put_line(stable_row, line, &config, Some(now));
+                        inner.put_line(stable_row, line, Some(now));
                     }
                 }
                 Err(err) => {

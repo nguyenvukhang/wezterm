@@ -498,42 +498,6 @@ impl Line {
         self.update_last_change_seqno(seqno);
     }
 
-    /// Scan through the line and look for sequences that match the provided
-    /// rules.  Matching sequences are considered to be implicit hyperlinks
-    /// and will have a hyperlink attribute associated with them.
-    /// This function will only make changes if the line has been invalidated
-    /// since the last time this function was called.
-    /// This function does not remember the values of the `rules` slice, so it
-    /// is the responsibility of the caller to call `invalidate_implicit_hyperlinks`
-    /// if it wishes to call this function with different `rules`.
-    pub fn scan_and_create_hyperlinks(&mut self, rules: &[Rule]) {
-        if (self.bits & LineBits::SCANNED_IMPLICIT_HYPERLINKS)
-            == LineBits::SCANNED_IMPLICIT_HYPERLINKS
-        {
-            // Has not changed since last time we scanned
-            return;
-        }
-
-        // FIXME: let's build a string and a byte-to-cell map here, and
-        // use this as an opportunity to rebuild HAS_HYPERLINK, skip matching
-        // cells with existing non-implicit hyperlinks, and avoid matching
-        // text with zero-width cells.
-        self.bits |= LineBits::SCANNED_IMPLICIT_HYPERLINKS;
-        self.bits &= !LineBits::HAS_IMPLICIT_HYPERLINKS;
-        let line = self.as_str();
-
-        let matches = Rule::match_hyperlinks(&line, rules);
-        if matches.is_empty() {
-            return;
-        }
-
-        let line = line.into_owned();
-        let cells = self.coerce_vec_storage();
-        if cells.scan_and_create_hyperlinks(&line, matches) {
-            self.bits |= LineBits::HAS_IMPLICIT_HYPERLINKS;
-        }
-    }
-
     /// Scan through a logical line that is comprised of an array of
     /// physical lines and look for sequences that match the provided
     /// rules.  Matching sequences are considered to be implicit hyperlinks
@@ -568,9 +532,6 @@ impl Line {
             logical.append_line((**line).clone(), seqno);
         }
         let seq = logical.current_seqno();
-
-        logical.invalidate_implicit_hyperlinks(seq);
-        logical.scan_and_create_hyperlinks(rules);
 
         if !logical.has_hyperlink() {
             for line in logical_line.iter_mut() {

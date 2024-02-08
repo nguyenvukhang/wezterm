@@ -2,8 +2,6 @@ use crate::cell::Cell;
 use crate::surface::line::cellref::CellRef;
 #[cfg(feature = "use_serde")]
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
@@ -18,30 +16,6 @@ impl VecStorage {
 
     pub(crate) fn set_cell(&mut self, idx: usize, cell: Cell) {
         self.cells[idx] = cell;
-    }
-
-    pub(crate) fn scan_and_create_hyperlinks(
-        &mut self,
-        line: &str,
-        matches: Vec<crate::hyperlink::RuleMatch>,
-    ) -> bool {
-        // The capture range is measured in bytes but we need to translate
-        // that to the index of the column.  This is complicated a bit further
-        // because double wide sequences have a blank column cell after them
-        // in the cells array, but the string we match against excludes that
-        // string.
-        let mut cell_idx = 0;
-        let mut has_implicit_hyperlinks = false;
-        for (byte_idx, _grapheme) in line.grapheme_indices(true) {
-            let cell = &mut self.cells[cell_idx];
-            let mut matched = false;
-            cell_idx += cell.width();
-            if matched {
-                has_implicit_hyperlinks = true;
-            }
-        }
-
-        has_implicit_hyperlinks
     }
 }
 

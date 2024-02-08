@@ -696,8 +696,6 @@ impl super::TermWindow {
                 stable_row,
             ));
 
-        pane.apply_hyperlinks(stable_row..stable_row + 1, &self.config.hyperlink_rules);
-
         struct FindCurrentLink {
             current: Option<Arc<Hyperlink>>,
             stable_row: StableRowIndex,
