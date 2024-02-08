@@ -49,7 +49,6 @@ mod spawn;
 mod stats;
 mod tabbar;
 mod termwindow;
-mod unicode_names;
 mod uniforms;
 mod utilsprites;
 
