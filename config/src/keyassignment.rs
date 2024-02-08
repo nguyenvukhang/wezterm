@@ -568,8 +568,6 @@ pub enum KeyAssignment {
         confirm: bool,
     },
     EmitEvent(String),
-    QuickSelect,
-    QuickSelectArgs(QuickSelectArguments),
 
     Multiple(Vec<KeyAssignment>),
 

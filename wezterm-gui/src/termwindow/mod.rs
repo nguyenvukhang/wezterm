@@ -2683,22 +2683,6 @@ impl TermWindow {
                         });
                 }
             }
-            QuickSelect => {
-                if let Some(pane) = self.get_active_pane_no_overlay() {
-                    let qa = QuickSelectOverlay::with_pane(
-                        self,
-                        &pane,
-                        &QuickSelectArguments::default(),
-                    );
-                    self.assign_overlay_for_pane(pane.pane_id(), qa);
-                }
-            }
-            QuickSelectArgs(args) => {
-                if let Some(pane) = self.get_active_pane_no_overlay() {
-                    let qa = QuickSelectOverlay::with_pane(self, &pane, args);
-                    self.assign_overlay_for_pane(pane.pane_id(), qa);
-                }
-            }
             ActivateCopyMode => {
                 if let Some(pane) = self.get_active_pane_or_overlay() {
                     let mut replace_current = false;
