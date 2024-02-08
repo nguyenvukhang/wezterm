@@ -216,17 +216,6 @@ impl TerminfoRenderer {
                 }
             }
 
-            if self.caps.hyperlinks() {
-                if let Some(link) = attr.hyperlink() {
-                    let osc = OperatingSystemCommand::SetHyperlink(Some((**link).clone()));
-                    write!(out, "{}", osc)?;
-                } else if self.current_attr.hyperlink().is_some() {
-                    // Close out the old hyperlink
-                    let osc = OperatingSystemCommand::SetHyperlink(None);
-                    write!(out, "{}", osc)?;
-                }
-            }
-
             self.current_attr = attr;
         }
 

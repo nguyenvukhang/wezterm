@@ -3,7 +3,6 @@ use crate::color::{ColorAttribute, PaletteIndex};
 pub use crate::emoji::Presentation;
 use crate::emoji_variation::WCWIDTH_TABLE;
 pub use crate::escape::osc::Hyperlink;
-use crate::image::ImageCell;
 use crate::widechar_width::WcWidth;
 use finl_unicode::grapheme_clusters::Graphemes;
 #[cfg(feature = "use_serde")]
@@ -449,11 +448,6 @@ impl CellAttributes {
 
     // TODO: delete me!
     pub fn hyperlink(&self) -> Option<&Arc<Hyperlink>> {
-        None
-    }
-
-    // TODO: DELETE
-    pub fn images(&self) -> Option<Vec<ImageCell>> {
         None
     }
 

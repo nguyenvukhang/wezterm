@@ -8,7 +8,7 @@ use ::window::{
 };
 use config::keyassignment::{KeyAssignment, MouseEventTrigger, SpawnTabDomain};
 use config::MouseEventAltScreen;
-use mux::pane::{Pane, WithPaneLines};
+use mux::pane::Pane;
 use mux::tab::SplitDirection;
 use mux::Mux;
 use mux_lua::MuxPane;
@@ -17,8 +17,6 @@ use std::ops::Sub;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Duration;
-use termwiz::hyperlink::Hyperlink;
-use termwiz::surface::Line;
 use wezterm_dynamic::ToDynamic;
 use wezterm_term::input::{MouseButton, MouseEventKind as TMEK};
 use wezterm_term::{ClickPosition, LastMouseClick, StableRowIndex};
@@ -695,47 +693,6 @@ impl super::TermWindow {
                 },
                 stable_row,
             ));
-
-        struct FindCurrentLink {
-            current: Option<Arc<Hyperlink>>,
-            stable_row: StableRowIndex,
-            column: usize,
-        }
-
-        impl WithPaneLines for FindCurrentLink {
-            fn with_lines_mut(&mut self, stable_top: StableRowIndex, lines: &mut [&mut Line]) {
-                if stable_top == self.stable_row {
-                    if let Some(line) = lines.get(0) {
-                        if let Some(cell) = line.get_cell(self.column) {
-                            self.current = cell.attrs().hyperlink().cloned();
-                        }
-                    }
-                }
-            }
-        }
-
-        let mut find_link = FindCurrentLink {
-            current: None,
-            stable_row,
-            column,
-        };
-        pane.with_lines_mut(stable_row..stable_row + 1, &mut find_link);
-        let new_highlight = find_link.current;
-
-        match (self.current_highlight.as_ref(), new_highlight) {
-            (Some(old_link), Some(new_link)) if Arc::ptr_eq(&old_link, &new_link) => {
-                // Unchanged
-            }
-            (None, None) => {
-                // Unchanged
-            }
-            (_, rhs) => {
-                // We're hovering over a different URL, so invalidate and repaint
-                // so that we render the underline correctly
-                self.current_highlight = rhs;
-                context.invalidate();
-            }
-        };
 
         let outside_window = event.coords.x < 0
             || event.coords.x as usize > self.dimensions.pixel_width

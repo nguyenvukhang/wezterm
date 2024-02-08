@@ -6,12 +6,11 @@ use crate::quad::{
     TripleLayerQuadAllocatorTrait,
 };
 use crate::shapecache::*;
-use crate::termwindow::render::paint::AllowImage;
 use crate::termwindow::{BorrowedShapeCacheKey, RenderState, ShapedInfo, TermWindowNotif};
 use crate::utilsprites::RenderMetrics;
-use ::window::bitmaps::{TextureCoord, TextureRect, TextureSize};
+use ::window::bitmaps::TextureRect;
 use ::window::{DeadKeyStatus, PointF, RectF, SizeF, WindowOps};
-use anyhow::{anyhow, Context};
+use anyhow::anyhow;
 use config::{BoldBrightening, ConfigHandle, DimensionContext, TextStyle, VisualBellTarget};
 use euclid::num::Zero;
 use mux::pane::{Pane, PaneId};
@@ -401,89 +400,6 @@ impl crate::TermWindow {
         quad.set_fg_color(glyph_color);
         quad.set_texture(sprite);
         quad.set_has_color(false);
-        Ok(())
-    }
-
-    /// Render iTerm2 style image attributes
-    pub fn populate_image_quad(
-        &self,
-        image: &termwiz::image::ImageCell,
-        gl_state: &RenderState,
-        layers: &mut TripleLayerQuadAllocator,
-        layer_num: usize,
-        cell_idx: usize,
-        params: &RenderScreenLineParams,
-        hsv: Option<config::HsbTransform>,
-        glyph_color: LinearRgba,
-    ) -> anyhow::Result<()> {
-        if self.allow_images == AllowImage::No {
-            return Ok(());
-        }
-
-        let padding = self
-            .render_metrics
-            .cell_size
-            .height
-            .max(params.render_metrics.cell_size.width) as usize;
-        let padding = if padding.is_power_of_two() {
-            padding
-        } else {
-            padding.next_power_of_two()
-        };
-
-        let (sprite, next_due, _load_state) = gl_state
-            .glyph_cache
-            .borrow_mut()
-            .cached_image(image.image_data(), Some(padding), self.allow_images)
-            .context("cached_image")?;
-        self.update_next_frame_time(next_due);
-        let width = sprite.coords.size.width;
-        let height = sprite.coords.size.height;
-
-        let top_left = image.top_left();
-        let bottom_right = image.bottom_right();
-
-        // We *could* call sprite.texture.to_texture_coords() here,
-        // but since that takes integer pixel coordinates, we'd
-        // lose precision and end up with visual artifacts.
-        // Instead, we compute the texture coords here in floating point.
-
-        let texture_width = sprite.texture.width() as f32;
-        let texture_height = sprite.texture.height() as f32;
-        let origin = TextureCoord::new(
-            (sprite.coords.origin.x as f32 + (*top_left.x * width as f32)) / texture_width,
-            (sprite.coords.origin.y as f32 + (*top_left.y * height as f32)) / texture_height,
-        );
-
-        let size = TextureSize::new(
-            (*bottom_right.x - *top_left.x) * width as f32 / texture_width,
-            (*bottom_right.y - *top_left.y) * height as f32 / texture_height,
-        );
-
-        let texture_rect = TextureRect::new(origin, size);
-
-        let mut quad = layers.allocate(layer_num)?;
-        let cell_width = params.render_metrics.cell_size.width as f32;
-        let cell_height = params.render_metrics.cell_size.height as f32;
-        let pos_y = (self.dimensions.pixel_height as f32 / -2.) + params.top_pixel_y;
-
-        let pos_x = (self.dimensions.pixel_width as f32 / -2.)
-            + params.left_pixel_x
-            + (cell_idx as f32 * cell_width);
-
-        let (padding_left, padding_top, padding_right, padding_bottom) = image.padding();
-
-        quad.set_position(
-            pos_x + padding_left as f32,
-            pos_y + padding_top as f32,
-            pos_x + cell_width + padding_left as f32 - padding_right as f32,
-            pos_y + cell_height + padding_top as f32 - padding_bottom as f32,
-        );
-        quad.set_hsv(hsv);
-        quad.set_fg_color(glyph_color);
-        quad.set_texture(texture_rect);
-        quad.set_has_color(true);
-
         Ok(())
     }
 
