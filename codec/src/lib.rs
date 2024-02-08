@@ -30,7 +30,7 @@ use std::ops::Range;
 use std::path::PathBuf;
 use std::sync::Arc;
 use termwiz::hyperlink::Hyperlink;
-use termwiz::image::{ImageData, TextureCoordinate};
+use termwiz::image::TextureCoordinate;
 use termwiz::surface::{Line, SequenceNo};
 use thiserror::Error;
 use wezterm_term::color::ColorPalette;
@@ -476,7 +476,6 @@ pdu! {
     WindowWorkspaceChanged: 44,
     SetFocusedPane: 45,
     GetImageCell: 46,
-    GetImageCellResponse: 47,
     MovePaneToNewTab: 48,
     MovePaneToNewTabResponse: 49,
     ActivatePaneDirection: 50,
@@ -1123,12 +1122,6 @@ pub struct GetImageCell {
     pub line_idx: StableRowIndex,
     pub cell_idx: usize,
     pub data_hash: [u8; 32],
-}
-
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
-pub struct GetImageCellResponse {
-    pub pane_id: PaneId,
-    pub data: Option<Arc<ImageData>>,
 }
 
 #[cfg(test)]

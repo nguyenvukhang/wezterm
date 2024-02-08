@@ -138,8 +138,7 @@ impl ClientPane {
                 *self.mouse_grabbed.lock() = delta.mouse_grabbed;
 
                 let bonus_lines = std::mem::take(&mut delta.bonus_lines);
-                let client = { Arc::clone(&self.renderable.lock().inner.borrow().client) };
-                let bonus_lines = hydrate_lines(client, delta.pane_id, bonus_lines).await;
+                let bonus_lines = hydrate_lines(bonus_lines).await;
 
                 self.renderable
                     .lock()

@@ -966,7 +966,6 @@ impl Client {
     rpc!(list_clients, GetClientList, GetClientListResponse);
     rpc!(set_window_workspace, SetWindowWorkspace, UnitResponse);
     rpc!(set_focused_pane_id, SetFocusedPane, UnitResponse);
-    rpc!(get_image_cell, GetImageCell, GetImageCellResponse);
     rpc!(set_configured_palette_for_pane, SetPalette, UnitResponse);
     rpc!(set_tab_title, TabTitleChanged, UnitResponse);
     rpc!(set_window_title, WindowTitleChanged, UnitResponse);
