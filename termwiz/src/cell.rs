@@ -78,8 +78,6 @@ impl std::fmt::Debug for CellAttributes {
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 struct FatAttributes {
-    /// The hyperlink content, if any
-    hyperlink: Option<Arc<Hyperlink>>,
     /// The image data, if any
     image: Vec<Box<ImageCell>>,
     /// The color of the underline.  If None, then
@@ -91,9 +89,6 @@ struct FatAttributes {
 
 impl FatAttributes {
     pub fn compute_shape_hash<H: Hasher>(&self, hasher: &mut H) {
-        if let Some(link) = &self.hyperlink {
-            link.compute_shape_hash(hasher);
-        }
         for cell in &self.image {
             cell.compute_shape_hash(hasher);
         }
@@ -378,7 +373,6 @@ impl CellAttributes {
     fn allocate_fat_attributes(&mut self) {
         if self.fat.is_none() {
             self.fat.replace(Box::new(FatAttributes {
-                hyperlink: None,
                 image: vec![],
                 underline_color: ColorAttribute::Default,
                 foreground: ColorAttribute::Default,
@@ -393,7 +387,6 @@ impl CellAttributes {
             .as_ref()
             .map(|fat| {
                 fat.image.is_empty()
-                    && fat.hyperlink.is_none()
                     && fat.underline_color == ColorAttribute::Default
                     && fat.foreground == ColorAttribute::Default
                     && fat.background == ColorAttribute::Default
@@ -409,7 +402,6 @@ impl CellAttributes {
             self
         } else {
             self.allocate_fat_attributes();
-            self.fat.as_mut().unwrap().hyperlink = link;
             self.deallocate_fat_attributes_if_none();
             self
         }
@@ -511,8 +503,9 @@ impl CellAttributes {
         res
     }
 
+    // TODO: delete me!
     pub fn hyperlink(&self) -> Option<&Arc<Hyperlink>> {
-        self.fat.as_ref().and_then(|fat| fat.hyperlink.as_ref())
+        None
     }
 
     /// Returns the list of attached images in z-index order.
