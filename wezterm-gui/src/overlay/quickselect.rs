@@ -22,37 +22,6 @@ use wezterm_term::{
 };
 use window::WindowOps;
 
-const PATTERNS: [&str; 14] = [
-    // markdown_url
-    r"\[[^]]*\]\(([^)]+)\)",
-    // url
-    r"(?:https?://|git@|git://|ssh://|ftp://|file:///)\S+",
-    // diff_a
-    r"--- a/(\S+)",
-    // diff_b
-    r"\+\+\+ b/(\S+)",
-    // docker
-    r"sha256:([0-9a-f]{64})",
-    // path
-    r"(?:[.\w\-@~]+)?(?:/[.\w\-@]+)+",
-    // color
-    r"#[0-9a-fA-F]{6}",
-    // uuid
-    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
-    // ipfs
-    r"Qm[0-9a-zA-Z]{44}",
-    // sha
-    r"[0-9a-f]{7,40}",
-    // ip
-    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",
-    // ipv6
-    r"[A-f0-9:]+:+[A-f0-9:]+[%\w\d]+",
-    // address
-    r"0x[0-9a-fA-F]+",
-    // number
-    r"[0-9]{4,}",
-];
-
 /// This function computes a set of labels for a given alphabet.
 /// It is derived from https://github.com/fcsonline/tmux-thumbs/blob/master/src/alphabets.rs
 /// which is Copyright (c) 2019 Ferran Basora and provided under the MIT license
@@ -222,78 +191,6 @@ struct QuickSelectRenderable {
 }
 
 impl QuickSelectOverlay {
-    pub fn with_pane(
-        term_window: &TermWindow,
-        pane: &Arc<dyn Pane>,
-        args: &QuickSelectArguments,
-    ) -> Arc<dyn Pane> {
-        let viewport = term_window.get_viewport(pane.pane_id());
-        let dims = pane.get_dimensions();
-
-        let config = term_window.config.clone();
-
-        let mut pattern = "(?m)(".to_string();
-        let mut have_patterns = false;
-        if !args.patterns.is_empty() {
-            for p in &args.patterns {
-                if have_patterns {
-                    pattern.push('|');
-                }
-                pattern.push_str(p);
-                have_patterns = true;
-            }
-        } else {
-            // User-provided patterns take precedence over built-ins
-            for p in &config.quick_select_patterns {
-                if have_patterns {
-                    pattern.push('|');
-                }
-                pattern.push_str(p);
-                have_patterns = true;
-            }
-            if !config.disable_default_quick_select_patterns {
-                for p in &PATTERNS {
-                    if have_patterns {
-                        pattern.push('|');
-                    }
-                    pattern.push_str(p);
-                    have_patterns = true;
-                }
-            }
-        }
-        pattern.push(')');
-
-        let pattern = Pattern::Regex(pattern);
-
-        let window = term_window.window.clone().unwrap();
-        let mut renderer = QuickSelectRenderable {
-            delegate: Arc::clone(pane),
-            pattern,
-            selection: "".to_string(),
-            results: vec![],
-            by_line: HashMap::new(),
-            by_label: HashMap::new(),
-            dirty_results: RangeSet::default(),
-            viewport,
-            last_bar_pos: None,
-            window,
-            result_pos: None,
-            width: dims.cols,
-            height: dims.viewport_rows,
-            config,
-            args: args.clone(),
-        };
-
-        let search_row = renderer.compute_search_row();
-        renderer.dirty_results.add(search_row);
-        renderer.update_search(true);
-
-        Arc::new(QuickSelectOverlay {
-            renderer: Mutex::new(renderer),
-            delegate: Arc::clone(pane),
-        })
-    }
-
     pub fn viewport_changed(&self, viewport: Option<StableRowIndex>) {
         let mut render = self.renderer.lock();
         if render.viewport != viewport {

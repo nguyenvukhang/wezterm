@@ -30,8 +30,8 @@ use ::wezterm_term::input::{ClickPosition, MouseButton as TMB};
 use ::window::*;
 use anyhow::{anyhow, ensure, Context};
 use config::keyassignment::{
-    KeyAssignment, PaneDirection, Pattern, PromptInputLine, QuickSelectArguments,
-    RotationDirection, SpawnCommand, SplitSize,
+    KeyAssignment, PaneDirection, Pattern, PromptInputLine, RotationDirection, SpawnCommand,
+    SplitSize,
 };
 use config::window::WindowLevel;
 use config::{
@@ -847,12 +847,12 @@ impl TermWindow {
                     ResizeIncrementCalculator {
                         x: myself.render_metrics.cell_size.width as u16,
                         y: myself.render_metrics.cell_size.height as u16,
-                        padding_left: padding_left,
-                        padding_top: padding_top,
-                        padding_right: padding_right,
-                        padding_bottom: padding_bottom,
-                        border: border,
-                        tab_bar_height: tab_bar_height,
+                        padding_left,
+                        padding_top,
+                        padding_right,
+                        padding_bottom,
+                        border,
+                        tab_bar_height,
                     }
                     .into(),
                 );
@@ -3138,12 +3138,6 @@ impl TermWindow {
 
     fn scroll_to_bottom(&mut self, pane: &Arc<dyn Pane>) {
         self.pane_state(pane.pane_id()).viewport = None;
-    }
-
-    fn get_active_pane_no_overlay(&self) -> Option<Arc<dyn Pane>> {
-        let mux = Mux::get();
-        mux.get_active_tab_for_window(self.mux_window_id)
-            .and_then(|tab| tab.get_active_pane())
     }
 
     /// Returns a Pane that we can interact with; this will typically be
