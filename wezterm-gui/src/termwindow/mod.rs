@@ -68,7 +68,6 @@ use wezterm_term::{Alert, StableRowIndex, TerminalConfiguration, TerminalSize};
 
 pub mod background;
 pub mod box_model;
-pub mod charselect;
 pub mod clipboard;
 pub mod keyevent;
 pub mod modal;
