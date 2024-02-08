@@ -422,11 +422,6 @@ impl crate::TermWindow {
             }
         }
 
-        let mut overlay_images = vec![];
-
-        // Number of cells we've rendered, starting from the edge of the line
-        let mut visual_cell_idx = 0;
-
         let mut cluster_x_pos = match direction {
             Direction::LeftToRight => 0.,
             Direction::RightToLeft => params.pixel_width,
@@ -648,7 +643,6 @@ impl crate::TermWindow {
                 }
 
                 phys_cell_idx += info.pos.num_cells as usize;
-                visual_cell_idx += info.pos.num_cells as usize;
                 cluster_x_pos += if params.use_pixel_positioning {
                     glyph.x_advance.get() as f32 * width_scale
                 } else {
@@ -667,20 +661,6 @@ impl crate::TermWindow {
                 }
                 Direction::LeftToRight => {}
             }
-        }
-
-        for (cell_idx, img, glyph_color) in overlay_images {
-            self.populate_image_quad(
-                &img,
-                gl_state,
-                layers,
-                2,
-                phys(cell_idx, num_cols, direction),
-                &params,
-                hsv,
-                glyph_color,
-            )
-            .context("populate_image_quad")?;
         }
 
         metrics::histogram!("render_screen_line", start.elapsed());

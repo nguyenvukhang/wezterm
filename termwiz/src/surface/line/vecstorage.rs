@@ -16,7 +16,7 @@ impl VecStorage {
         Self { cells }
     }
 
-    pub(crate) fn set_cell(&mut self, idx: usize, mut cell: Cell, clear_image_placement: bool) {
+    pub(crate) fn set_cell(&mut self, idx: usize, cell: Cell) {
         self.cells[idx] = cell;
     }
 

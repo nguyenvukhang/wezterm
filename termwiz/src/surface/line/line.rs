@@ -777,9 +777,9 @@ impl Line {
         self.set_cell_impl(idx, cell, true, seqno)
     }
 
-    fn raw_set_cell(&mut self, idx: usize, cell: Cell, clear: bool) {
+    fn raw_set_cell(&mut self, idx: usize, cell: Cell) {
         let cells = self.coerce_vec_storage();
-        cells.set_cell(idx, cell, clear);
+        cells.set_cell(idx, cell);
     }
 
     fn set_cell_impl(&mut self, idx: usize, cell: Cell, clear: bool, seqno: SequenceNo) {
@@ -835,10 +835,10 @@ impl Line {
         // For double-wide or wider chars, ensure that the cells that
         // are overlapped by this one are blanked out.
         for i in 1..=width.saturating_sub(1) {
-            self.raw_set_cell(idx + i, Cell::blank_with_attrs(cell.attrs().clone()), clear);
+            self.raw_set_cell(idx + i, Cell::blank_with_attrs(cell.attrs().clone()));
         }
 
-        self.raw_set_cell(idx, cell, clear);
+        self.raw_set_cell(idx, cell);
     }
 
     /// Place text starting at the specified column index.
