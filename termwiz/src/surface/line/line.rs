@@ -533,14 +533,6 @@ impl Line {
         }
         let seq = logical.current_seqno();
 
-        if !logical.has_hyperlink() {
-            for line in logical_line.iter_mut() {
-                line.bits.set(LineBits::SCANNED_IMPLICIT_HYPERLINKS, true);
-                line.clear_appdata();
-            }
-            return;
-        }
-
         // Re-compute the physical lines that comprise this logical line
         for phys in logical_line.iter_mut() {
             let wrapped = phys.last_cell_was_wrapped();
@@ -555,13 +547,6 @@ impl Line {
                 phys.compress_for_scrollback();
             }
         }
-    }
-
-    /// Returns true if the line contains a hyperlink
-    #[inline]
-    pub fn has_hyperlink(&self) -> bool {
-        (self.bits & (LineBits::HAS_HYPERLINK | LineBits::HAS_IMPLICIT_HYPERLINKS))
-            != LineBits::NONE
     }
 
     /// Recompose line into the corresponding utf8 string.
@@ -700,10 +685,6 @@ impl Line {
         attr: CellAttributes,
         seqno: SequenceNo,
     ) {
-        if attr.hyperlink().is_some() {
-            self.bits |= LineBits::HAS_HYPERLINK;
-        }
-
         if let CellStorage::C(cl) = &mut self.cells {
             if idx > cl.len() && text == " " && attr == CellAttributes::blank() {
                 // Appending blank beyond end of line; is already
@@ -753,9 +734,6 @@ impl Line {
         self.invalidate_implicit_hyperlinks(seqno);
         self.invalidate_zones();
         self.update_last_change_seqno(seqno);
-        if cell.attrs().hyperlink().is_some() {
-            self.bits |= LineBits::HAS_HYPERLINK;
-        }
 
         if let CellStorage::C(cl) = &mut self.cells {
             if idx > cl.len() && cell == Cell::blank() {

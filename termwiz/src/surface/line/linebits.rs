@@ -7,8 +7,6 @@ bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub(crate) struct LineBits : u16 {
         const NONE = 0;
-        /// The line contains 1+ cells with explicit hyperlinks set
-        const HAS_HYPERLINK = 1<<1;
         /// true if we have scanned for implicit hyperlinks
         const SCANNED_IMPLICIT_HYPERLINKS = 1<<2;
         /// true if we found implicit hyperlinks in the last scan
