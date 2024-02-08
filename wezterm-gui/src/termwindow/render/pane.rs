@@ -5,7 +5,6 @@ use crate::termwindow::render::{
     same_hyperlink, CursorProperties, LineQuadCacheKey, LineQuadCacheValue, LineToEleShapeCacheKey,
     RenderScreenLineParams,
 };
-use crate::termwindow::ScrollHit;
 use ::window::bitmaps::TextureRect;
 use ::window::DeadKeyStatus;
 use anyhow::Context;
@@ -68,10 +67,10 @@ impl crate::TermWindow {
         } else {
             0.
         };
-        let (top_bar_height, bottom_bar_height) = if self.config.tab_bar_at_bottom {
-            (0.0, tab_bar_height)
+        let top_bar_height = if self.config.tab_bar_at_bottom {
+            0.0
         } else {
-            (tab_bar_height, 0.0)
+            tab_bar_height
         };
 
         let border = self.get_os_border();
@@ -219,50 +218,6 @@ impl crate::TermWindow {
                     Some(config.inactive_pane_hsb)
                 });
             }
-        }
-
-        // TODO: we only have a single scrollbar in a single position.
-        // We only update it for the active pane, but we should probably
-        // do a per-pane scrollbar.  That will require more extensive
-        // changes to ScrollHit, mouse positioning, PositionedPane
-        // and tab size calculation.
-        if pos.is_active && self.show_scroll_bar {
-            let thumb_y_offset = top_bar_height as usize + border.top.get();
-
-            let min_height = self.min_scroll_bar_height();
-
-            let info = ScrollHit::thumb(
-                &*pos.pane,
-                current_viewport,
-                self.dimensions.pixel_height.saturating_sub(
-                    thumb_y_offset + border.bottom.get() + bottom_bar_height as usize,
-                ),
-                min_height as usize,
-            );
-            let abs_thumb_top = thumb_y_offset + info.top;
-            let thumb_size = info.height;
-            let color = palette.scrollbar_thumb.to_linear();
-
-            // Adjust the scrollbar thumb position
-            let config = &self.config;
-            let padding = self.effective_right_padding(&config) as f32;
-
-            let thumb_x = self.dimensions.pixel_width - padding as usize - border.right.get();
-
-            // Register the scroll bar location
-
-            self.filled_rectangle(
-                layers,
-                2,
-                euclid::rect(
-                    thumb_x as f32,
-                    abs_thumb_top as f32,
-                    padding,
-                    thumb_size as f32,
-                ),
-                color,
-            )
-            .context("filled_rectangle")?;
         }
 
         let (selrange, rectangular) = {

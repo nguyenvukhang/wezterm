@@ -34,7 +34,6 @@ mod quad;
 mod renderstate;
 mod resize_increment_calculator;
 mod scripting;
-mod scrollbar;
 mod selection;
 mod shapecache;
 mod spawn;
