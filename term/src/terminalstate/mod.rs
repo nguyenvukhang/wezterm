@@ -28,8 +28,6 @@ mod image;
 mod keyboard;
 mod mouse;
 pub(crate) mod performer;
-mod sixel;
-use crate::terminalstate::image::*;
 
 lazy_static::lazy_static! {
     static ref DB: Database = {
@@ -354,7 +352,6 @@ pub struct TerminalState {
 
     writer: BufWriter<ThreadedWriter>,
 
-    image_cache: lru::LruCache<[u8; 32], Arc<ImageData>>,
     sixel_scrolls_right: bool,
 
     user_vars: HashMap<String, String>,
@@ -557,7 +554,6 @@ impl TerminalState {
             term_program: term_program.to_string(),
             term_version: term_version.to_string(),
             writer,
-            image_cache: lru::LruCache::new(16),
             user_vars: HashMap::new(),
             seqno,
             unicode_version,
