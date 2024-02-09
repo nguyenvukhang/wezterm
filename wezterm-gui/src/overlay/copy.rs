@@ -1,5 +1,4 @@
 use crate::selection::{SelectionCoordinate, SelectionRange, SelectionX};
-use crate::termwindow::keyevent::KeyTableArgs;
 use crate::termwindow::{TermWindow, TermWindowNotif};
 use config::keyassignment::{
     ClipboardCopyDestination, CopyModeAssignment, KeyAssignment, KeyTable, KeyTableEntry,
@@ -545,48 +544,6 @@ impl CopyRenderable {
         self.select_to_cursor_pos();
     }
 
-    fn clear_pattern(&mut self) {
-        self.pattern.clear();
-        self.update_search();
-    }
-
-    fn edit_pattern(&mut self) {
-        self.editing_search = true;
-        self.update_key_table();
-    }
-
-    fn accept_pattern(&mut self) {
-        self.editing_search = false;
-        self.update_key_table();
-    }
-
-    fn update_key_table(&mut self) {
-        let window = self.window.clone();
-        let pane_id = self.delegate.pane_id();
-
-        window.notify(TermWindowNotif::Apply(Box::new(move |term_window| {
-            let mut state = term_window.pane_state(pane_id);
-            if let Some(overlay) = state.overlay.as_mut() {
-                if let Some(copy_overlay) = overlay.pane.downcast_ref::<CopyOverlay>() {
-                    let editing_search = copy_overlay.render.lock().editing_search;
-
-                    overlay.key_table_state.activate(KeyTableArgs {
-                        name: if editing_search {
-                            "search_mode"
-                        } else {
-                            "copy_mode"
-                        },
-                        timeout_milliseconds: None,
-                        replace_current: true,
-                        one_shot: false,
-                        until_unknown: false,
-                        prevent_fallback: false,
-                    });
-                }
-            }
-        })));
-    }
-
     fn move_to_viewport_middle(&mut self) {
         let dims = self.dimensions();
         self.cursor.y = dims.top + (dims.dims.viewport_rows as isize) / 2;
@@ -1097,9 +1054,6 @@ impl Pane for CopyOverlay {
                     PageUp => render.move_by_page(-1.0),
                     PageDown => render.move_by_page(1.0),
                     Close => render.close(),
-                    ClearPattern => render.clear_pattern(),
-                    EditPattern => render.edit_pattern(),
-                    AcceptPattern => render.accept_pattern(),
                     SetSelectionMode(mode) => render.set_selection_mode(mode),
                     ClearSelectionMode => render.clear_selection_mode(),
                     MoveBackwardSemanticZone => render.move_by_zone(-1, None),
@@ -1420,18 +1374,11 @@ fn is_whitespace_word(word: &str) -> bool {
 
 pub fn search_key_table() -> KeyTable {
     let mut table = KeyTable::default();
-    for (key, mods, action) in [
-        (
-            WKeyCode::Char('\x1b'),
-            Modifiers::NONE,
-            KeyAssignment::CopyMode(CopyModeAssignment::Close),
-        ),
-        (
-            WKeyCode::Char('u'),
-            Modifiers::CTRL,
-            KeyAssignment::CopyMode(CopyModeAssignment::ClearPattern),
-        ),
-    ] {
+    for (key, mods, action) in [(
+        WKeyCode::Char('\x1b'),
+        Modifiers::NONE,
+        KeyAssignment::CopyMode(CopyModeAssignment::Close),
+    )] {
         table.insert((key, mods), KeyTableEntry { action });
     }
     table
