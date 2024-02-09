@@ -11,8 +11,6 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::fmt::{Display, Error as FmtError, Formatter};
 use std::hash::{Hash, Hasher};
-use std::ops::Range;
-use std::sync::Arc;
 use wezterm_dynamic::{FromDynamic, FromDynamicOptions, ToDynamic, Value};
 
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
@@ -212,29 +210,4 @@ where
 {
     let s = regex.to_string();
     s.serialize(serializer)
-}
-
-/// Holds a resolved rule match.
-#[derive(Debug, PartialEq)]
-pub struct RuleMatch {
-    /// Holds the span (measured in bytes) of the matched text
-    pub range: Range<usize>,
-    /// Holds the created Hyperlink object that should be associated
-    /// the cells that correspond to the span.
-    pub link: Arc<Hyperlink>,
-}
-
-impl Rule {
-    /// Construct a new rule.  It may fail if the regex is invalid.
-    pub fn new(regex: &str, format: &str) -> Result<Self> {
-        Self::with_highlight(regex, format, 0)
-    }
-
-    pub fn with_highlight(regex: &str, format: &str, highlight: usize) -> Result<Self> {
-        Ok(Self {
-            regex: Regex::new(regex)?,
-            format: format.to_owned(),
-            highlight,
-        })
-    }
 }

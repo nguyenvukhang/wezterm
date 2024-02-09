@@ -833,7 +833,6 @@ impl crate::TermWindow {
                     expires,
                     shaped: Rc::clone(&shaped),
                     invalidate_on_hover_change,
-                    current_highlight: None,
                 },
             );
         }
