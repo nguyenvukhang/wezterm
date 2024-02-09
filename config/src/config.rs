@@ -1,8 +1,6 @@
 use crate::background::{BackgroundLayer, Gradient};
 use crate::bell::{AudibleBell, EasingFunction, VisualBell};
-use crate::color::{
-    ColorSchemeFile, HsbTransform, Palette, SrgbaTuple, TabBarStyle, WindowFrameConfig,
-};
+use crate::color::{HsbTransform, Palette, SrgbaTuple, TabBarStyle, WindowFrameConfig};
 use crate::daemon::DaemonOptions;
 use crate::font::{
     AllowSquareGlyphOverflow, DisplayPixelGeometry, FontLocatorSelection, FontRasterizerSelection,
@@ -20,8 +18,8 @@ use crate::{
     default_config_with_overrides_applied, default_one_point_oh, default_one_point_oh_f64,
     default_true, default_win32_acrylic_accent_color, GpuInfo, IntegratedTitleButtonColor,
     KeyMapPreference, LoadedConfig, MouseEventTriggerMods, RgbaColor, SystemBackdrop,
-    WebGpuPowerPreference, CONFIG_DIRS, CONFIG_FILE_OVERRIDE, CONFIG_OVERRIDES, CONFIG_SKIP,
-    HOME_DIR, COLOR_SCHEMES,
+    WebGpuPowerPreference, COLOR_SCHEMES, CONFIG_DIRS, CONFIG_FILE_OVERRIDE, CONFIG_OVERRIDES,
+    CONFIG_SKIP, HOME_DIR,
 };
 use anyhow::Context;
 use luahelper::impl_lua_conversion_dynamic;
@@ -1254,7 +1252,6 @@ impl Config {
 
         cfg
     }
-
 
     pub fn initial_size(&self, dpi: u32) -> TerminalSize {
         TerminalSize {
