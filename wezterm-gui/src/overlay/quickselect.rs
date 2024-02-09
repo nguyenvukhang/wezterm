@@ -54,21 +54,6 @@ struct QuickSelectRenderable {
     args: QuickSelectArguments,
 }
 
-impl QuickSelectOverlay {
-    pub fn viewport_changed(&self, viewport: Option<StableRowIndex>) {
-        let mut render = self.renderer.lock();
-        if render.viewport != viewport {
-            if let Some(last) = render.last_bar_pos.take() {
-                render.dirty_results.add(last);
-            }
-            if let Some(pos) = viewport.as_ref() {
-                render.dirty_results.add(*pos);
-            }
-            render.viewport = viewport;
-        }
-    }
-}
-
 impl Pane for QuickSelectOverlay {
     fn pane_id(&self) -> PaneId {
         self.delegate.pane_id()

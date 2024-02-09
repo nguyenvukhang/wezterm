@@ -10,8 +10,8 @@ debug:
 	rm -rf $(RUN_DIR)/*
 	cp ./target/debug/wezterm $(RUN_DIR)
 	cp ./target/debug/wezterm-gui $(RUN_DIR)
+	@make send_to_applications
 	@make size
-	# open Alatty.app
 
 install:
 	cargo build --release
@@ -19,11 +19,15 @@ install:
 	rm -rf $(RUN_DIR)/*
 	cp ./target/release/wezterm $(RUN_DIR)
 	cp ./target/release/wezterm-gui $(RUN_DIR)
-	rm -rf /Applications/Alatty.app
-	cp -a $(APP_DIR) /Applications/Alatty.app
+	@make send_to_applications
 	@make size
 
+send_to_applications:
+	rm -rf /Applications/Alatty.app
+	cp -a $(APP_DIR) /Applications/Alatty.app
+
 size:
+	@echo '[build size]'
 	du -sh $(APP_DIR)
 	du -s $(APP_DIR)
 
