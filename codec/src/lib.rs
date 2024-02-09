@@ -457,8 +457,6 @@ pdu! {
     GetTlsCreds: 28,
     GetTlsCredsResponse: 29,
     LivenessResponse: 30,
-    SearchScrollbackRequest: 31,
-    SearchScrollbackResponse: 32,
     SetPaneZoomed: 33,
     SplitPane: 34,
     KillPane: 35,
@@ -979,19 +977,6 @@ pub struct GetLinesResponse {
 pub struct EraseScrollbackRequest {
     pub pane_id: PaneId,
     pub erase_mode: ScrollbackEraseMode,
-}
-
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
-pub struct SearchScrollbackRequest {
-    pub pane_id: PaneId,
-    pub pattern: mux::pane::Pattern,
-    pub range: Range<StableRowIndex>,
-    pub limit: Option<u32>,
-}
-
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
-pub struct SearchScrollbackResponse {
-    pub results: Vec<mux::pane::SearchResult>,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Debug)]

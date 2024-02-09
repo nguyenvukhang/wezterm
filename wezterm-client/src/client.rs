@@ -956,11 +956,6 @@ impl Client {
     );
     rpc!(get_codec_version, GetCodecVersion, GetCodecVersionResponse);
     rpc!(get_tls_creds, GetTlsCreds = (), GetTlsCredsResponse);
-    rpc!(
-        search_scrollback,
-        SearchScrollbackRequest,
-        SearchScrollbackResponse
-    );
     rpc!(kill_pane, KillPane, UnitResponse);
     rpc!(set_client_id, SetClientId, UnitResponse);
     rpc!(list_clients, GetClientList, GetClientListResponse);

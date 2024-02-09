@@ -8,8 +8,7 @@ use config::configuration;
 use config::keyassignment::ScrollbackEraseMode;
 use mux::domain::DomainId;
 use mux::pane::{
-    alloc_pane_id, CloseReason, ForEachPaneLogicalLine, LogicalLine, Pane, PaneId, Pattern,
-    SearchResult, WithPaneLines,
+    alloc_pane_id, CloseReason, ForEachPaneLogicalLine, LogicalLine, Pane, PaneId, WithPaneLines,
 };
 use mux::renderable::{RenderableDimensions, StableCursorPosition};
 use mux::tab::TabId;
@@ -409,28 +408,6 @@ impl Pane for ClientPane {
             inner.update_last_send();
         }
         Ok(())
-    }
-
-    async fn search(
-        &self,
-        pattern: Pattern,
-        range: Range<StableRowIndex>,
-        limit: Option<u32>,
-    ) -> anyhow::Result<Vec<SearchResult>> {
-        match self
-            .client
-            .client
-            .search_scrollback(SearchScrollbackRequest {
-                pane_id: self.remote_pane_id,
-                pattern,
-                range,
-                limit,
-            })
-            .await
-        {
-            Ok(SearchScrollbackResponse { results }) => Ok(results),
-            Err(e) => Err(e),
-        }
     }
 
     fn key_down(&self, key: KeyCode, mods: KeyModifiers) -> anyhow::Result<()> {
