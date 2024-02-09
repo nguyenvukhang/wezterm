@@ -2627,8 +2627,6 @@ impl TermWindow {
                     self.copy_to_clipboard(*dest, text);
                     let window = self.window.as_ref().unwrap();
                     window.invalidate();
-                } else {
-                    self.do_open_link_at_mouse_cursor(pane);
                 }
             }
             CompleteSelection(dest) => {
@@ -2916,49 +2914,6 @@ impl TermWindow {
         Ok(PerformAssignmentResult::Handled)
     }
 
-    fn do_open_link_at_mouse_cursor(&self, pane: &Arc<dyn Pane>) {
-        // They clicked on a link, so let's open it!
-        // We need to ensure that we spawn the `open` call outside of the context
-        // of our window loop; on Windows it can cause a panic due to
-        // triggering our WndProc recursively.
-        // We get that assurance for free as part of the async dispatch that we
-        // perform below; here we allow the user to define an `open-uri` event
-        // handler that can bypass the normal `open_url` functionality.
-        if let Some(link) = self.current_highlight.as_ref().cloned() {
-            let window = GuiWin::new(self);
-            let pane = MuxPane(pane.pane_id());
-
-            async fn open_uri(
-                lua: Option<Rc<mlua::Lua>>,
-                window: GuiWin,
-                pane: MuxPane,
-                link: String,
-            ) -> anyhow::Result<()> {
-                let default_click = match lua {
-                    Some(lua) => {
-                        let args = lua.pack_multi((window, pane, link.clone()))?;
-                        config::lua::emit_event(&lua, ("open-uri".to_string(), args))
-                            .await
-                            .map_err(|e| {
-                                log::error!("while processing open-uri event: {:#}", e);
-                                e
-                            })?
-                    }
-                    None => true,
-                };
-                if default_click {
-                    log::info!("clicking {}", link);
-                    wezterm_open_url::open_url(&link);
-                }
-                Ok(())
-            }
-
-            promise::spawn::spawn(config::with_lua_config_on_main_thread(move |lua| {
-                open_uri(lua, window, pane, link.uri().to_string())
-            }))
-            .detach();
-        }
-    }
     fn close_current_pane(&mut self, confirm: bool) {
         let mux_window_id = self.mux_window_id;
         let mux = Mux::get();

@@ -2,7 +2,7 @@
 
 use crate::ToastNotification;
 use cocoa::base::*;
-use cocoa::foundation::{NSDictionary, NSString};
+use cocoa::foundation::NSString;
 use core_foundation::dictionary::CFMutableDictionary;
 use core_foundation::string::CFString;
 use objc::declare::ClassDecl;
@@ -58,15 +58,6 @@ impl NotifDelegate {
 
     extern "C" fn did_activate_notif(_: &mut Object, _sel: Sel, center: id, notif: id) {
         unsafe {
-            let info: *mut Object = msg_send![notif, userInfo];
-
-            // If the notification had an associated URL, open it!
-            let url = info.valueForKey_(*nsstring("url"));
-            if !url.is_null() {
-                let url = std::slice::from_raw_parts(url.UTF8String() as *const u8, url.len());
-                let url = String::from_utf8_lossy(url);
-                wezterm_open_url::open_url(&*url);
-            }
             let () = msg_send![center, removeDeliveredNotification: notif];
         }
     }

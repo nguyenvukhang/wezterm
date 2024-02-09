@@ -49,20 +49,7 @@ fn show_notif_impl(toast: TN) -> Result<(), Box<dyn std::error::Error>> {
     let notif = ToastNotification::CreateToastNotification(xml)?;
 
     notif.Activated(TypedEventHandler::new(
-        move |_: &Option<ToastNotification>, result: &Option<IInspectable>| {
-            // let myself = unwrap_arg(myself)?;
-            let result = unwrap_arg(result)?.cast::<ToastActivatedEventArgs>()?;
-
-            let args = result.Arguments()?;
-
-            if args == "show" {
-                if let Some(url) = toast.url.as_ref() {
-                    wezterm_open_url::open_url(url);
-                }
-            }
-
-            Ok(())
-        },
+        move |_: &Option<ToastNotification>, result: &Option<IInspectable>| Ok(()),
     ))?;
 
     /*
