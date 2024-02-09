@@ -557,12 +557,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
-name = "bytes"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
-
-[[package]]
 name = "cairo-rs"
 version = "0.18.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1421,15 +1415,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "emojis"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ee61eb945bff65ee7d19d157d39c67c33290ff0742907413fd5eefd29edc979"
-dependencies = [
- "phf",
-]
-
-[[package]]
 name = "encoding_rs"
 version = "0.8.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1988,15 +1973,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "getopts"
-version = "0.2.21"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14dbbfd5c71d70241ecf9e6f13737f7b5ce823821063188d7e46c41d371eebd5"
-dependencies = [
- "unicode-width",
-]
-
-[[package]]
 name = "getrandom"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2288,16 +2264,6 @@ dependencies = [
  "libc",
  "match_cfg",
  "winapi",
-]
-
-[[package]]
-name = "http_req"
-version = "0.10.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90394b01e9de1f7eca6ca0664cc64bd92add9603c1aa4f961813f23789035e10"
-dependencies = [
- "native-tls",
- "unicase",
 ]
 
 [[package]]
@@ -3113,24 +3079,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "native-tls"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07226173c32f2926027b63cce4bcd8076c3552846cbe7925f3aaffeac0a3b92e"
-dependencies = [
- "lazy_static",
- "libc",
- "log",
- "openssl",
- "openssl-probe",
- "openssl-sys",
- "schannel",
- "security-framework",
- "security-framework-sys",
- "tempfile",
-]
-
-[[package]]
 name = "nix"
 version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3828,18 +3776,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pulldown-cmark"
-version = "0.9.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57206b407293d2bcd3af849ce869d52068623f19e1b5ff8e8778e3309439682b"
-dependencies = [
- "bitflags 2.4.2",
- "getopts",
- "memchr",
- "unicase",
-]
-
-[[package]]
 name = "pure-rust-locales"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4110,15 +4046,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "schannel"
-version = "0.1.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbc91545643bcf3a0bbb6569265615222618bdf33ce4ffbbd13c4bbd4c093534"
-dependencies = [
- "windows-sys 0.52.0",
-]
-
-[[package]]
 name = "scoped-tls"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4129,29 +4056,6 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
-
-[[package]]
-name = "security-framework"
-version = "2.9.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05b64fb303737d99b81884b2c63433e9ae28abebe5eb5045dcdd175dc2ecf4de"
-dependencies = [
- "bitflags 1.3.2",
- "core-foundation 0.9.4",
- "core-foundation-sys 0.8.6",
- "libc",
- "security-framework-sys",
-]
-
-[[package]]
-name = "security-framework-sys"
-version = "2.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e932934257d3b408ed8f30db49d85ea163bfe74961f017f405b025af298f0c7a"
-dependencies = [
- "core-foundation-sys 0.8.6",
- "libc",
-]
 
 [[package]]
 name = "semver"
@@ -5013,15 +4917,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "unicase"
-version = "2.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7d2d4dafb69621809a81864c9c1b864479e1235c0dd4e199924b9742439ed89"
-dependencies = [
- "version_check",
-]
-
-[[package]]
 name = "unicode-bidi"
 version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5496,7 +5391,6 @@ dependencies = [
  "image",
  "k9 0.11.6",
  "lazy_static",
- "lfucache",
  "log",
  "memmap2 0.2.3",
  "metrics",
@@ -5532,7 +5426,6 @@ dependencies = [
  "dirs-next",
  "downcast-rs",
  "embed-resource",
- "emojis",
  "env-bootstrap",
  "env_logger 0.11.1",
  "euclid",
@@ -5543,7 +5436,6 @@ dependencies = [
  "futures",
  "fuzzy-matcher",
  "hdrhistogram",
- "http_req",
  "image",
  "k9 0.12.0",
  "lazy_static",
@@ -5560,7 +5452,6 @@ dependencies = [
  "parking_lot",
  "portable-pty",
  "promise",
- "pulldown-cmark",
  "rangeset",
  "ratelim",
  "rayon",
@@ -5591,7 +5482,6 @@ dependencies = [
  "wezterm-dynamic",
  "wezterm-font",
  "wezterm-gui-subcommands",
- "wezterm-open-url",
  "wezterm-term",
  "wezterm-toast-notification",
  "wgpu",
@@ -5619,13 +5509,6 @@ dependencies = [
  "lazy_static",
  "serde",
  "wezterm-dynamic",
-]
-
-[[package]]
-name = "wezterm-open-url"
-version = "0.1.0"
-dependencies = [
- "winapi",
 ]
 
 [[package]]
@@ -5668,7 +5551,6 @@ dependencies = [
  "log",
  "objc",
  "serde",
- "wezterm-open-url",
  "windows 0.33.0",
  "xml-rs",
  "zbus",
@@ -5844,7 +5726,6 @@ dependencies = [
  "async-task",
  "async-trait",
  "bitflags 1.3.2",
- "bytes",
  "cgl",
  "clipboard-win",
  "cocoa 0.25.0",
@@ -5878,7 +5759,6 @@ dependencies = [
  "shlex",
  "smithay-client-toolkit",
  "thiserror",
- "tiny-skia",
  "url",
  "wayland-client",
  "wayland-egl",

@@ -5,7 +5,6 @@ members = [
   "wezterm",
   "wezterm-dynamic",
   "wezterm-gui",
-  "wezterm-open-url",
 ]
 resolver = "2"
 

@@ -23,7 +23,6 @@ freetype = { path = "../deps/freetype" }
 harfbuzz = { path = "../deps/harfbuzz" }
 image = "0.24.6"
 lazy_static = "1.4"
-lfucache = { path = "../lfucache" }
 log = "0.4"
 memmap2 = "0.2"
 metrics = { version="0.17", features=["std"]}
