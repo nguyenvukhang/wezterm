@@ -21,7 +21,7 @@ use crate::wsl::WslDomain;
 use crate::{
     default_config_with_overrides_applied, default_one_point_oh, default_one_point_oh_f64,
     default_true, default_win32_acrylic_accent_color, GpuInfo, IntegratedTitleButtonColor,
-    KeyMapPreference, LoadedConfig, MouseEventTriggerMods, RgbaColor, SerialDomain, SystemBackdrop,
+    KeyMapPreference, LoadedConfig, MouseEventTriggerMods, RgbaColor, SystemBackdrop,
     WebGpuPowerPreference, CONFIG_DIRS, CONFIG_FILE_OVERRIDE, CONFIG_OVERRIDES, CONFIG_SKIP,
     HOME_DIR,
 };
@@ -327,9 +327,6 @@ pub struct Config {
 
     #[dynamic(default)]
     pub exec_domains: Vec<ExecDomain>,
-
-    #[dynamic(default)]
-    pub serial_ports: Vec<SerialDomain>,
 
     /// The set of unix domains
     #[dynamic(default = "UnixDomain::default_unix_domains")]
