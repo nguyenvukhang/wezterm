@@ -11,7 +11,7 @@ use wezterm_dynamic::{FromDynamic, ToDynamic};
 pub mod change;
 pub mod line;
 
-pub use self::change::{Change, Image, LineAttribute, TextureCoordinate};
+pub use self::change::{Change, LineAttribute, TextureCoordinate};
 pub use self::line::Line;
 
 /// Position holds 0-based positioning information, where
