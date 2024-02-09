@@ -5,10 +5,10 @@ used by [wezterm](https://wezfurlong.org/wezterm/).  The home for this
 crate is in the wezterm repo and development is tracked at
 <https://github.com/wez/wezterm/>.
 
-It is full featured, providing terminal escape sequence parsing, keyboard
-and mouse input encoding, a model for the screen cells including scrollback,
-sixel and iTerm2 image support, OSC 8 Hyperlinks and a wide range of
-terminal cell attributes.
+It is full featured, providing terminal escape sequence parsing,
+keyboard and mouse input encoding, a model for the screen cells
+including scrollback, sixel and iTerm2 image support, and a wide range
+of terminal cell attributes.
 
 This crate does not provide any kind of gui, nor does it directly
 manage a PTY; you provide a `std::io::Write` implementation that

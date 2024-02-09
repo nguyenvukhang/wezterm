@@ -203,7 +203,7 @@ EOF
         cat >> wezterm.spec <<EOF
 %description
 wezterm is a terminal emulator with support for modern features
-such as fonts with ligatures, hyperlinks, tabs and multiple
+such as fonts with ligatures, tabs and multiple
 windows.
 
 ${BUILD_COMMAND}
@@ -271,7 +271,7 @@ Priority: optional
 Homepage: https://wezfurlong.org/wezterm/
 Description: Wez's Terminal Emulator.
  wezterm is a terminal emulator with support for modern features
- such as fonts with ligatures, hyperlinks, tabs and multiple
+ such as fonts with ligatures, tabs and multiple
  windows.
 Provides: x-terminal-emulator
 Source: https://wezfurlong.org/wezterm/

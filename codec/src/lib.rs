@@ -943,7 +943,8 @@ pub struct SerializedImageCell {
 }
 
 /// What's all this?
-/// Cells hold references to Arc<Hyperlink> and it is important to us to
+///
+/// It is important to us to
 /// maintain identity of the hyperlinks in the individual cells, while also
 /// only sending a single copy of the associated URL.
 /// This section of code extracts the hyperlinks from the cells and builds
