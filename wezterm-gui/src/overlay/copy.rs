@@ -167,25 +167,6 @@ impl CopyOverlay {
         }))
     }
 
-    pub fn get_params(&self) -> CopyModeParams {
-        let render = self.render.lock();
-        CopyModeParams {
-            pattern: render.pattern.clone(),
-            editing_search: render.editing_search,
-        }
-    }
-
-    pub fn apply_params(&self, params: CopyModeParams) {
-        let mut render = self.render.lock();
-        render.editing_search = params.editing_search;
-        if render.pattern != params.pattern {
-            render.pattern = params.pattern;
-            render.schedule_update_search();
-        }
-        let search_row = render.compute_search_row();
-        render.dirty_results.add(search_row);
-    }
-
     pub fn viewport_changed(&self, viewport: Option<StableRowIndex>) {
         let mut render = self.render.lock();
         if render.viewport != viewport {

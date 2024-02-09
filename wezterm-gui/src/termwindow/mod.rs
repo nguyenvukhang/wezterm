@@ -2627,23 +2627,15 @@ impl TermWindow {
             }
             ActivateCopyMode => {
                 if let Some(pane) = self.get_active_pane_or_overlay() {
-                    let mut replace_current = false;
-                    if let Some(existing) = pane.downcast_ref::<CopyOverlay>() {
-                        let mut params = existing.get_params();
-                        params.editing_search = false;
-                        existing.apply_params(params);
-                        replace_current = true;
-                    } else {
-                        let copy = CopyOverlay::with_pane(
-                            self,
-                            &pane,
-                            CopyModeParams {
-                                pattern: MuxPattern::default(),
-                                editing_search: false,
-                            },
-                        )?;
-                        self.assign_overlay_for_pane(pane.pane_id(), copy);
-                    }
+                    let copy = CopyOverlay::with_pane(
+                        self,
+                        &pane,
+                        CopyModeParams {
+                            pattern: MuxPattern::default(),
+                            editing_search: false,
+                        },
+                    )?;
+                    self.assign_overlay_for_pane(pane.pane_id(), copy);
                     self.pane_state(pane.pane_id())
                         .overlay
                         .as_mut()
@@ -2651,7 +2643,7 @@ impl TermWindow {
                             overlay.key_table_state.activate(KeyTableArgs {
                                 name: "copy_mode",
                                 timeout_milliseconds: None,
-                                replace_current,
+                                replace_current: false,
                                 one_shot: false,
                                 until_unknown: false,
                                 prevent_fallback: false,
