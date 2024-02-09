@@ -241,9 +241,6 @@ pub struct Config {
     #[dynamic(default = "default_initial_cols", validate = "validate_row_or_col")]
     pub initial_cols: u16,
 
-    #[dynamic(default = "default_hyperlink_rules")]
-    pub hyperlink_rules: Vec<hyperlink::Rule>,
-
     /// What to set the TERM variable to
     #[dynamic(default = "default_term")]
     pub term: String,
@@ -1584,21 +1581,6 @@ fn default_initial_rows() -> u16 {
 
 fn default_initial_cols() -> u16 {
     80
-}
-
-pub fn default_hyperlink_rules() -> Vec<hyperlink::Rule> {
-    vec![
-        // First handle URLs wrapped with punctuation (i.e. brackets)
-        // e.g. [http://foo] (http://foo) <http://foo>
-        hyperlink::Rule::with_highlight(r"\((\w+://\S+)\)", "$1", 1).unwrap(),
-        hyperlink::Rule::with_highlight(r"\[(\w+://\S+)\]", "$1", 1).unwrap(),
-        hyperlink::Rule::with_highlight(r"<(\w+://\S+)>", "$1", 1).unwrap(),
-        // Then handle URLs not wrapped in brackets
-        // and include terminating ), / or - characters, if any
-        hyperlink::Rule::new(r"\b\w+://\S+[)/a-zA-Z0-9-]+", "$0").unwrap(),
-        // implicit mailto link
-        hyperlink::Rule::new(r"\b\w+@[\w-]+(\.[\w-]+)+\b", "mailto:$0").unwrap(),
-    ]
 }
 
 fn default_harfbuzz_features() -> Vec<String> {
