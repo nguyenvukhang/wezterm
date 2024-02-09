@@ -216,10 +216,6 @@ impl CopyRenderable {
 
         self.width = dims.cols;
         self.height = dims.viewport_rows;
-
-        let pos = self.result_pos;
-        self.update_search();
-        self.result_pos = pos;
     }
 
     fn incrementally_recompute_results(&mut self, mut results: Vec<SearchResult>) {
@@ -568,65 +564,6 @@ impl CopyRenderable {
         self.select_to_cursor_pos();
     }
 
-    /// Move to next match
-    fn next_match(&mut self) {
-        if let Some(cur) = self.result_pos.as_ref() {
-            let prior = if *cur > 0 {
-                cur - 1
-            } else {
-                self.results.len() - 1
-            };
-            self.activate_match_number(prior);
-        }
-    }
-
-    /// Move to prior match
-    fn prior_match(&mut self) {
-        if let Some(cur) = self.result_pos.as_ref() {
-            let next = if *cur + 1 >= self.results.len() {
-                0
-            } else {
-                *cur + 1
-            };
-            self.activate_match_number(next);
-        }
-    }
-
-    /// Skip this page of matches and move down to the first match from
-    /// the next page.
-    fn next_match_page(&mut self) {
-        let dims = self.delegate.get_dimensions();
-        if let Some(cur) = self.result_pos {
-            let top = self.viewport.unwrap_or(dims.physical_top);
-            let prior = top - dims.viewport_rows as isize;
-            if let Some(pos) = self
-                .results
-                .iter()
-                .position(|res| res.start_y > prior && res.start_y < top)
-            {
-                self.activate_match_number(pos);
-            } else {
-                self.activate_match_number(cur.saturating_sub(1));
-            }
-        }
-    }
-
-    /// Skip this page of matches and move up to the first match from
-    /// the prior page.
-    fn prior_match_page(&mut self) {
-        let dims = self.delegate.get_dimensions();
-        if let Some(cur) = self.result_pos {
-            let top = self.viewport.unwrap_or(dims.physical_top);
-            let bottom = top + dims.viewport_rows as isize;
-            if let Some(pos) = self.results.iter().position(|res| res.start_y >= bottom) {
-                self.activate_match_number(pos);
-            } else {
-                let len = self.results.len().saturating_sub(1);
-                self.activate_match_number(cur.min(len));
-            }
-        }
-    }
-
     fn clear_pattern(&mut self) {
         self.pattern.clear();
         self.update_search();
@@ -667,16 +604,6 @@ impl CopyRenderable {
                 }
             }
         })));
-    }
-
-    fn cycle_match_type(&mut self) {
-        let pattern = match &self.pattern {
-            Pattern::CaseSensitiveString(s) => Pattern::CaseInSensitiveString(s.clone()),
-            Pattern::CaseInSensitiveString(s) => Pattern::Regex(s.clone()),
-            Pattern::Regex(s) => Pattern::CaseSensitiveString(s.clone()),
-        };
-        self.pattern = pattern;
-        self.schedule_update_search();
     }
 
     fn move_to_viewport_middle(&mut self) {
@@ -1189,11 +1116,6 @@ impl Pane for CopyOverlay {
                     PageUp => render.move_by_page(-1.0),
                     PageDown => render.move_by_page(1.0),
                     Close => render.close(),
-                    PriorMatch => render.prior_match(),
-                    NextMatch => render.next_match(),
-                    PriorMatchPage => render.prior_match_page(),
-                    NextMatchPage => render.next_match_page(),
-                    CycleMatchType => render.cycle_match_type(),
                     ClearPattern => render.clear_pattern(),
                     EditPattern => render.edit_pattern(),
                     AcceptPattern => render.accept_pattern(),
@@ -1522,46 +1444,6 @@ pub fn search_key_table() -> KeyTable {
             WKeyCode::Char('\x1b'),
             Modifiers::NONE,
             KeyAssignment::CopyMode(CopyModeAssignment::Close),
-        ),
-        (
-            WKeyCode::UpArrow,
-            Modifiers::NONE,
-            KeyAssignment::CopyMode(CopyModeAssignment::PriorMatch),
-        ),
-        (
-            WKeyCode::Char('\r'),
-            Modifiers::NONE,
-            KeyAssignment::CopyMode(CopyModeAssignment::PriorMatch),
-        ),
-        (
-            WKeyCode::Char('p'),
-            Modifiers::CTRL,
-            KeyAssignment::CopyMode(CopyModeAssignment::PriorMatch),
-        ),
-        (
-            WKeyCode::PageUp,
-            Modifiers::NONE,
-            KeyAssignment::CopyMode(CopyModeAssignment::PriorMatchPage),
-        ),
-        (
-            WKeyCode::PageDown,
-            Modifiers::NONE,
-            KeyAssignment::CopyMode(CopyModeAssignment::NextMatchPage),
-        ),
-        (
-            WKeyCode::Char('n'),
-            Modifiers::CTRL,
-            KeyAssignment::CopyMode(CopyModeAssignment::NextMatch),
-        ),
-        (
-            WKeyCode::DownArrow,
-            Modifiers::NONE,
-            KeyAssignment::CopyMode(CopyModeAssignment::NextMatch),
-        ),
-        (
-            WKeyCode::Char('r'),
-            Modifiers::CTRL,
-            KeyAssignment::CopyMode(CopyModeAssignment::CycleMatchType),
         ),
         (
             WKeyCode::Char('u'),
