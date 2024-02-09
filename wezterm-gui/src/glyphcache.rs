@@ -906,23 +906,15 @@ impl GlyphCache {
     /// then we want to show the underline.
     pub fn cached_line_sprite(
         &mut self,
-        is_highlited_hyperlink: bool,
         is_strike_through: bool,
         underline: Underline,
         overline: bool,
         metrics: &RenderMetrics,
     ) -> anyhow::Result<Sprite> {
-        let effective_underline = match (is_highlited_hyperlink, underline) {
-            (true, Underline::None) => Underline::Single,
-            (true, Underline::Single) => Underline::Double,
-            (true, _) => Underline::Single,
-            (false, u) => u,
-        };
-
         let key = LineKey {
             strike_through: is_strike_through,
             overline,
-            underline: effective_underline,
+            underline,
             size: metrics.into(),
         };
 

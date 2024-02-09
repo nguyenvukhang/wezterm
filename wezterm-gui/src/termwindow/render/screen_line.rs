@@ -697,13 +697,11 @@ impl crate::TermWindow {
             {
                 let attrs = &cluster.attrs;
                 let style = self.fonts.match_style(params.config, attrs);
-                let is_highlited_hyperlink = false;
                 // underline and strikethrough
                 let underline_tex_rect = gl_state
                     .glyph_cache
                     .borrow_mut()
                     .cached_line_sprite(
-                        is_highlited_hyperlink,
                         attrs.strikethrough(),
                         attrs.underline(),
                         attrs.overline(),
