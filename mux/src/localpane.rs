@@ -378,17 +378,14 @@ impl Pane for LocalPane {
     }
 
     fn mouse_event(&self, event: MouseEvent) -> Result<(), Error> {
-        Mux::get().record_input_for_current_identity();
         self.terminal.lock().mouse_event(event)
     }
 
     fn key_down(&self, key: KeyCode, mods: KeyModifiers) -> Result<(), Error> {
-        Mux::get().record_input_for_current_identity();
         self.terminal.lock().key_down(key, mods)
     }
 
     fn key_up(&self, key: KeyCode, mods: KeyModifiers) -> Result<(), Error> {
-        Mux::get().record_input_for_current_identity();
         self.terminal.lock().key_up(key, mods)
     }
 
@@ -404,7 +401,6 @@ impl Pane for LocalPane {
     }
 
     fn writer(&self) -> MappedMutexGuard<dyn std::io::Write> {
-        Mux::get().record_input_for_current_identity();
         MutexGuard::map(self.writer.lock(), |writer| {
             let w: &mut dyn std::io::Write = writer;
             w
@@ -416,7 +412,6 @@ impl Pane for LocalPane {
     }
 
     fn send_paste(&self, text: &str) -> Result<(), Error> {
-        Mux::get().record_input_for_current_identity();
         self.terminal.lock().send_paste(text)
     }
 

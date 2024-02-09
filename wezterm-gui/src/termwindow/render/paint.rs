@@ -248,7 +248,6 @@ impl crate::TermWindow {
                 self.update_text_cursor(&pos);
                 if focused {
                     pos.pane.advise_focus();
-                    mux::Mux::get().record_focus_for_current_identity(pos.pane.pane_id());
                 }
             }
             self.paint_pane(&pos, &mut layers).context("paint_pane")?;

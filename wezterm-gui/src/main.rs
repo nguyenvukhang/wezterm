@@ -229,10 +229,6 @@ async fn async_run_terminal_gui(
     cmd: Option<CommandBuilder>,
     opts: StartCommand,
 ) -> anyhow::Result<()> {
-    let unix_socket_path =
-        config::RUNTIME_DIR.join(format!("gui-sock-{}", unsafe { libc::getpid() }));
-    std::env::set_var("WEZTERM_UNIX_SOCKET", unix_socket_path.clone());
-
     if !opts.no_auto_connect {
         connect_to_auto_connect_domains().await?;
     }
@@ -568,9 +564,6 @@ fn terminate_with_error(err: anyhow::Error) -> ! {
 }
 
 fn main() {
-    #[cfg(feature = "dhat-heap")]
-    let _profiler = dhat::Profiler::new_heap();
-
     config::designate_this_as_the_main_thread();
     config::assign_error_callback(mux::connui::show_configuration_error_message);
     notify_on_panic();

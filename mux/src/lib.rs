@@ -465,18 +465,6 @@ impl Mux {
         }
     }
 
-    pub fn record_input_for_current_identity(&self) {
-        if let Some(ident) = self.identity.read().as_ref() {
-            self.client_had_input(ident);
-        }
-    }
-
-    pub fn record_focus_for_current_identity(&self, pane_id: PaneId) {
-        if let Some(ident) = self.identity.read().as_ref() {
-            self.record_focus_for_client(ident, pane_id);
-        }
-    }
-
     pub fn resolve_focused_pane(
         &self,
         client_id: &ClientId,
