@@ -190,25 +190,6 @@ fn register_panic_hook() {
     }));
 }
 
-fn register_lua_modules() {
-    for func in [
-        battery::register,
-        color_funcs::register,
-        termwiz_funcs::register,
-        logging::register,
-        mux_lua::register,
-        procinfo_funcs::register,
-        filesystem::register,
-        json::register,
-        plugin::register,
-        share_data::register,
-        time_funcs::register,
-        url_funcs::register,
-    ] {
-        config::lua::add_context_setup_func(func);
-    }
-}
-
 pub fn bootstrap() {
     config::assign_version_info(
         wezterm_version::wezterm_version(),
@@ -224,8 +205,6 @@ pub fn bootstrap() {
 
     fixup_appimage();
     fixup_snap();
-
-    register_lua_modules();
 
     // Remove this env var to avoid weirdness with some vim configurations.
     // wezterm never sets WINDOWID and we don't want to inherit it from a
