@@ -72,19 +72,27 @@ for i in n:
     for dep in parse_cargo_toml(projects[i].path):
         update(projects, i, dep)
 
-unneeded = list(filter(lambda v: len(v.needed_by) == 0, projects))
+
+def show_unused(projects: list[Project]):
+    unneeded = list(filter(lambda v: len(v.needed_by) == 0, projects))
+    print("[unneeded]")
+    for p in unneeded:
+        print("*", p.dir)
+
+
+def show_1_dep(projects: list[Project]):
+    print("[needed by only 1]")
+    for p in projects:
+        if len(p.needed_by) == 1:
+            print("[1]", p.dir, dirs(p.needed_by))
 
 
 def dirs(ps: list[Project]):
     return list(map(lambda v: v.dir, ps))
 
 
-for p in projects:
-    if len(p.needed_by) == 1:
-        print("[1]", p.dir, dirs(p.needed_by))
-#
-# for p in unneeded:
-#     print("[x]", p.dir)
+show_unused(projects)
+show_1_dep(projects)
 
 for i, p in enumerate(projects):
     if p.dir == "wezterm":
