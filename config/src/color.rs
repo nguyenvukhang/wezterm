@@ -160,16 +160,6 @@ pub struct Palette {
     pub visual_bell: Option<RgbaColor>,
     /// The color to use for the cursor when a dead key or leader state is active
     pub compose_cursor: Option<RgbaColor>,
-
-    pub copy_mode_active_highlight_fg: Option<ColorSpec>,
-    pub copy_mode_active_highlight_bg: Option<ColorSpec>,
-    pub copy_mode_inactive_highlight_fg: Option<ColorSpec>,
-    pub copy_mode_inactive_highlight_bg: Option<ColorSpec>,
-
-    pub quick_select_label_fg: Option<ColorSpec>,
-    pub quick_select_label_bg: Option<ColorSpec>,
-    pub quick_select_match_fg: Option<ColorSpec>,
-    pub quick_select_match_bg: Option<ColorSpec>,
 }
 impl_lua_conversion_dynamic!(Palette);
 
@@ -211,14 +201,6 @@ impl Palette {
             split: overlay!(split),
             visual_bell: overlay!(visual_bell),
             compose_cursor: overlay!(compose_cursor),
-            copy_mode_active_highlight_fg: overlay!(copy_mode_active_highlight_fg),
-            copy_mode_active_highlight_bg: overlay!(copy_mode_active_highlight_bg),
-            copy_mode_inactive_highlight_fg: overlay!(copy_mode_inactive_highlight_fg),
-            copy_mode_inactive_highlight_bg: overlay!(copy_mode_inactive_highlight_bg),
-            quick_select_label_fg: overlay!(quick_select_label_fg),
-            quick_select_label_bg: overlay!(quick_select_label_bg),
-            quick_select_match_fg: overlay!(quick_select_match_fg),
-            quick_select_match_bg: overlay!(quick_select_match_bg),
         }
     }
 }

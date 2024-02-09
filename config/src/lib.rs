@@ -213,14 +213,6 @@ pub fn build_default_schemes() -> HashMap<String, Palette> {
             split: Some(hex("#8A9948")),
             visual_bell: None,
             compose_cursor: None,
-            copy_mode_active_highlight_fg: None,
-            copy_mode_active_highlight_bg: None,
-            copy_mode_inactive_highlight_fg: None,
-            copy_mode_inactive_highlight_bg: None,
-            quick_select_label_fg: None,
-            quick_select_label_bg: None,
-            quick_select_match_fg: None,
-            quick_select_match_bg: None,
         },
     );
     color_schemes

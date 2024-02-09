@@ -4,7 +4,6 @@ use ::window::bitmaps::{BitmapImage, Image};
 use ::window::color::SrgbaPixel;
 use ::window::{Point, Rect, Size};
 use anyhow::Context;
-use config::DimensionContext;
 use std::rc::Rc;
 use wezterm_font::units::*;
 use wezterm_font::{FontConfiguration, FontMetrics};
@@ -94,7 +93,6 @@ impl RenderMetrics {
         // such that we are horizontally centered.
         let line_height_y_adjust = (cell_height as f64 - metrics.cell_height.get().ceil()) / 2.;
 
-        let config = fonts.config();
         let underline_height = metrics.underline_thickness.get().round().max(1.) as isize;
         let underline_position = metrics.underline_position.get();
 
