@@ -695,25 +695,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clap_complete"
-version = "4.4.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df631ae429f6613fcd3a7c1adbdb65f637271e561b03680adaa6573015dfb106"
-dependencies = [
- "clap 4.4.18",
-]
-
-[[package]]
-name = "clap_complete_fig"
-version = "4.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87e571d70e22ec91d34e1c5317c8308035a2280d925167646bf094fc5de1737c"
-dependencies = [
- "clap 4.4.18",
- "clap_complete",
-]
-
-[[package]]
 name = "clap_derive"
 version = "4.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5083,8 +5064,6 @@ dependencies = [
  "cc",
  "chrono",
  "clap 4.4.18",
- "clap_complete",
- "clap_complete_fig",
  "config",
  "embed-resource",
  "env-bootstrap",

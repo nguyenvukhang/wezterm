@@ -39,6 +39,9 @@ o:
 a:
 	@make analyze
 
+u:
+	cargo +nightly udeps
+
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIR  := $(dir $(MAKEFILE_PATH))
 APP_DIR := $(MAKEFILE_DIR)Alatty.app

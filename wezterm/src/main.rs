@@ -1,7 +1,6 @@
 use anyhow::anyhow;
 use clap::builder::ValueParser;
-use clap::{Parser, ValueEnum, ValueHint};
-use clap_complete::{generate as generate_completion, shells, Generator as CompletionGenerator};
+use clap::{Parser, ValueHint};
 use config::wezterm_version;
 use mux::Mux;
 use std::ffi::OsString;
@@ -42,40 +41,6 @@ pub struct Opt {
     cmd: Option<SubCommand>,
 }
 
-#[derive(Debug, Clone, ValueEnum)]
-enum Shell {
-    Bash,
-    Elvish,
-    Fish,
-    PowerShell,
-    Zsh,
-    Fig,
-}
-
-impl CompletionGenerator for Shell {
-    fn file_name(&self, name: &str) -> String {
-        match self {
-            Shell::Bash => shells::Bash.file_name(name),
-            Shell::Elvish => shells::Elvish.file_name(name),
-            Shell::Fish => shells::Fish.file_name(name),
-            Shell::PowerShell => shells::PowerShell.file_name(name),
-            Shell::Zsh => shells::Zsh.file_name(name),
-            Shell::Fig => clap_complete_fig::Fig.file_name(name),
-        }
-    }
-
-    fn generate(&self, cmd: &clap::Command, buf: &mut dyn std::io::Write) {
-        match self {
-            Shell::Bash => shells::Bash.generate(cmd, buf),
-            Shell::Elvish => shells::Elvish.generate(cmd, buf),
-            Shell::Fish => shells::Fish.generate(cmd, buf),
-            Shell::PowerShell => shells::PowerShell.generate(cmd, buf),
-            Shell::Zsh => shells::Zsh.generate(cmd, buf),
-            Shell::Fig => clap_complete_fig::Fig.generate(cmd, buf),
-        }
-    }
-}
-
 #[derive(Debug, Parser, Clone)]
 enum SubCommand {
     #[command(
@@ -83,14 +48,6 @@ enum SubCommand {
         about = "Start the GUI, optionally running an alternative program"
     )]
     Start(StartCommand),
-
-    /// Generate shell completion information
-    #[command(name = "shell-completion")]
-    ShellCompletion {
-        /// Which shell to generate for
-        #[arg(long, value_parser)]
-        shell: Shell,
-    },
 }
 
 fn terminate_with_error_message(err: &str) -> ! {
@@ -113,26 +70,7 @@ fn main() {
 
 fn run() -> anyhow::Result<()> {
     env_bootstrap::bootstrap();
-
-    let saver = UmaskSaver::new();
-
-    let opts = Opt::parse();
-
-    match opts
-        .cmd
-        .as_ref()
-        .cloned()
-        .unwrap_or_else(|| SubCommand::Start(StartCommand::default()))
-    {
-        SubCommand::Start(_) => delegate_to_gui(saver),
-        SubCommand::ShellCompletion { shell } => {
-            use clap::CommandFactory;
-            let mut cmd = Opt::command();
-            let name = cmd.get_name().to_string();
-            generate_completion(shell, &mut cmd, name, &mut std::io::stdout());
-            Ok(())
-        }
-    }
+    delegate_to_gui(UmaskSaver::new())
 }
 
 fn delegate_to_gui(saver: UmaskSaver) -> anyhow::Result<()> {
