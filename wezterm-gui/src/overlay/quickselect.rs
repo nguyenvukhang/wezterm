@@ -3,9 +3,7 @@ use crate::termwindow::{TermWindow, TermWindowNotif};
 use config::keyassignment::{ClipboardCopyDestination, QuickSelectArguments, ScrollbackEraseMode};
 use config::ConfigHandle;
 use mux::domain::DomainId;
-use mux::pane::{
-    ForEachPaneLogicalLine, LogicalLine, Pane, PaneId, Pattern, SearchResult, WithPaneLines,
-};
+use mux::pane::{ForEachPaneLogicalLine, LogicalLine, Pane, PaneId, SearchResult, WithPaneLines};
 use mux::renderable::*;
 use parking_lot::{MappedMutexGuard, Mutex};
 use rangeset::RangeSet;
@@ -22,70 +20,6 @@ use wezterm_term::{
 };
 use window::WindowOps;
 
-/// This function computes a set of labels for a given alphabet.
-/// It is derived from https://github.com/fcsonline/tmux-thumbs/blob/master/src/alphabets.rs
-/// which is Copyright (c) 2019 Ferran Basora and provided under the MIT license
-pub fn compute_labels_for_alphabet(alphabet: &str, num_matches: usize) -> Vec<String> {
-    compute_labels_for_alphabet_impl(alphabet, num_matches, true)
-}
-
-fn compute_labels_for_alphabet_impl(
-    alphabet: &str,
-    num_matches: usize,
-    make_lowercase: bool,
-) -> Vec<String> {
-    let alphabet = if make_lowercase {
-        alphabet
-            .chars()
-            .map(|c| c.to_lowercase().to_string())
-            .collect::<Vec<String>>()
-    } else {
-        alphabet
-            .chars()
-            .map(|c| c.to_string())
-            .collect::<Vec<String>>()
-    };
-    // Prefer to use single character matches to represent everything
-    let mut primary = alphabet.clone();
-    let mut secondary = vec![];
-
-    loop {
-        if primary.len() + secondary.len() >= num_matches {
-            break;
-        }
-
-        // We have more matches than can be represented by alphabet,
-        // so steal one of the single character options from the end
-        // of the alphabet and use it to generate a two character
-        // label
-        let prefix = match primary.pop() {
-            Some(p) => p,
-            None => break,
-        };
-
-        // Generate a two character label for each of the alphabet
-        // characters.  This ignores later alphabet characters;
-        // since we popped our prefix from the end of alphabet,
-        // length limiting this iteration ensures that we don't
-        // end up with a duplicate letters in the result.
-        let prefixed: Vec<String> = alphabet
-            .iter()
-            .take(num_matches - primary.len() - secondary.len())
-            .map(|s| format!("{}{}", prefix, s))
-            .collect();
-
-        secondary.splice(0..0, prefixed);
-    }
-
-    let len = secondary.len();
-
-    primary
-        .drain(0..)
-        .take(num_matches - len)
-        .chain(secondary.drain(0..))
-        .collect()
-}
-
 pub struct QuickSelectOverlay {
     renderer: Mutex<QuickSelectRenderable>,
     delegate: Arc<dyn Pane>,
@@ -99,8 +33,6 @@ struct MatchResult {
 
 struct QuickSelectRenderable {
     delegate: Arc<dyn Pane>,
-    /// The text that the user entered
-    pattern: Pattern,
     /// The most recently queried set of matches
     results: Vec<SearchResult>,
     by_line: HashMap<StableRowIndex, Vec<MatchResult>>,
@@ -560,94 +492,6 @@ impl QuickSelectRenderable {
 
         self.width = dims.cols;
         self.height = dims.viewport_rows;
-    }
-
-    fn recompute_results(&mut self) {
-        /// Produce the sorted seq of unique match_ids from the results
-        fn compute_uniq_results(results: &[SearchResult]) -> Vec<usize> {
-            let mut ids: Vec<usize> = results.iter().map(|sr| sr.match_id).collect();
-            ids.sort();
-            ids.dedup();
-            ids
-        }
-
-        let uniq_results = compute_uniq_results(&self.results);
-
-        // Label each unique result
-        let labels = compute_labels_for_alphabet(
-            if !self.args.alphabet.is_empty() {
-                &self.args.alphabet
-            } else {
-                &self.config.quick_select_alphabet
-            },
-            uniq_results.len(),
-        );
-        self.by_label.clear();
-
-        // Keep track of match_id -> label
-        let mut assigned_labels: HashMap<usize, usize> = HashMap::new();
-
-        // Work through the results in reverse order, so that we assign eg: `a` to the
-        // bottom-right-most result first and so on
-        for (result_index, res) in self.results.iter().enumerate().rev() {
-            // Figure out which label to use based on the match_id
-            let label_index = match assigned_labels.get(&res.match_id).copied() {
-                Some(idx) => idx,
-                None => {
-                    let idx = assigned_labels.len();
-                    assigned_labels.insert(res.match_id, idx);
-                    idx
-                }
-            };
-            let label = match labels.get(label_index) {
-                Some(l) => l,
-                None => {
-                    // There are more result candidates than the alphabet
-                    // can support, so we skip this one and keep looking:
-                    // we may still have matches that have an assigned
-                    // label, so we keep going rather than breaking
-                    // out of the loop.
-                    continue;
-                }
-            };
-
-            self.by_label.entry(label.clone()).or_insert(result_index);
-            for idx in res.start_y..=res.end_y {
-                let range = if idx == res.start_y && idx == res.end_y {
-                    // Range on same line
-                    res.start_x..res.end_x
-                } else if idx == res.end_y {
-                    // final line of multi-line
-                    0..res.end_x
-                } else if idx == res.start_y {
-                    // first line of multi-line
-                    res.start_x..self.width
-                } else {
-                    // a middle line
-                    0..self.width
-                };
-
-                let result = MatchResult {
-                    range,
-                    label: label.clone(),
-                };
-
-                let matches = self.by_line.entry(idx).or_insert_with(|| vec![]);
-                matches.push(result);
-
-                self.dirty_results.add(idx);
-            }
-        }
-    }
-
-    fn clear_selection(&mut self) {
-        let pane_id = self.delegate.pane_id();
-        self.window
-            .notify(TermWindowNotif::Apply(Box::new(move |term_window| {
-                let mut selection = term_window.selection(pane_id);
-                selection.origin.take();
-                selection.range.take();
-            })));
     }
 
     fn select_and_copy_match_number(&mut self, n: usize, paste: bool) {
