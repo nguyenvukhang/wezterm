@@ -9,7 +9,6 @@ use ::window::{Point, Rect};
 use anyhow::Context;
 use config::{AllowSquareGlyphOverflow, TextStyle};
 use euclid::num::Zero;
-use lfucache::LfuCache;
 use ordered_float::NotNan;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -238,7 +237,6 @@ pub struct GlyphCache {
     glyph_cache: HashMap<GlyphKey, Rc<CachedGlyph>>,
     pub atlas: Atlas,
     pub fonts: Rc<FontConfiguration>,
-    pub image_cache: LfuCache<[u8; 32], DecodedImage>,
     frame_cache: HashMap<[u8; 32], Sprite>,
     line_glyphs: HashMap<LineKey, Sprite>,
     pub block_glyphs: HashMap<SizedBlockKey, Sprite>,
@@ -255,12 +253,6 @@ impl GlyphCache {
         Ok(Self {
             fonts: Rc::clone(fonts),
             glyph_cache: HashMap::new(),
-            image_cache: LfuCache::new(
-                "glyph_cache.image_cache.hit.rate",
-                "glyph_cache.image_cache.miss.rate",
-                |config| config.glyph_cache_image_cache_size,
-                &fonts.config(),
-            ),
             frame_cache: HashMap::new(),
             atlas,
             line_glyphs: HashMap::new(),
@@ -284,12 +276,6 @@ impl GlyphCache {
         Ok(Self {
             fonts: Rc::clone(fonts),
             glyph_cache: HashMap::new(),
-            image_cache: LfuCache::new(
-                "glyph_cache.image_cache.hit.rate",
-                "glyph_cache.image_cache.miss.rate",
-                |config| config.glyph_cache_image_cache_size,
-                &fonts.config(),
-            ),
             frame_cache: HashMap::new(),
             atlas,
             line_glyphs: HashMap::new(),
@@ -316,7 +302,7 @@ impl GlyphCache {
         let key = BorrowedGlyphKey {
             font_idx: info.font_idx,
             glyph_pos: info.glyph_pos,
-            num_cells: num_cells,
+            num_cells,
             style,
             followed_by_space,
             metric: metrics.into(),
@@ -369,8 +355,6 @@ impl GlyphCache {
     }
 
     pub fn config_changed(&mut self) {
-        let config = self.fonts.config();
-        self.image_cache.update_config(&config);
         self.cursor_glyphs.clear();
     }
 
@@ -676,30 +660,16 @@ impl GlyphCache {
         padding: Option<usize>,
         allow_image: AllowImage,
     ) -> anyhow::Result<(Sprite, Option<Instant>, LoadState)> {
-        let hash = image_data.hash();
-
-        if let Some(decoded) = self.image_cache.get(&hash) {
-            Self::cached_image_impl(
-                &mut self.frame_cache,
-                &mut self.atlas,
-                decoded,
-                padding,
-                self.min_frame_duration,
-                allow_image,
-            )
-        } else {
-            let decoded = DecodedImage::load(image_data);
-            let res = Self::cached_image_impl(
-                &mut self.frame_cache,
-                &mut self.atlas,
-                &decoded,
-                padding,
-                self.min_frame_duration,
-                allow_image,
-            )?;
-            self.image_cache.put(hash, decoded);
-            Ok(res)
-        }
+        let decoded = DecodedImage::load(image_data);
+        let res = Self::cached_image_impl(
+            &mut self.frame_cache,
+            &mut self.atlas,
+            &decoded,
+            padding,
+            self.min_frame_duration,
+            allow_image,
+        )?;
+        Ok(res)
     }
 
     pub fn cached_color(&mut self, color: RgbColor, alpha: f32) -> anyhow::Result<Sprite> {

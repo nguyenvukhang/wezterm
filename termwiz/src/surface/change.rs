@@ -5,7 +5,6 @@ use crate::surface::{CursorShape, CursorVisibility, Position};
 use finl_unicode::grapheme_clusters::Graphemes;
 #[cfg(feature = "use_serde")]
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Eq, PartialEq)]
