@@ -694,11 +694,6 @@ impl super::TermWindow {
                 stable_row,
             ));
 
-        let outside_window = event.coords.x < 0
-            || event.coords.x as usize > self.dimensions.pixel_width
-            || event.coords.y < 0
-            || event.coords.y as usize > self.dimensions.pixel_height;
-
         let event_trigger_type = match &event.kind {
             WMEK::Press(press) => {
                 let press = mouse_press_to_tmb(press);

@@ -9,7 +9,6 @@ use finl_unicode::grapheme_clusters::Graphemes;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::hash::{Hash, Hasher};
 use std::mem;
-use std::sync::Arc;
 use wezterm_dynamic::{FromDynamic, ToDynamic};
 
 #[cfg_attr(feature = "use_serde", derive(Serialize, Deserialize))]

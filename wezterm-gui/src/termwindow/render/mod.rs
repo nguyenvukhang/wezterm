@@ -73,9 +73,6 @@ pub struct LineQuadCacheValue {
     pub line: Line,
     pub expires: Option<Instant>,
     pub layers: HeapQuadAllocator,
-    // Only set if the line contains any hyperlinks, so
-    // that we can invalidate when it changes
-    pub current_highlight: Option<Arc<Hyperlink>>,
     pub invalidate_on_hover_change: bool,
 }
 
@@ -814,12 +811,5 @@ fn update_next_frame_time(storage: &mut Option<Instant>, next_due: Option<Instan
                 storage.replace(t);
             }
         }
-    }
-}
-
-fn same_hyperlink(a: Option<&Arc<Hyperlink>>, b: Option<&Arc<Hyperlink>>) -> bool {
-    match (a, b) {
-        (Some(a), Some(b)) => Arc::ptr_eq(a, b),
-        _ => false,
     }
 }

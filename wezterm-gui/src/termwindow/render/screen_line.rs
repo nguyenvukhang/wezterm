@@ -1,8 +1,8 @@
 use crate::quad::{QuadTrait, TripleLayerQuadAllocator, TripleLayerQuadAllocatorTrait};
 use crate::termwindow::render::{
-    resolve_fg_color_attr, same_hyperlink, update_next_frame_time, ClusterStyleCache,
-    ComputeCellFgBgParams, ComputeCellFgBgResult, LineToElementParams, LineToElementShape,
-    RenderScreenLineParams, RenderScreenLineResult,
+    resolve_fg_color_attr, update_next_frame_time, ClusterStyleCache, ComputeCellFgBgParams,
+    ComputeCellFgBgResult, LineToElementParams, LineToElementShape, RenderScreenLineParams,
+    RenderScreenLineResult,
 };
 use crate::termwindow::LineToElementShapeItem;
 use ::window::DeadKeyStatus;

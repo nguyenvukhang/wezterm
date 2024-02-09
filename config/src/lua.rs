@@ -5,7 +5,7 @@ use crate::{
     TextStyle,
 };
 use anyhow::{anyhow, Context};
-use luahelper::{from_lua_value_dynamic, lua_value_to_dynamic, to_lua};
+use luahelper::{from_lua_value_dynamic, lua_value_to_dynamic};
 use mlua::{FromLua, IntoLuaMulti, Lua, Table, Value, Variadic};
 use ordered_float::NotNan;
 use portable_pty::CommandBuilder;

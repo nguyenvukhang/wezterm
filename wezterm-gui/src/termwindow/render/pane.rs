@@ -2,7 +2,7 @@ use crate::quad::{HeapQuadAllocator, QuadTrait, TripleLayerQuadAllocator};
 use crate::selection::SelectionRange;
 use crate::termwindow::box_model::*;
 use crate::termwindow::render::{
-    same_hyperlink, CursorProperties, LineQuadCacheKey, LineQuadCacheValue, LineToEleShapeCacheKey,
+    CursorProperties, LineQuadCacheKey, LineQuadCacheValue, LineToEleShapeCacheKey,
     RenderScreenLineParams,
 };
 use ::window::bitmaps::TextureRect;
@@ -460,7 +460,6 @@ impl crate::TermWindow {
                         expires,
                         line: (*line).clone(),
                         invalidate_on_hover_change: render_result.invalidate_on_hover_change,
-                        current_highlight: None
                     };
 
                     self.term_window
