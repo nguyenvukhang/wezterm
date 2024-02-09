@@ -414,8 +414,6 @@ pub struct Config {
     /// active tab.  Clicking on a tab activates it.
     #[dynamic(default = "default_true")]
     pub enable_tab_bar: bool,
-    #[dynamic(default = "default_true")]
-    pub use_fancy_tab_bar: bool,
 
     #[dynamic(default)]
     pub tab_bar_at_bottom: bool,

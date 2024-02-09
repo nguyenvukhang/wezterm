@@ -829,25 +829,10 @@ pub(crate) fn load_built_in_fonts(font_info: &mut Vec<ParsedFont>) -> anyhow::Re
     let built_ins: &[&[(&[u8], &str)]] = &[
         #[cfg(any(test, feature = "vendor-jetbrains"))]
         &[
-            font!("../../assets/fonts/JetBrainsMono-BoldItalic.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-Bold.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-ExtraBoldItalic.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-ExtraBold.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-ExtraLightItalic.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-ExtraLight.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-Italic.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-LightItalic.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-Light.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-MediumItalic.ttf"),
             font!("../../assets/fonts/JetBrainsMono-Medium.ttf"),
             font!("../../assets/fonts/JetBrainsMono-Regular.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-SemiBoldItalic.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-SemiBold.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-ThinItalic.ttf"),
             font!("../../assets/fonts/JetBrainsMono-Thin.ttf"),
         ],
-        #[cfg(any(test, feature = "vendor-noto-emoji"))]
-        &[font!("../../assets/fonts/NotoColorEmoji.ttf")],
     ];
     for bundle in built_ins {
         for (data, name) in bundle.iter() {
