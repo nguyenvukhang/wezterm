@@ -27,7 +27,6 @@ use std::convert::TryInto;
 use std::io::Cursor;
 use std::ops::Range;
 use std::path::PathBuf;
-use termwiz::hyperlink::Hyperlink;
 use termwiz::image::TextureCoordinate;
 use termwiz::surface::{Line, SequenceNo};
 use thiserror::Error;
@@ -923,12 +922,6 @@ pub struct GetLines {
 struct CellCoordinates {
     line_idx: usize,
     cols: Range<usize>,
-}
-
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
-struct LineHyperlink {
-    link: Hyperlink,
-    coords: Vec<CellCoordinates>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]

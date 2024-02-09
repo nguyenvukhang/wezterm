@@ -11,7 +11,7 @@ use crate::color::ColorPalette;
 use k9::assert_equal as assert_eq;
 use std::sync::{Arc, Mutex};
 use termwiz::escape::csi::{Edit, EraseInDisplay, EraseInLine};
-use termwiz::escape::{OneBased, OperatingSystemCommand, CSI};
+use termwiz::escape::{OneBased, CSI};
 use termwiz::surface::{CursorShape, CursorVisibility, SequenceNo, SEQ_ZERO};
 
 #[derive(Debug)]
@@ -133,20 +133,6 @@ impl TestTerm {
     fn erase_in_line(&mut self, erase: EraseInLine) {
         let csi = CSI::Edit(Edit::EraseInLine(erase));
         self.print(format!("{}", csi));
-    }
-
-    fn hyperlink(&mut self, link: &Arc<Hyperlink>) {
-        let osc = OperatingSystemCommand::SetHyperlink(Some(link.as_ref().clone()));
-        self.print(format!("{}", osc));
-    }
-
-    fn hyperlink_off(&mut self) {
-        self.print("\x1b]8;;\x1b\\");
-    }
-
-    fn soft_reset(&mut self) {
-        self.print(CSI);
-        self.print("!p");
     }
 
     fn assert_cursor_pos(&self, x: usize, y: i64, reason: Option<&str>, seqno: Option<SequenceNo>) {
