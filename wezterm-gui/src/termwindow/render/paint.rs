@@ -6,21 +6,12 @@ use smol::Timer;
 use std::time::{Duration, Instant};
 use wezterm_font::ClearShapeCache;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AllowImage {
-    Yes,
-    Scale(usize),
-    No,
-}
-
 impl crate::TermWindow {
     pub fn paint_impl(&mut self, frame: &mut RenderFrame) {
         self.num_frames += 1;
         // If nothing on screen needs animating, then we can avoid
         // invalidating as frequently
         *self.has_animation.borrow_mut() = None;
-        // Start with the assumption that we should allow images to render
-        self.allow_images = AllowImage::Yes;
 
         let start = Instant::now();
 
@@ -54,7 +45,7 @@ impl crate::TermWindow {
                         current_size,
                     }) = err.root_cause().downcast_ref::<OutOfTextureSpace>()
                     {
-                        let result = if pass == 0 {
+                        let _ = if pass == 0 {
                             // Let's try clearing out the atlas and trying again
                             // self.clear_texture_atlas()
                             log::trace!("recreate_texture_atlas");
@@ -64,30 +55,6 @@ impl crate::TermWindow {
                             self.recreate_texture_atlas(Some(size))
                         };
                         self.invalidate_modal();
-
-                        if let Err(err) = result {
-                            self.allow_images = match self.allow_images {
-                                AllowImage::Yes => AllowImage::Scale(2),
-                                AllowImage::Scale(2) => AllowImage::Scale(4),
-                                AllowImage::Scale(4) => AllowImage::Scale(8),
-                                AllowImage::Scale(8) => AllowImage::No,
-                                AllowImage::No | _ => {
-                                    log::error!(
-                                        "Failed to {} texture: {}",
-                                        if pass == 0 { "clear" } else { "resize" },
-                                        err
-                                    );
-                                    break 'pass;
-                                }
-                            };
-
-                            log::info!(
-                                "Not enough texture space ({:#}); \
-                                     will retry render with {:?}",
-                                err,
-                                self.allow_images,
-                            );
-                        }
                     } else if err.root_cause().downcast_ref::<ClearShapeCache>().is_some() {
                         self.invalidate_modal();
                         self.shape_generation += 1;
@@ -183,30 +150,7 @@ impl crate::TermWindow {
         let mut paint_terminal_background = false;
 
         // Render the full window background
-        match (self.window_background.is_empty(), self.allow_images) {
-            (false, AllowImage::Yes | AllowImage::Scale(_)) => {
-                let bg_color = self.palette().background.to_linear();
-
-                let top = panes
-                    .iter()
-                    .find(|p| p.is_active)
-                    .map(|p| match self.get_viewport(p.pane.pane_id()) {
-                        Some(top) => top,
-                        None => p.pane.get_dimensions().physical_top,
-                    })
-                    .unwrap_or(0);
-
-                let loaded_any = self
-                    .render_backgrounds(bg_color, top)
-                    .context("render_backgrounds")?;
-
-                if !loaded_any {
-                    // Either there was a problem loading the background(s)
-                    // or they haven't finished loading yet.
-                    // Use the regular terminal background until that changes.
-                    paint_terminal_background = true;
-                }
-            }
+        match self.window_background.is_empty() {
             _ if window_is_transparent => {
                 // Avoid doubling up the background color: the panes
                 // will render out through the padding so there

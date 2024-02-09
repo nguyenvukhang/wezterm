@@ -1,6 +1,6 @@
 use crate::cell::{unicode_column_width, AttributeChange, CellAttributes};
 use crate::color::ColorAttribute;
-pub use crate::image::{ImageData, TextureCoordinate};
+pub use crate::image::TextureCoordinate;
 use crate::surface::{CursorShape, CursorVisibility, Position};
 use finl_unicode::grapheme_clusters::Graphemes;
 #[cfg(feature = "use_serde")]

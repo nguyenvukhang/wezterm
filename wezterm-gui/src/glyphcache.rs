@@ -1,7 +1,6 @@
 use super::utilsprites::RenderMetrics;
 use crate::customglyph::*;
 use crate::renderstate::RenderContext;
-use crate::termwindow::render::paint::AllowImage;
 use ::window::bitmaps::atlas::{Atlas, OutOfTextureSpace, Sprite};
 use ::window::bitmaps::{BitmapImage, Image, ImageTexture, Texture2d};
 use ::window::color::SrgbaPixel;
@@ -563,17 +562,13 @@ impl GlyphCache {
         decoded: &DecodedImage,
         padding: Option<usize>,
         min_frame_duration: Duration,
-        allow_image: AllowImage,
     ) -> anyhow::Result<(Sprite, Option<Instant>, LoadState)> {
         let mut handle = DecodedImageHandle {
             h: decoded.image.data(),
             current_frame: *decoded.current_frame.borrow(),
         };
 
-        let scale_down = match allow_image {
-            AllowImage::Scale(n) => Some(n),
-            _ => None,
-        };
+        let scale_down = None;
 
         match &*handle.h {
             ImageDataType::Rgba8 { hash, .. } => {
@@ -658,7 +653,6 @@ impl GlyphCache {
         &mut self,
         image_data: &Arc<ImageData>,
         padding: Option<usize>,
-        allow_image: AllowImage,
     ) -> anyhow::Result<(Sprite, Option<Instant>, LoadState)> {
         let decoded = DecodedImage::load(image_data);
         let res = Self::cached_image_impl(
@@ -667,7 +661,6 @@ impl GlyphCache {
             &decoded,
             padding,
             self.min_frame_duration,
-            allow_image,
         )?;
         Ok(res)
     }
