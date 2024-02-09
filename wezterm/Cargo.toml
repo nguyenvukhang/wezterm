@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0"
 chrono = {version="0.4", default-features=false}
-clap = {version="4.0", features=["derive", "wrap_help"]}
 config = { path = "../config" }
 env-bootstrap = { path = "../env-bootstrap" }
 filedescriptor = { version="0.8", path = "../filedescriptor" }
@@ -30,7 +29,6 @@ termwiz-funcs = { path = "../lua-api-crates/termwiz-funcs" }
 textwrap = "0.16"
 umask = { path = "../umask" }
 url = "2"
-wezterm-gui-subcommands = { path = "../wezterm-gui-subcommands" }
 wezterm-term = { path = "../term" }
 
 [target."cfg(unix)".dependencies]

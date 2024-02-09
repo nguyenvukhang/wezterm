@@ -691,7 +691,6 @@ dependencies = [
  "anstyle",
  "clap_lex 0.6.0",
  "strsim",
- "terminal_size 0.3.0",
 ]
 
 [[package]]
@@ -2461,7 +2460,7 @@ dependencies = [
  "proc-macro2",
  "regex",
  "syn 2.0.48",
- "terminal_size 0.2.6",
+ "terminal_size",
 ]
 
 [[package]]
@@ -4358,16 +4357,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "terminal_size"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21bebf2b7c9e0a515f6e0f8c51dc0f8e4696391e6f1ff30379559f8365fb0df7"
-dependencies = [
- "rustix 0.38.30",
- "windows-sys 0.48.0",
-]
-
-[[package]]
 name = "terminfo"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5063,7 +5052,6 @@ dependencies = [
  "anyhow",
  "cc",
  "chrono",
- "clap 4.4.18",
  "config",
  "embed-resource",
  "env-bootstrap",
@@ -5086,7 +5074,6 @@ dependencies = [
  "textwrap 0.16.0",
  "umask",
  "url",
- "wezterm-gui-subcommands",
  "wezterm-term",
  "winapi",
 ]

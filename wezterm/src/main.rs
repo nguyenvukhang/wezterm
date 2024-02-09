@@ -1,54 +1,6 @@
 use anyhow::anyhow;
-use clap::builder::ValueParser;
-use clap::{Parser, ValueHint};
-use config::wezterm_version;
 use mux::Mux;
-use std::ffi::OsString;
 use umask::UmaskSaver;
-use wezterm_gui_subcommands::*;
-
-//    let message = "; ❤ 😍🤢\n\x1b[91;mw00t\n\x1b[37;104;m bleet\x1b[0;m.";
-
-#[derive(Debug, Parser)]
-#[command(
-    about = "Wez's Terminal Emulator\nhttp://github.com/wez/wezterm",
-    version = wezterm_version()
-)]
-pub struct Opt {
-    /// Skip loading wezterm.lua
-    #[arg(long, short = 'n')]
-    skip_config: bool,
-
-    /// Specify the configuration file to use, overrides the normal
-    /// configuration file resolution
-    #[arg(
-        long,
-        value_parser,
-        conflicts_with = "skip_config",
-        value_hint=ValueHint::FilePath
-    )]
-    config_file: Option<OsString>,
-
-    /// Override specific configuration values
-    #[arg(
-        long = "config",
-        name = "name=value",
-        value_parser=ValueParser::new(name_equals_value),
-        number_of_values = 1)]
-    config_override: Vec<(String, String)>,
-
-    #[command(subcommand)]
-    cmd: Option<SubCommand>,
-}
-
-#[derive(Debug, Parser, Clone)]
-enum SubCommand {
-    #[command(
-        name = "start",
-        about = "Start the GUI, optionally running an alternative program"
-    )]
-    Start(StartCommand),
-}
 
 fn terminate_with_error_message(err: &str) -> ! {
     log::error!("{}; terminating", err);
