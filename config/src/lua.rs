@@ -330,11 +330,6 @@ end
             lua.create_function(|_, ()| Ok(crate::running_under_wsl()))?,
         )?;
 
-        wezterm_mod.set(
-            "default_wsl_domains",
-            lua.create_function(|_, ()| Ok(crate::WslDomain::default_domains()))?,
-        )?;
-
         wezterm_mod.set("font", lua.create_function(font)?)?;
         wezterm_mod.set(
             "font_with_fallback",

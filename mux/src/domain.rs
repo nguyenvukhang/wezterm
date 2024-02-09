@@ -12,11 +12,10 @@ use crate::window::WindowId;
 use crate::Mux;
 use anyhow::{bail, Context, Error};
 use async_trait::async_trait;
-use config::{configuration, WslDomain};
+use config::configuration;
 use downcast_rs::{impl_downcast, Downcast};
 use parking_lot::Mutex;
 use portable_pty::{native_pty_system, CommandBuilder, ExitStatus, MasterPty, PtySize, PtySystem};
-use std::ffi::OsString;
 use std::io::Write;
 use std::path::Path;
 use std::sync::Arc;
@@ -198,14 +197,6 @@ impl LocalDomain {
         Ok(Self::with_pty_system(name, native_pty_system()))
     }
 
-    fn resolve_wsl_domain(&self) -> Option<WslDomain> {
-        config::configuration()
-            .wsl_domains()
-            .iter()
-            .find(|d| d.name == self.name)
-            .cloned()
-    }
-
     pub fn with_pty_system(name: &str, pty_system: Box<dyn PtySystem + Send>) -> Self {
         let id = alloc_domain_id();
         Self {
@@ -213,10 +204,6 @@ impl LocalDomain {
             id,
             name: name.to_string(),
         }
-    }
-
-    pub fn new_wsl(wsl: WslDomain) -> Result<Self, Error> {
-        Self::new(&wsl.name)
     }
 
     #[cfg(unix)]
@@ -234,49 +221,7 @@ impl LocalDomain {
     }
 
     async fn fixup_command(&self, cmd: &mut CommandBuilder) -> anyhow::Result<()> {
-        if let Some(wsl) = self.resolve_wsl_domain() {
-            let mut args: Vec<OsString> = cmd.get_argv().clone();
-
-            if args.is_empty() {
-                if let Some(def_prog) = &wsl.default_prog {
-                    for arg in def_prog {
-                        args.push(arg.into());
-                    }
-                }
-            }
-
-            let mut argv: Vec<OsString> = vec![
-                "wsl.exe".into(),
-                "--distribution".into(),
-                wsl.distribution
-                    .as_deref()
-                    .unwrap_or(wsl.name.as_str())
-                    .into(),
-            ];
-
-            if let Some(cwd) = cmd.get_cwd() {
-                argv.push("--cd".into());
-                argv.push(cwd.into());
-            }
-
-            if let Some(user) = &wsl.username {
-                argv.push("--user".into());
-                argv.push(user.into());
-            }
-
-            if !args.is_empty() {
-                argv.push("--exec".into());
-                for arg in args {
-                    argv.push(arg);
-                }
-            }
-
-            // TODO: process env list and update WLSENV so that they
-            // get passed through
-
-            cmd.clear_cwd();
-            *cmd.get_argv_mut() = argv;
-        } else if Path::new("/.flatpak-info").exists() {
+        if Path::new("/.flatpak-info").exists() {
             // We're running inside a flatpak sandbox.
             // Run the command outside the sandbox via flatpak-spawn
             let mut args = vec![
@@ -363,18 +308,11 @@ impl LocalDomain {
                 config.apply_cmd_defaults(&mut cmd, config.default_cwd.as_ref());
                 cmd
             }
-            None => {
-                let wsl = self.resolve_wsl_domain();
-                config.build_prog(
-                    None,
-                    wsl.as_ref()
-                        .map(|wsl| wsl.default_prog.as_ref())
-                        .unwrap_or(config.default_prog.as_ref()),
-                    wsl.as_ref()
-                        .map(|wsl| wsl.default_cwd.as_ref())
-                        .unwrap_or(config.default_cwd.as_ref()),
-                )?
-            }
+            None => config.build_prog(
+                None,
+                config.default_prog.as_ref(),
+                config.default_cwd.as_ref(),
+            )?,
         };
         if let Some(dir) = command_dir {
             cmd.cwd(dir);
@@ -573,11 +511,7 @@ impl Domain for LocalDomain {
     }
 
     async fn domain_label(&self) -> String {
-        if let Some(wsl) = self.resolve_wsl_domain() {
-            wsl.distribution.unwrap_or_else(|| self.name.to_string())
-        } else {
-            self.name.to_string()
-        }
+        self.name.to_string()
     }
 
     async fn attach(&self, _window_id: Option<WindowId>) -> anyhow::Result<()> {

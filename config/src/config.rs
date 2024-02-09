@@ -16,7 +16,6 @@ use crate::keys::{Key, LeaderKey, Mouse};
 use crate::lua::make_lua_context;
 use crate::units::Dimension;
 use crate::unix::UnixDomain;
-use crate::wsl::WslDomain;
 use crate::{
     default_config_with_overrides_applied, default_one_point_oh, default_one_point_oh_f64,
     default_true, default_win32_acrylic_accent_color, GpuInfo, IntegratedTitleButtonColor,
@@ -320,9 +319,6 @@ pub struct Config {
 
     #[dynamic(default)]
     pub webgpu_preferred_adapter: Option<GpuInfo>,
-
-    #[dynamic(default)]
-    pub wsl_domains: Option<Vec<WslDomain>>,
 
     /// The set of unix domains
     #[dynamic(default = "UnixDomain::default_unix_domains")]
@@ -830,14 +826,6 @@ impl Config {
         Self::load_with_overrides(&wezterm_dynamic::Value::default())
     }
 
-    pub fn wsl_domains(&self) -> Vec<WslDomain> {
-        if let Some(domains) = &self.wsl_domains {
-            domains.clone()
-        } else {
-            WslDomain::default_domains()
-        }
-    }
-
     pub fn update_ulimit(&self) -> anyhow::Result<()> {
         #[cfg(unix)]
         {
@@ -1136,11 +1124,6 @@ impl Config {
 
         for d in &self.unix_domains {
             check_domain(&d.name, "unix domain")?;
-        }
-        if let Some(domains) = &self.wsl_domains {
-            for d in domains {
-                check_domain(&d.name, "wsl domain")?;
-            }
         }
         Ok(())
     }
