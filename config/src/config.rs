@@ -21,7 +21,7 @@ use crate::{
     default_true, default_win32_acrylic_accent_color, GpuInfo, IntegratedTitleButtonColor,
     KeyMapPreference, LoadedConfig, MouseEventTriggerMods, RgbaColor, SystemBackdrop,
     WebGpuPowerPreference, CONFIG_DIRS, CONFIG_FILE_OVERRIDE, CONFIG_OVERRIDES, CONFIG_SKIP,
-    HOME_DIR,
+    HOME_DIR, COLOR_SCHEMES,
 };
 use anyhow::Context;
 use luahelper::impl_lua_conversion_dynamic;
@@ -121,9 +121,6 @@ pub struct Config {
     /// doesn't apply to text that is the default color.
     #[dynamic(default)]
     pub bold_brightens_ansi_colors: BoldBrightening,
-
-    /// The color palette
-    pub colors: Option<Palette>,
 
     #[dynamic(default)]
     pub switch_to_last_active_tab_when_closing_tab: bool,
@@ -1249,28 +1246,7 @@ impl Config {
             ..Default::default()
         });
 
-        // Load any additional color schemes into the color_schemes map
-        cfg.load_color_schemes(&cfg.compute_color_scheme_dirs())
-            .ok();
-
-        if let Some(scheme) = cfg.color_scheme.as_ref() {
-            match cfg.resolve_color_scheme() {
-                None => {
-                    log::error!(
-                        "Your configuration specifies color_scheme=\"{}\" \
-                        but that scheme was not found",
-                        scheme
-                    );
-                }
-                Some(p) => {
-                    cfg.resolved_palette = p.clone();
-                }
-            }
-        }
-
-        if let Some(colors) = &cfg.colors {
-            cfg.resolved_palette = cfg.resolved_palette.overlay_with(colors);
-        }
+        cfg.resolved_palette = COLOR_SCHEMES.get("gruvbox").unwrap().clone();
 
         if let Some(bg) = BackgroundLayer::with_legacy(self) {
             cfg.background.insert(0, bg);
@@ -1279,89 +1255,6 @@ impl Config {
         cfg
     }
 
-    fn compute_color_scheme_dirs(&self) -> Vec<PathBuf> {
-        let mut paths = self.color_scheme_dirs.clone();
-        for dir in CONFIG_DIRS.iter() {
-            paths.push(dir.join("colors"));
-        }
-        if cfg!(windows) {
-            // See commentary re: portable tools above!
-            if let Ok(exe_name) = std::env::current_exe() {
-                if let Some(exe_dir) = exe_name.parent() {
-                    paths.insert(0, exe_dir.join("colors"));
-                }
-            }
-        }
-        paths
-    }
-
-    fn load_color_schemes(&mut self, paths: &[PathBuf]) -> anyhow::Result<()> {
-        fn extract_scheme_name(name: &str) -> Option<&str> {
-            if name.ends_with(".toml") {
-                let len = name.len();
-                Some(&name[..len - 5])
-            } else {
-                None
-            }
-        }
-
-        fn load_scheme(path: &Path) -> anyhow::Result<ColorSchemeFile> {
-            let s = std::fs::read_to_string(path)?;
-            ColorSchemeFile::from_toml_str(&s).context("parsing TOML")
-        }
-
-        for colors_dir in paths {
-            if let Ok(dir) = std::fs::read_dir(colors_dir) {
-                for entry in dir {
-                    if let Ok(entry) = entry {
-                        if let Some(name) = entry.file_name().to_str() {
-                            if let Some(scheme_name) = extract_scheme_name(name) {
-                                if self.color_schemes.contains_key(scheme_name) {
-                                    // This scheme has already been defined
-                                    continue;
-                                }
-
-                                let path = entry.path();
-                                match load_scheme(&path) {
-                                    Ok(scheme) => {
-                                        let name = scheme
-                                            .metadata
-                                            .name
-                                            .unwrap_or_else(|| scheme_name.to_string());
-                                        log::trace!(
-                                            "Loaded color scheme `{}` from {}",
-                                            name,
-                                            path.display()
-                                        );
-                                        self.color_schemes.insert(name, scheme.colors);
-                                    }
-                                    Err(err) => {
-                                        log::error!(
-                                            "Color scheme in `{}` failed to load: {:#}",
-                                            path.display(),
-                                            err
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Ok(())
-    }
-
-    pub fn resolve_color_scheme(&self) -> Option<&Palette> {
-        let scheme_name = self.color_scheme.as_ref()?;
-
-        if let Some(palette) = self.color_schemes.get(scheme_name) {
-            Some(palette)
-        } else {
-            crate::COLOR_SCHEMES.get(scheme_name)
-        }
-    }
 
     pub fn initial_size(&self, dpi: u32) -> TerminalSize {
         TerminalSize {
