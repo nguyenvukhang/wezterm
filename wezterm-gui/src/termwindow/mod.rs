@@ -2625,32 +2625,6 @@ impl TermWindow {
                 let window = self.window.as_ref().unwrap();
                 window.invalidate();
             }
-            ActivateCopyMode => {
-                if let Some(pane) = self.get_active_pane_or_overlay() {
-                    let copy = CopyOverlay::with_pane(
-                        self,
-                        &pane,
-                        CopyModeParams {
-                            pattern: MuxPattern::default(),
-                            editing_search: false,
-                        },
-                    )?;
-                    self.assign_overlay_for_pane(pane.pane_id(), copy);
-                    self.pane_state(pane.pane_id())
-                        .overlay
-                        .as_mut()
-                        .map(|overlay| {
-                            overlay.key_table_state.activate(KeyTableArgs {
-                                name: "copy_mode",
-                                timeout_milliseconds: None,
-                                replace_current: false,
-                                one_shot: false,
-                                until_unknown: false,
-                                prevent_fallback: false,
-                            });
-                        });
-                }
-            }
             AdjustPaneSize(direction, amount) => {
                 let mux = Mux::get();
                 let tab = match mux.get_active_tab_for_window(self.mux_window_id) {

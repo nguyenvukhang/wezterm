@@ -1320,16 +1320,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["View"],
             icon: Some("md_format_align_top"),
         },
-        ActivateCopyMode => CommandDef {
-            brief: "Activate Copy Mode".into(),
-            doc: "Enter mouse-less copy mode to select text using only \
-            the keyboard"
-                .into(),
-            keys: vec![(Modifiers::CTRL.union(Modifiers::SHIFT), "x".into())],
-            args: &[ArgType::ActivePane],
-            menubar: &["Edit"],
-            icon: Some("md_content_copy"),
-        },
         SplitVertical(SpawnCommand {
             domain: SpawnTabDomain::CurrentPaneDomain,
             ..
@@ -1889,7 +1879,6 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         PasteFrom(ClipboardPasteSource::Clipboard),
         ClearScrollback(ScrollbackEraseMode::ScrollbackOnly),
         ClearScrollback(ScrollbackEraseMode::ScrollbackAndViewport),
-        ActivateCopyMode,
         ClearKeyTableStack,
         ActivateCommandPalette,
         // ----------------- View
