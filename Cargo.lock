@@ -408,17 +408,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
-name = "battery"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "luahelper",
- "starship-battery",
- "wezterm-dynamic",
-]
-
-[[package]]
 name = "benchmarking"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -497,23 +486,12 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59604ece62a407dc9164732e5adea02467898954c3a5811fd2dc140af14ef15b"
-dependencies = [
- "lazy_static",
- "memchr",
- "regex-automata 0.1.10",
-]
-
-[[package]]
-name = "bstr"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c48f0051a4b4c5e0b6d365cd04af53aeaa209e3cc15ec2cdb69e73cc87fbd0dc"
 dependencies = [
  "memchr",
- "regex-automata 0.4.5",
+ "regex-automata",
  "serde",
 ]
 
@@ -803,25 +781,6 @@ checksum = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e"
 dependencies = [
  "termcolor",
  "unicode-width",
-]
-
-[[package]]
-name = "color-funcs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "csscolorparser",
- "deltae",
- "image",
- "lazy_static",
- "log",
- "lru",
- "luahelper",
- "serde",
- "serde_json",
- "wezterm-dynamic",
- "wezterm-term",
 ]
 
 [[package]]
@@ -1431,28 +1390,16 @@ name = "env-bootstrap"
 version = "0.1.0"
 dependencies = [
  "backtrace",
- "battery",
  "chrono",
  "cocoa 0.20.2",
- "color-funcs",
  "config",
  "dirs-next",
  "env_logger 0.10.2",
- "filesystem",
- "json",
  "lazy_static",
  "libc",
  "log",
- "logging",
- "mux-lua",
  "objc",
- "plugin",
- "procinfo-funcs",
- "share-data",
  "termwiz",
- "termwiz-funcs",
- "time-funcs",
- "url-funcs",
  "wezterm-version",
  "winapi",
 ]
@@ -1613,29 +1560,6 @@ dependencies = [
  "libc",
  "thiserror",
  "winapi",
-]
-
-[[package]]
-name = "filenamegen"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b2da6e8ef70499318bc50abd003fd66dbf6d8a46c23f9e90158f388a788976a"
-dependencies = [
- "anyhow",
- "bstr 0.1.4",
- "regex",
- "walkdir",
-]
-
-[[package]]
-name = "filesystem"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "filenamegen",
- "luahelper",
- "smol",
 ]
 
 [[package]]
@@ -1982,8 +1906,6 @@ dependencies = [
  "libc",
  "libgit2-sys",
  "log",
- "openssl-probe",
- "openssl-sys",
  "url",
 ]
 
@@ -2419,17 +2341,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "luahelper",
- "serde_json",
- "wezterm-dynamic",
-]
-
-[[package]]
 name = "k9"
 version = "0.11.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2513,12 +2424,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
-name = "lazycell"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
-
-[[package]]
 name = "leb128"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2557,7 +2462,6 @@ dependencies = [
  "cc",
  "libc",
  "libz-sys",
- "openssl-sys",
  "pkg-config",
 ]
 
@@ -2661,16 +2565,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
-name = "logging"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "log",
- "luahelper",
-]
-
-[[package]]
 name = "lru"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2692,7 +2586,7 @@ dependencies = [
 name = "luahelper"
 version = "0.1.0"
 dependencies = [
- "bstr 1.9.0",
+ "bstr",
  "log",
  "mlua",
  "wezterm-dynamic",
@@ -2706,15 +2600,6 @@ checksum = "d8bcba9790f4e3b1c1467d75cdd011a63bbe6bc75da95af5d2cb4e3631f939c4"
 dependencies = [
  "cc",
  "which",
-]
-
-[[package]]
-name = "mach"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b823e83b2affd8f40a9ee8c29dbc56404c1e34cd2710921f2801e2cf29527afa"
-dependencies = [
- "libc",
 ]
 
 [[package]]
@@ -2892,7 +2777,7 @@ version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d3561f79659ff3afad7b25e2bf2ec21507fe601ebecb7f81088669ec4bfd51e"
 dependencies = [
- "bstr 1.9.0",
+ "bstr",
  "futures-util",
  "mlua-sys",
  "num-traits",
@@ -3018,19 +2903,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "nix"
-version = "0.23.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f3790c00a0150112de0f4cd161e3d7fc4b2d8a5542ffc35f099a2562aecb35c"
-dependencies = [
- "bitflags 1.3.2",
- "cc",
- "cfg-if",
- "libc",
- "memoffset 0.6.5",
 ]
 
 [[package]]
@@ -3249,24 +3121,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
 
 [[package]]
-name = "openssl-probe"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
-
-[[package]]
-name = "openssl-sys"
-version = "0.9.99"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22e1bf214306098e4832460f797824c05d25aacdf896f64a985fb0fd992454ae"
-dependencies = [
- "cc",
- "libc",
- "pkg-config",
- "vcpkg",
-]
-
-[[package]]
 name = "ordered-float"
 version = "4.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3478,19 +3332,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "plugin"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "git2",
- "log",
- "luahelper",
- "tempfile",
- "wezterm-dynamic",
-]
-
-[[package]]
 name = "png"
 version = "0.17.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3603,18 +3444,6 @@ dependencies = [
  "ntapi",
  "wezterm-dynamic",
  "winapi",
-]
-
-[[package]]
-name = "procinfo-funcs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "libc",
- "luahelper",
- "procinfo",
- "wezterm-dynamic",
 ]
 
 [[package]]
@@ -3786,15 +3615,9 @@ checksum = "b62dbe01f0b06f9d8dc7d49e05a0785f153b00b2c227856282f671e0318c9b15"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.4.5",
+ "regex-automata",
  "regex-syntax",
 ]
-
-[[package]]
-name = "regex-automata"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
 
 [[package]]
 name = "regex-automata"
@@ -4078,18 +3901,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "share-data"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "lazy_static",
- "luahelper",
- "ordered-float",
- "wezterm-dynamic",
-]
-
-[[package]]
 name = "shared_library"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4218,15 +4029,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "spa"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab074195b3f78a133cd7b7998142cf39dfaac71f6e990eaeecd14f5524db009a"
-dependencies = [
- "chrono",
-]
-
-[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4243,23 +4045,6 @@ checksum = "246bfa38fe3db3f1dfc8ca5a2cdeb7348c78be2112740cc0ec8ef18b6d94f830"
 dependencies = [
  "bitflags 1.3.2",
  "num-traits",
-]
-
-[[package]]
-name = "starship-battery"
-version = "0.7.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3336198ad004af4447ae69be4f4e562c26814570f8f0c1e37858405a294e015d"
-dependencies = [
- "cfg-if",
- "core-foundation 0.7.0",
- "lazycell",
- "libc",
- "mach",
- "nix 0.23.2",
- "num-traits",
- "uom",
- "winapi",
 ]
 
 [[package]]
@@ -4534,21 +4319,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
 
 [[package]]
-name = "time-funcs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "config",
- "lazy_static",
- "luahelper",
- "promise",
- "smol",
- "spa",
- "wezterm-dynamic",
-]
-
-[[package]]
 name = "time-macros"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4768,16 +4538,6 @@ name = "unicode-xid"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
-
-[[package]]
-name = "uom"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e76503e636584f1e10b9b3b9498538279561adcef5412927ba00c2b32c4ce5ed"
-dependencies = [
- "num-traits",
- "typenum",
-]
 
 [[package]]
 name = "url"
