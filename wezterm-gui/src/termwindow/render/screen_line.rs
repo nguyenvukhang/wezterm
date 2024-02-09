@@ -120,14 +120,7 @@ impl crate::TermWindow {
             let mut cache = self.line_to_ele_shape_cache.borrow_mut();
             if let Some(entry) = cache.get(shape_key) {
                 let expired = entry.expires.map(|i| Instant::now() >= i).unwrap_or(false);
-                let hover_changed = if entry.invalidate_on_hover_change {
-                    !same_hyperlink(
-                        entry.current_highlight.as_ref(),
-                        self.current_highlight.as_ref(),
-                    )
-                } else {
-                    false
-                };
+                let hover_changed = false;
 
                 if !expired && !hover_changed {
                     self.update_next_frame_time(entry.expires);
@@ -840,11 +833,7 @@ impl crate::TermWindow {
                     expires,
                     shaped: Rc::clone(&shaped),
                     invalidate_on_hover_change,
-                    current_highlight: if invalidate_on_hover_change {
-                        self.current_highlight.clone()
-                    } else {
-                        None
-                    },
+                    current_highlight: None,
                 },
             );
         }

@@ -32,7 +32,6 @@ pub enum OperatingSystemCommand {
     SetWindowTitleSun(String),
     SetIconName(String),
     SetIconNameSun(String),
-    SetHyperlink(Option<Hyperlink>),
     ClearSelection(Selection),
     QuerySelection(Selection),
     SetSelection(Selection, String),
@@ -307,7 +306,6 @@ impl OperatingSystemCommand {
             SetIconNameSun => Ok(OperatingSystemCommand::SetIconNameSun(
                 p1str[1..].to_owned(),
             )),
-            SetHyperlink => Ok(OperatingSystemCommand::SetHyperlink(Hyperlink::parse(osc)?)),
             ManipulateSelectionData => Self::parse_selection(osc),
             SystemNotification => single_string!(SystemNotification),
             SetCurrentWorkingDirectory => single_string!(CurrentWorkingDirectory),
@@ -400,8 +398,6 @@ osc_entries!(
     /// iTerm2
     ChangeTitleTabColor = "6",
     SetCurrentWorkingDirectory = "7",
-    /// See https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-    SetHyperlink = "8",
     /// iTerm2
     SystemNotification = "9",
     SetTextForegroundColor = "10",
@@ -488,8 +484,6 @@ impl Display for OperatingSystemCommand {
             SetWindowTitleSun(title) => single_string!(SetWindowTitleSun, title),
             SetIconName(title) => single_string!(SetIconName, title),
             SetIconNameSun(title) => single_string!(SetIconNameSun, title),
-            SetHyperlink(Some(link)) => link.fmt(f)?,
-            SetHyperlink(None) => write!(f, "8;;")?,
             RxvtExtension(params) => write!(f, "777;{}", params.join(";"))?,
             Unspecified(v) => {
                 for (idx, item) in v.iter().enumerate() {

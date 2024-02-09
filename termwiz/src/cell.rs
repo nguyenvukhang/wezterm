@@ -446,11 +446,6 @@ impl CellAttributes {
         res
     }
 
-    // TODO: delete me!
-    pub fn hyperlink(&self) -> Option<&Arc<Hyperlink>> {
-        None
-    }
-
     pub fn underline_color(&self) -> ColorAttribute {
         self.fat
             .as_ref()

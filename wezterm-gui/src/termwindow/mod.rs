@@ -397,9 +397,6 @@ pub struct TermWindow {
     /// Keeps track of double and triple clicks
     last_mouse_click: Option<LastMouseClick>,
 
-    /// The URL over which we are currently hovering
-    current_highlight: Option<Arc<Hyperlink>>,
-
     quad_generation: usize,
     shape_generation: usize,
     shape_cache: RefCell<LfuCache<ShapeCacheKey, anyhow::Result<Rc<Vec<ShapedInfo>>>>>,
@@ -701,7 +698,6 @@ impl TermWindow {
             current_mouse_buttons: vec![],
             current_mouse_capture: None,
             last_mouse_click: None,
-            current_highlight: None,
             quad_generation: 0,
             shape_generation: 0,
             shape_cache: RefCell::new(LfuCache::new(
@@ -1255,7 +1251,6 @@ impl TermWindow {
                 *self.mux_window_id_for_subscriptions.lock().unwrap() = mux_window_id;
 
                 self.clear_all_overlays();
-                self.current_highlight.take();
                 self.invalidate_modal();
 
                 let mux = Mux::get();

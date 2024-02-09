@@ -377,14 +377,7 @@ impl crate::TermWindow {
                             .expires
                             .map(|i| Instant::now() >= i)
                             .unwrap_or(false);
-                        let hover_changed = if cached_quad.invalidate_on_hover_change {
-                            !same_hyperlink(
-                                cached_quad.current_highlight.as_ref(),
-                                self.term_window.current_highlight.as_ref(),
-                            )
-                        } else {
-                            false
-                        };
+                        let hover_changed = false;
                         if !expired && !hover_changed {
                             cached_quad
                                 .layers
@@ -467,11 +460,7 @@ impl crate::TermWindow {
                         expires,
                         line: (*line).clone(),
                         invalidate_on_hover_change: render_result.invalidate_on_hover_change,
-                        current_highlight: if render_result.invalidate_on_hover_change {
-                            self.term_window.current_highlight.clone()
-                        } else {
-                            None
-                        },
+                        current_highlight: None
                     };
 
                     self.term_window

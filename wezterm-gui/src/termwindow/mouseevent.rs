@@ -699,16 +699,6 @@ impl super::TermWindow {
             || event.coords.y < 0
             || event.coords.y as usize > self.dimensions.pixel_height;
 
-        context.set_cursor(Some(if self.current_highlight.is_some() {
-            // When hovering over a hyperlink, show an appropriate
-            // mouse cursor to give the cue that it is clickable
-            MouseCursor::Hand
-        } else if pane.is_mouse_grabbed() || outside_window {
-            MouseCursor::Arrow
-        } else {
-            MouseCursor::Text
-        }));
-
         let event_trigger_type = match &event.kind {
             WMEK::Press(press) => {
                 let press = mouse_press_to_tmb(press);
