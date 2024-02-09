@@ -1,4 +1,3 @@
-use crate::exec_domain::{ExecDomain, ValueOrFunc};
 use crate::keyassignment::KeyAssignment;
 use crate::{
     Config, FontAttributes, FontStretch, FontStyle, FontWeight, FreeTypeLoadTarget, RgbaColor,
@@ -352,7 +351,6 @@ end
 
         lua.set_named_registry_value(LUA_REGISTRY_USER_CALLBACK_COUNT, 0)?;
         wezterm_mod.set("action_callback", lua.create_function(action_callback)?)?;
-        wezterm_mod.set("exec_domain", lua.create_function(exec_domain)?)?;
 
         wezterm_mod.set("utf16_to_utf8", lua.create_function(utf16_to_utf8)?)?;
         wezterm_mod.set("split_by_newlines", lua.create_function(split_by_newlines)?)?;
@@ -643,39 +641,6 @@ pub fn wrap_callback<'lua>(lua: &'lua Lua, callback: mlua::Function) -> mlua::Re
 fn action_callback<'lua>(lua: &'lua Lua, callback: mlua::Function) -> mlua::Result<KeyAssignment> {
     let user_event_id = wrap_callback(lua, callback)?;
     Ok(KeyAssignment::EmitEvent(user_event_id))
-}
-
-fn exec_domain<'lua>(
-    lua: &'lua Lua,
-    (name, fixup_command, label): (String, mlua::Function, Option<mlua::Value>),
-) -> mlua::Result<ExecDomain> {
-    let fixup_command = {
-        let event_name = format!("exec-domain-{name}");
-        register_event(lua, (event_name.clone(), fixup_command))?;
-        event_name
-    };
-
-    let label = match label {
-        Some(Value::Function(callback)) => {
-            let event_name = format!("exec-domain-{name}-label");
-            register_event(lua, (event_name.clone(), callback))?;
-            Some(ValueOrFunc::Func(event_name))
-        }
-        Some(Value::String(value)) => Some(ValueOrFunc::Value(lua_value_to_dynamic(
-            Value::String(value),
-        )?)),
-        Some(_) => {
-            return Err(mlua::Error::external(
-                "label function parameter must be either a string or a lua function",
-            ))
-        }
-        None => None,
-    };
-    Ok(ExecDomain {
-        name,
-        fixup_command,
-        label,
-    })
 }
 
 fn split_by_newlines<'lua>(_: &'lua Lua, text: String) -> mlua::Result<Vec<String>> {

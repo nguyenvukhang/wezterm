@@ -4,7 +4,6 @@ use crate::color::{
     ColorSchemeFile, HsbTransform, Palette, SrgbaTuple, TabBarStyle, WindowFrameConfig,
 };
 use crate::daemon::DaemonOptions;
-use crate::exec_domain::ExecDomain;
 use crate::font::{
     AllowSquareGlyphOverflow, DisplayPixelGeometry, FontLocatorSelection, FontRasterizerSelection,
     FontShaperSelection, FreeTypeLoadFlags, FreeTypeLoadTarget, StyleRule, TextStyle,
@@ -324,9 +323,6 @@ pub struct Config {
 
     #[dynamic(default)]
     pub wsl_domains: Option<Vec<WslDomain>>,
-
-    #[dynamic(default)]
-    pub exec_domains: Vec<ExecDomain>,
 
     /// The set of unix domains
     #[dynamic(default = "UnixDomain::default_unix_domains")]
@@ -1140,9 +1136,6 @@ impl Config {
 
         for d in &self.unix_domains {
             check_domain(&d.name, "unix domain")?;
-        }
-        for d in &self.exec_domains {
-            check_domain(&d.name, "exec domain")?;
         }
         if let Some(domains) = &self.wsl_domains {
             for d in domains {
