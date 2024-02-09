@@ -6,7 +6,7 @@ use crate::frontend::{front_end, try_front_end};
 use crate::inputmap::InputMap;
 use crate::overlay::{
     confirm_close_pane, confirm_close_tab, confirm_close_window, confirm_quit_program, launcher,
-    start_overlay, start_overlay_pane, CopyModeParams, CopyOverlay, LauncherArgs, LauncherFlags,
+    start_overlay, start_overlay_pane, CopyOverlay, LauncherArgs, LauncherFlags,
     QuickSelectOverlay,
 };
 use crate::resize_increment_calculator::ResizeIncrementCalculator;
@@ -38,7 +38,7 @@ use config::{
 };
 use lfucache::*;
 use mlua::{FromLua, UserData, UserDataFields};
-use mux::pane::{CloseReason, Pane, PaneId, Pattern as MuxPattern, PerformAssignmentResult};
+use mux::pane::{CloseReason, Pane, PaneId, PerformAssignmentResult};
 use mux::renderable::RenderableDimensions;
 use mux::tab::{
     PositionedPane, PositionedSplit, SplitDirection, SplitRequest, SplitSize as MuxSplitSize, Tab,

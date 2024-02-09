@@ -20,7 +20,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use termwiz::cell::{Cell, CellAttributes};
 use termwiz::color::AnsiColor;
-use termwiz::surface::{CursorVisibility, SequenceNo, SEQ_ZERO};
+use termwiz::surface::{SequenceNo, SEQ_ZERO};
 use unicode_segmentation::*;
 use url::Url;
 use wezterm_term::color::ColorPalette;
@@ -106,66 +106,6 @@ pub struct CopyModeParams {
 }
 
 impl CopyOverlay {
-    pub fn with_pane(
-        term_window: &TermWindow,
-        pane: &Arc<dyn Pane>,
-        params: CopyModeParams,
-    ) -> anyhow::Result<Arc<dyn Pane>> {
-        let mut cursor = pane.get_cursor_position();
-        cursor.shape = termwiz::surface::CursorShape::SteadyBlock;
-        cursor.visibility = CursorVisibility::Visible;
-
-        let (_domain, _window, tab_id) = mux::Mux::get()
-            .resolve_pane_id(pane.pane_id())
-            .ok_or_else(|| anyhow::anyhow!("no tab contains the current pane"))?;
-
-        let window = term_window
-            .window
-            .clone()
-            .ok_or_else(|| anyhow::anyhow!("failed to clone window handle"))?;
-        let dims = pane.get_dimensions();
-        let mut render = CopyRenderable {
-            cursor,
-            window,
-            delegate: Arc::clone(pane),
-            start: None,
-            viewport: term_window.get_viewport(pane.pane_id()),
-            results: vec![],
-            by_line: HashMap::new(),
-            dirty_results: RangeSet::default(),
-            width: dims.cols,
-            height: dims.viewport_rows,
-            last_result_seqno: SEQ_ZERO,
-            last_bar_pos: None,
-            tab_id,
-            pattern: if params.pattern.is_empty() {
-                SAVED_PATTERN
-                    .lock()
-                    .get(&tab_id)
-                    .map(|p| p.clone())
-                    .unwrap_or(params.pattern)
-            } else {
-                params.pattern
-            },
-            editing_search: params.editing_search,
-            result_pos: None,
-            selection_mode: SelectionMode::Cell,
-            typing_cookie: 0,
-            searching: None,
-            pending_jump: None,
-            last_jump: None,
-        };
-
-        let search_row = render.compute_search_row();
-        render.dirty_results.add(search_row);
-        render.update_search();
-
-        Ok(Arc::new(CopyOverlay {
-            delegate: Arc::clone(pane),
-            render: Mutex::new(render),
-        }))
-    }
-
     pub fn viewport_changed(&self, viewport: Option<StableRowIndex>) {
         let mut render = self.render.lock();
         if render.viewport != viewport {
@@ -241,17 +181,6 @@ impl CopyRenderable {
 
         promise::spawn::spawn(async move {
             smol::Timer::after(Duration::from_millis(350)).await;
-            window.notify(TermWindowNotif::Apply(Box::new(move |term_window| {
-                let state = term_window.pane_state(pane_id);
-                if let Some(overlay) = state.overlay.as_ref() {
-                    if let Some(copy_overlay) = overlay.pane.downcast_ref::<CopyOverlay>() {
-                        let mut r = copy_overlay.render.lock();
-                        if cookie == r.typing_cookie {
-                            r.update_search();
-                        }
-                    }
-                }
-            })));
             anyhow::Result::<()>::Ok(())
         })
         .detach();
@@ -999,23 +928,6 @@ impl Pane for CopyOverlay {
                 }
             }
             return Ok(());
-        }
-
-        if render.editing_search {
-            match (key, mods) {
-                (KeyCode::Char(c), KeyModifiers::NONE)
-                | (KeyCode::Char(c), KeyModifiers::SHIFT) => {
-                    // Type to add to the pattern
-                    render.pattern.push(c);
-                    render.schedule_update_search();
-                }
-                (KeyCode::Backspace, KeyModifiers::NONE) => {
-                    // Backspace to edit the pattern
-                    render.pattern.pop();
-                    render.schedule_update_search();
-                }
-                _ => {}
-            }
         }
 
         Ok(())
