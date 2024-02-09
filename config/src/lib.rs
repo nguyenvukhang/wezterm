@@ -145,15 +145,85 @@ fn json_to_dynamic(value: &serde_json::Value) -> Value {
 }
 
 pub fn build_default_schemes() -> HashMap<String, Palette> {
+    use wezterm_term::{Intensity, Underline};
     let mut color_schemes = HashMap::new();
-    for (scheme_name, data) in scheme_data::SCHEMES.iter() {
-        let scheme_name = scheme_name.to_string();
-        let scheme = ColorSchemeFile::from_toml_str(data).unwrap();
-        color_schemes.insert(scheme_name, scheme.colors.clone());
-        for alias in scheme.metadata.aliases {
-            color_schemes.insert(alias, scheme.colors.clone());
-        }
-    }
+    let hex = |v| RgbColor::from_rgb_str(v).map(RgbaColor::from).unwrap();
+    color_schemes.insert(
+        "gruvbox".to_string(),
+        Palette {
+            foreground: Some(hex("#ebdbb2")),
+            background: Some(hex("#282828")),
+            cursor_fg: Some(hex("#282828")),
+            cursor_bg: Some(hex("#bdae93")),
+            cursor_border: Some(hex("#bdae93")),
+            selection_fg: Some(hex("#282828")),
+            selection_bg: Some(hex("#d8a657")),
+            ansi: Some([
+                hex("#282828"),
+                hex("#ea6962"),
+                hex("#a9b665"),
+                hex("#d8a657"),
+                hex("#7daea3"),
+                hex("#d3869b"),
+                hex("#89b48c"),
+                hex("#a89984"),
+            ]),
+            brights: Some([
+                hex("#928374"),
+                hex("#ea6962"),
+                hex("#a9b665"),
+                hex("#d8a657"),
+                hex("#7daea3"),
+                hex("#d3869b"),
+                hex("#89b48c"),
+                hex("#ebdbb2"),
+            ]),
+            indexed: HashMap::new(),
+            tab_bar: Some(TabBarColors {
+                inactive_tab_edge: None,
+                inactive_tab_edge_hover: None,
+                new_tab: None,
+                new_tab_hover: None,
+                background: Some(hex("#212121")),
+                active_tab: Some(TabBarColor {
+                    fg_color: hex("#a9b665"),
+                    bg_color: hex("#353535"),
+                    intensity: Intensity::Normal,
+                    italic: false,
+                    underline: Underline::None,
+                    strikethrough: false,
+                }),
+                inactive_tab: Some(TabBarColor {
+                    fg_color: hex("#928374"),
+                    bg_color: hex("#212121"),
+                    intensity: Intensity::Normal,
+                    italic: false,
+                    underline: Underline::None,
+                    strikethrough: false,
+                }),
+                inactive_tab_hover: Some(TabBarColor {
+                    fg_color: hex("#928374"),
+                    bg_color: hex("#212121"),
+                    intensity: Intensity::Normal,
+                    italic: false,
+                    underline: Underline::None,
+                    strikethrough: false,
+                }),
+            }),
+            scrollbar_thumb: None,
+            split: Some(hex("#8A9948")),
+            visual_bell: None,
+            compose_cursor: None,
+            copy_mode_active_highlight_fg: None,
+            copy_mode_active_highlight_bg: None,
+            copy_mode_inactive_highlight_fg: None,
+            copy_mode_inactive_highlight_bg: None,
+            quick_select_label_fg: None,
+            quick_select_label_bg: None,
+            quick_select_match_fg: None,
+            quick_select_match_bg: None,
+        },
+    );
     color_schemes
 }
 
