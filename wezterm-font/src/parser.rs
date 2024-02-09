@@ -828,11 +828,7 @@ pub(crate) fn load_built_in_fonts(font_info: &mut Vec<ParsedFont>) -> anyhow::Re
 
     let built_ins: &[&[(&[u8], &str)]] = &[
         #[cfg(any(test, feature = "vendor-jetbrains"))]
-        &[
-            font!("../../assets/fonts/JetBrainsMono-Medium.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-Regular.ttf"),
-            font!("../../assets/fonts/JetBrainsMono-Thin.ttf"),
-        ],
+        &[font!("../../assets/fonts/JetBrainsMono-Medium.ttf")],
     ];
     for bundle in built_ins {
         for (data, name) in bundle.iter() {
