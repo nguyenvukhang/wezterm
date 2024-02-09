@@ -172,19 +172,7 @@ impl CopyRenderable {
         self.results.append(&mut results);
     }
 
-    fn schedule_update_search(&mut self) {
-        self.typing_cookie += 1;
-        let cookie = self.typing_cookie;
-
-        let window = self.window.clone();
-        let pane_id = self.delegate.pane_id();
-
-        promise::spawn::spawn(async move {
-            smol::Timer::after(Duration::from_millis(350)).await;
-            anyhow::Result::<()>::Ok(())
-        })
-        .detach();
-    }
+    fn schedule_update_search(&mut self) {}
 
     fn update_search(&mut self) {
         for idx in self.by_line.keys() {
