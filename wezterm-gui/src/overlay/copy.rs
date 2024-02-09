@@ -17,7 +17,6 @@ use rangeset::RangeSet;
 use std::collections::HashMap;
 use std::ops::Range;
 use std::sync::Arc;
-use std::time::Duration;
 use termwiz::cell::{Cell, CellAttributes};
 use termwiz::color::AnsiColor;
 use termwiz::surface::{SequenceNo, SEQ_ZERO};
@@ -35,11 +34,6 @@ lazy_static::lazy_static! {
 }
 
 const SEARCH_CHUNK_SIZE: StableRowIndex = 1000;
-
-pub struct CopyOverlay {
-    delegate: Arc<dyn Pane>,
-    render: Mutex<CopyRenderable>,
-}
 
 #[derive(Copy, Clone, Debug)]
 struct PendingJump {
@@ -103,21 +97,6 @@ struct Dimensions {
 pub struct CopyModeParams {
     pub pattern: Pattern,
     pub editing_search: bool,
-}
-
-impl CopyOverlay {
-    pub fn viewport_changed(&self, viewport: Option<StableRowIndex>) {
-        let mut render = self.render.lock();
-        if render.viewport != viewport {
-            if let Some(last) = render.last_bar_pos.take() {
-                render.dirty_results.add(last);
-            }
-            if let Some(pos) = viewport.as_ref() {
-                render.dirty_results.add(*pos);
-            }
-            render.viewport = viewport;
-        }
-    }
 }
 
 impl CopyRenderable {

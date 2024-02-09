@@ -87,11 +87,7 @@ pub struct UserPaletteEntry {
 }
 impl_lua_conversion_dynamic!(UserPaletteEntry);
 
-fn build_commands(
-    gui_window: GuiWin,
-    pane: Option<MuxPane>,
-    filter_copy_mode: bool,
-) -> Vec<ExpandedCommand> {
+fn build_commands(gui_window: GuiWin, pane: Option<MuxPane>) -> Vec<ExpandedCommand> {
     let mut commands = CommandDef::actions_for_palette_and_menubar(&config::configuration());
 
     match config::run_immediate_with_lua_config(|lua| {
@@ -129,14 +125,6 @@ fn build_commands(
             log::warn!("augment-command-palette: {err:#}");
         }
     }
-
-    commands.retain(|cmd| {
-        if filter_copy_mode {
-            !matches!(cmd.action, KeyAssignment::CopyMode(_))
-        } else {
-            true
-        }
-    });
 
     let mut scores: HashMap<&str, f64> = HashMap::new();
     let recents = load_recents();
@@ -217,22 +205,11 @@ fn compute_matches(selection: &str, commands: &[ExpandedCommand]) -> Vec<usize> 
 
 impl CommandPalette {
     pub fn new(term_window: &mut TermWindow) -> Self {
-        // Showing the CopyMode actions in the palette is useless
-        // if the CopyOverlay isn't active, so figure out if that
-        // is the case so that we can filter them out in build_commands.
-        let filter_copy_mode = term_window
-            .get_active_pane_or_overlay()
-            .map(|pane| {
-                pane.downcast_ref::<crate::termwindow::CopyOverlay>()
-                    .is_none()
-            })
-            .unwrap_or(true);
-
         let mux_pane = term_window
             .get_active_pane_or_overlay()
             .map(|pane| MuxPane(pane.pane_id()));
 
-        let commands = build_commands(GuiWin::new(term_window), mux_pane, filter_copy_mode);
+        let commands = build_commands(GuiWin::new(term_window), mux_pane);
 
         Self {
             element: RefCell::new(None),

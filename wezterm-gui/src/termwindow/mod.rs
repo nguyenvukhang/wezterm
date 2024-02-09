@@ -6,8 +6,7 @@ use crate::frontend::{front_end, try_front_end};
 use crate::inputmap::InputMap;
 use crate::overlay::{
     confirm_close_pane, confirm_close_tab, confirm_close_window, confirm_quit_program, launcher,
-    start_overlay, start_overlay_pane, CopyOverlay, LauncherArgs, LauncherFlags,
-    QuickSelectOverlay,
+    start_overlay, start_overlay_pane, LauncherArgs, LauncherFlags,
 };
 use crate::resize_increment_calculator::ResizeIncrementCalculator;
 use crate::scripting::guiwin::GuiWin;
@@ -1564,29 +1563,19 @@ impl TermWindow {
         if dirty.is_empty() {
             return;
         }
-        if pane.downcast_ref::<CopyOverlay>().is_none()
-            && pane.downcast_ref::<QuickSelectOverlay>().is_none()
-        {
-            // If any of the changed lines intersect with the
-            // selection, then we need to clear the selection, but not
-            // when the search overlay is active; the search overlay
-            // marks lines as dirty to force invalidate them for
-            // highlighting purpose but also manipulates the selection
-            // and we want to allow it to retain the selection it made!
 
-            let clear_selection =
-                if let Some(selection_range) = self.selection(pane.pane_id()).range.as_ref() {
-                    let selection_rows = selection_range.rows();
-                    selection_rows.into_iter().any(|row| dirty.contains(row))
-                } else {
-                    false
-                };
+        let clear_selection =
+            if let Some(selection_range) = self.selection(pane.pane_id()).range.as_ref() {
+                let selection_rows = selection_range.rows();
+                selection_rows.into_iter().any(|row| dirty.contains(row))
+            } else {
+                false
+            };
 
-            if clear_selection {
-                self.selection(pane.pane_id()).range.take();
-                self.selection(pane.pane_id()).origin.take();
-                self.selection(pane.pane_id()).seqno = pane.get_current_seqno();
-            }
+        if clear_selection {
+            self.selection(pane.pane_id()).range.take();
+            self.selection(pane.pane_id()).origin.take();
+            self.selection(pane.pane_id()).seqno = pane.get_current_seqno();
         }
     }
 }
@@ -2968,16 +2957,6 @@ impl TermWindow {
         let mut state = self.pane_state(pane_id);
         if pos != state.viewport {
             state.viewport = pos;
-
-            // This is a bit gross.  If we add other overlays that need this information,
-            // this should get extracted out into a trait
-            if let Some(overlay) = state.overlay.as_ref() {
-                if let Some(copy) = overlay.pane.downcast_ref::<CopyOverlay>() {
-                    copy.viewport_changed(pos);
-                } else if let Some(qs) = overlay.pane.downcast_ref::<QuickSelectOverlay>() {
-                    qs.viewport_changed(pos);
-                }
-            }
         }
         self.window.as_ref().unwrap().invalidate();
     }
