@@ -173,7 +173,7 @@ pub fn confirm_close_pane(
     mux_window_id: WindowId,
     window: ::window::Window,
 ) -> anyhow::Result<()> {
-    if run_confirmation_app("🛑 Really kill this pane?", &mut term)? {
+    if run_confirmation_app("Really kill this pane?", &mut term)? {
         promise::spawn::spawn_into_main_thread(async move {
             let mux = Mux::get();
             let tab = match mux.get_active_tab_for_window(mux_window_id) {
@@ -195,10 +195,7 @@ pub fn confirm_close_tab(
     _mux_window_id: WindowId,
     window: ::window::Window,
 ) -> anyhow::Result<()> {
-    if run_confirmation_app(
-        "🛑 Really kill this tab and all contained panes?",
-        &mut term,
-    )? {
+    if run_confirmation_app("Really kill this tab and all contained panes?", &mut term)? {
         promise::spawn::spawn_into_main_thread(async move {
             let mux = Mux::get();
             mux.remove_tab(tab_id);
@@ -217,7 +214,7 @@ pub fn confirm_close_window(
     tab_id: TabId,
 ) -> anyhow::Result<()> {
     if run_confirmation_app(
-        "🛑 Really kill this window and all contained tabs and panes?",
+        "Really kill this window and all contained tabs and panes?",
         &mut term,
     )? {
         promise::spawn::spawn_into_main_thread(async move {
@@ -236,7 +233,7 @@ pub fn confirm_quit_program(
     window: ::window::Window,
     tab_id: TabId,
 ) -> anyhow::Result<()> {
-    if run_confirmation_app("🛑 Really Quit WezTerm?", &mut term)? {
+    if run_confirmation_app("Really Quit WezTerm?", &mut term)? {
         promise::spawn::spawn_into_main_thread(async move {
             use ::window::{Connection, ConnectionOps};
             let con = Connection::get().expect("call on gui thread");
