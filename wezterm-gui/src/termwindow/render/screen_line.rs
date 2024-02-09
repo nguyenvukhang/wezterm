@@ -697,19 +697,14 @@ impl crate::TermWindow {
         let mut last_style = None;
         let mut x_pos = 0.;
         let mut expires = None;
-        let mut invalidate_on_hover_change = false;
+        let invalidate_on_hover_change = false;
 
         for cluster in &cell_clusters {
             if !matches!(last_style.as_ref(), Some(ClusterStyleCache{attrs,..}) if *attrs == &cluster.attrs)
             {
                 let attrs = &cluster.attrs;
                 let style = self.fonts.match_style(params.config, attrs);
-                let hyperlink = attrs.hyperlink();
-                let is_highlited_hyperlink =
-                    same_hyperlink(hyperlink, self.current_highlight.as_ref());
-                if hyperlink.is_some() {
-                    invalidate_on_hover_change = true;
-                }
+                let is_highlited_hyperlink = false;
                 // underline and strikethrough
                 let underline_tex_rect = gl_state
                     .glyph_cache
