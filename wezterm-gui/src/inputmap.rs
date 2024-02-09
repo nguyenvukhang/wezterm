@@ -168,20 +168,6 @@ impl InputMap {
                 ],
                 [
                     MouseEventTriggerMods {
-                        mods: Modifiers::SHIFT,
-                        mouse_reporting: false,
-                        alt_screen: MouseEventAltScreen::Any,
-                    },
-                    MouseEventTrigger::Up {
-                        streak: 1,
-                        button: MouseButton::Left
-                    },
-                    CompleteSelectionOrOpenLinkAtMouseCursor(
-                        ClipboardCopyDestination::ClipboardAndPrimarySelection
-                    )
-                ],
-                [
-                    MouseEventTriggerMods {
                         mods: Modifiers::NONE,
                         mouse_reporting: false,
                         alt_screen: MouseEventAltScreen::Any,
@@ -190,9 +176,7 @@ impl InputMap {
                         streak: 1,
                         button: MouseButton::Left
                     },
-                    CompleteSelectionOrOpenLinkAtMouseCursor(
-                        ClipboardCopyDestination::ClipboardAndPrimarySelection
-                    )
+                    CompleteSelection(ClipboardCopyDestination::ClipboardAndPrimarySelection)
                 ],
                 [
                     MouseEventTriggerMods {
@@ -217,20 +201,6 @@ impl InputMap {
                         button: MouseButton::Left
                     },
                     ExtendSelectionToMouseCursor(SelectionMode::Block)
-                ],
-                [
-                    MouseEventTriggerMods {
-                        mods: Modifiers::ALT | Modifiers::SHIFT,
-                        mouse_reporting: false,
-                        alt_screen: MouseEventAltScreen::Any,
-                    },
-                    MouseEventTrigger::Up {
-                        streak: 1,
-                        button: MouseButton::Left
-                    },
-                    CompleteSelectionOrOpenLinkAtMouseCursor(
-                        ClipboardCopyDestination::PrimarySelection
-                    )
                 ],
                 [
                     MouseEventTriggerMods {

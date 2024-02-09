@@ -1627,22 +1627,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &[],
             icon: None,
         },
-        CompleteSelectionOrOpenLinkAtMouseCursor(destination) => CommandDef {
-            brief: format!(
-                "Open a URL or Completes selection \
-            by copying to {destination:?}"
-            )
-            .into(),
-            doc: format!(
-                "If the mouse is over a link, open it, otherwise, completes \
-                text selection using the mouse, and copies to {destination:?}"
-            )
-            .into(),
-            keys: vec![],
-            args: &[],
-            menubar: &[],
-            icon: None,
-        },
         StartWindowDrag => CommandDef {
             brief: "Requests a window drag operation from \
                 the window environment"

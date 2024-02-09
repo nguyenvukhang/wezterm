@@ -2593,14 +2593,6 @@ impl TermWindow {
             EmitEvent(name) => {
                 self.emit_window_event(name, None);
             }
-            CompleteSelectionOrOpenLinkAtMouseCursor(dest) => {
-                let text = self.selection_text(pane);
-                if !text.is_empty() {
-                    self.copy_to_clipboard(*dest, text);
-                    let window = self.window.as_ref().unwrap();
-                    window.invalidate();
-                }
-            }
             CompleteSelection(dest) => {
                 let text = self.selection_text(pane);
                 if !text.is_empty() {
