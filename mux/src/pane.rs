@@ -240,25 +240,6 @@ pub trait Pane: Downcast + Send + Sync {
         false
     }
 
-    /// Performs a search bounded to the specified range.
-    /// If the result is empty then there are no matches.
-    /// Otherwise, if limit.is_none(), the result shall contain all possible
-    /// matches.
-    /// If limit.is_some(), then the maximum number of results that will be
-    /// returned is limited to the specified number, and the
-    /// SearchResult::start_y of the last item
-    /// in the result can be used as the start of the next region to search.
-    /// You can tell that you have reached the end of the results if the number
-    /// of results is smaller than the limit you set.
-    async fn search(
-        &self,
-        _pattern: Pattern,
-        _range: Range<StableRowIndex>,
-        _limit: Option<u32>,
-    ) -> anyhow::Result<Vec<SearchResult>> {
-        Ok(vec![])
-    }
-
     /// Retrieve the set of semantic zones
     fn get_semantic_zones(&self) -> anyhow::Result<Vec<SemanticZone>> {
         Ok(vec![])
