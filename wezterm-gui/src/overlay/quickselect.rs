@@ -560,10 +560,6 @@ impl QuickSelectRenderable {
 
         self.width = dims.cols;
         self.height = dims.viewport_rows;
-
-        let pos = self.result_pos;
-        self.update_search(false);
-        self.result_pos = pos;
     }
 
     fn recompute_results(&mut self) {
@@ -641,82 +637,6 @@ impl QuickSelectRenderable {
 
                 self.dirty_results.add(idx);
             }
-        }
-    }
-
-    fn update_search(&mut self, is_initial_run: bool) {
-        for idx in self.by_line.keys() {
-            self.dirty_results.add(*idx);
-        }
-        if let Some(idx) = self.last_bar_pos.as_ref() {
-            self.dirty_results.add(*idx);
-        }
-
-        self.results.clear();
-        self.by_line.clear();
-        self.result_pos.take();
-
-        let bar_pos = self.compute_search_row();
-        self.dirty_results.add(bar_pos);
-
-        if !self.pattern.is_empty() {
-            let pane: Arc<dyn Pane> = self.delegate.clone();
-            let window = self.window.clone();
-            let pattern = self.pattern.clone();
-            let scope = self.args.scope_lines;
-            let viewport = self.viewport;
-            promise::spawn::spawn(async move {
-                let dims = pane.get_dimensions();
-                let scope = scope.unwrap_or(1000).max(dims.viewport_rows);
-                let top = viewport.unwrap_or(dims.physical_top);
-                let range = top.saturating_sub(scope as StableRowIndex)
-                    ..top + (dims.viewport_rows + scope) as StableRowIndex;
-                let limit = None;
-                let mut results = pane.search(pattern, range, limit).await?;
-                results.sort();
-
-                let pane_id = pane.pane_id();
-                let mut results = Some(results);
-                window.notify(TermWindowNotif::Apply(Box::new(move |term_window| {
-                    let state = term_window.pane_state(pane_id);
-                    if let Some(overlay) = state.overlay.as_ref() {
-                        if let Some(search_overlay) =
-                            overlay.pane.downcast_ref::<QuickSelectOverlay>()
-                        {
-                            let mut r = search_overlay.renderer.lock();
-                            r.results = results.take().unwrap();
-                            r.recompute_results();
-                            let num_results = r.results.len();
-
-                            if !r.results.is_empty() {
-                                match &r.viewport {
-                                    Some(y) if is_initial_run => {
-                                        r.result_pos = r
-                                            .results
-                                            .iter()
-                                            .position(|result| result.start_y >= *y);
-                                    }
-                                    _ => {
-                                        r.activate_match_number(num_results - 1);
-                                    }
-                                }
-                            } else {
-                                if !is_initial_run {
-                                    r.set_viewport(None);
-                                }
-                                r.clear_selection();
-                            }
-                        }
-                    }
-                })));
-                anyhow::Result::<()>::Ok(())
-            })
-            .detach();
-        } else {
-            if !is_initial_run {
-                self.set_viewport(None);
-            }
-            self.clear_selection();
         }
     }
 
