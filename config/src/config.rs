@@ -60,13 +60,7 @@ pub struct Config {
     pub cursor_thickness: Option<Dimension>,
 
     #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
-    pub underline_thickness: Option<Dimension>,
-
-    #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
     pub underline_position: Option<Dimension>,
-
-    #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
-    pub strikethrough_position: Option<Dimension>,
 
     #[dynamic(default)]
     pub allow_square_glyphs_to_overflow_width: AllowSquareGlyphOverflow,
