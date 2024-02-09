@@ -549,7 +549,6 @@ pub enum KeyAssignment {
     ShowLauncher,
     ShowLauncherArgs(LauncherActionArgs),
     ClearScrollback(ScrollbackEraseMode),
-    Search(Pattern),
     ActivateCopyMode,
 
     SelectTextAtMouseCursor(SelectionMode),

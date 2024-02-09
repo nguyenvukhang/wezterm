@@ -29,8 +29,7 @@ use ::wezterm_term::input::{ClickPosition, MouseButton as TMB};
 use ::window::*;
 use anyhow::{anyhow, ensure, Context};
 use config::keyassignment::{
-    KeyAssignment, PaneDirection, Pattern, PromptInputLine, RotationDirection, SpawnCommand,
-    SplitSize,
+    KeyAssignment, PaneDirection, PromptInputLine, RotationDirection, SpawnCommand, SplitSize,
 };
 use config::window::WindowLevel;
 use config::{
@@ -2626,43 +2625,6 @@ impl TermWindow {
                 let window = self.window.as_ref().unwrap();
                 window.invalidate();
             }
-            Search(pattern) => {
-                if let Some(pane) = self.get_active_pane_or_overlay() {
-                    let mut replace_current = false;
-                    if let Some(existing) = pane.downcast_ref::<CopyOverlay>() {
-                        let mut params = existing.get_params();
-                        params.editing_search = true;
-                        if !pattern.is_empty() {
-                            params.pattern = self.resolve_search_pattern(pattern.clone(), &pane);
-                        }
-                        existing.apply_params(params);
-                        replace_current = true;
-                    } else {
-                        let search = CopyOverlay::with_pane(
-                            self,
-                            &pane,
-                            CopyModeParams {
-                                pattern: self.resolve_search_pattern(pattern.clone(), &pane),
-                                editing_search: true,
-                            },
-                        )?;
-                        self.assign_overlay_for_pane(pane.pane_id(), search);
-                    }
-                    self.pane_state(pane.pane_id())
-                        .overlay
-                        .as_mut()
-                        .map(|overlay| {
-                            overlay.key_table_state.activate(KeyTableArgs {
-                                name: "search_mode",
-                                timeout_milliseconds: None,
-                                replace_current,
-                                one_shot: false,
-                                until_unknown: false,
-                                prevent_fallback: false,
-                            });
-                        });
-                }
-            }
             ActivateCopyMode => {
                 if let Some(pane) = self.get_active_pane_or_overlay() {
                     let mut replace_current = false;
@@ -3275,23 +3237,6 @@ impl TermWindow {
             key_table_state: KeyTableState::default(),
         });
         self.update_title();
-    }
-
-    fn resolve_search_pattern(&self, pattern: Pattern, pane: &Arc<dyn Pane>) -> MuxPattern {
-        match pattern {
-            Pattern::CaseSensitiveString(s) => MuxPattern::CaseSensitiveString(s),
-            Pattern::CaseInSensitiveString(s) => MuxPattern::CaseInSensitiveString(s),
-            Pattern::Regex(s) => MuxPattern::Regex(s),
-            Pattern::CurrentSelectionOrEmptyString => {
-                let text = self.selection_text(pane);
-                let first_line = text
-                    .lines()
-                    .next()
-                    .map(|s| s.to_string())
-                    .unwrap_or_default();
-                MuxPattern::CaseSensitiveString(first_line)
-            }
-        }
     }
 }
 
