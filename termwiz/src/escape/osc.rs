@@ -1,5 +1,4 @@
 use crate::color::SrgbaTuple;
-pub use crate::hyperlink::Hyperlink;
 use crate::{bail, ensure, Result};
 use base64::Engine;
 use bitflags::bitflags;

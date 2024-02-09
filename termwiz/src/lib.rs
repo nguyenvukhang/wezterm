@@ -51,7 +51,6 @@ pub mod cellcluster;
 pub mod color;
 pub mod error;
 pub mod escape;
-pub mod hyperlink;
 pub mod image;
 pub mod input;
 pub mod istty;

@@ -2,7 +2,6 @@
 use crate::color::{ColorAttribute, PaletteIndex};
 pub use crate::emoji::Presentation;
 use crate::emoji_variation::WCWIDTH_TABLE;
-pub use crate::escape::osc::Hyperlink;
 use crate::widechar_width::WcWidth;
 use finl_unicode::grapheme_clusters::Graphemes;
 #[cfg(feature = "use_serde")]
