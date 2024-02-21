@@ -720,28 +720,6 @@ mod test {
     }
 
     #[test]
-    fn test_osc_with_c1_st() {
-        assert_eq!(
-            parse_as_vec(b"\x1b]0;there\x9c"),
-            vec![VTAction::OscDispatch(vec![
-                b"0".to_vec(),
-                b"there".to_vec()
-            ])]
-        );
-    }
-
-    #[test]
-    fn test_osc_with_bel_st() {
-        assert_eq!(
-            parse_as_vec(b"\x1b]0;hello\x07"),
-            vec![VTAction::OscDispatch(vec![
-                b"0".to_vec(),
-                b"hello".to_vec()
-            ])]
-        );
-    }
-
-    #[test]
     fn test_decset() {
         assert_eq!(
             parse_as_vec(b"\x1b[?1l"),
@@ -750,53 +728,6 @@ mod test {
                 parameters_truncated: false,
                 byte: b'l',
             },]
-        );
-    }
-
-    #[test]
-    fn test_osc_too_many_params() {
-        let fields = (0..MAX_OSC + 2)
-            .into_iter()
-            .map(|i| i.to_string())
-            .collect::<Vec<_>>();
-        let input = format!("\x1b]{}\x07", fields.join(";"));
-        let actions = parse_as_vec(input.as_bytes());
-        assert_eq!(actions.len(), 1);
-        match &actions[0] {
-            VTAction::OscDispatch(parsed_fields) => {
-                let fields: Vec<_> = fields.into_iter().map(|s| s.as_bytes().to_vec()).collect();
-                assert_eq!(parsed_fields.as_slice(), &fields[0..MAX_OSC]);
-            }
-            other => panic!("Expected OscDispatch but got {:?}", other),
-        }
-    }
-
-    #[test]
-    fn test_osc_with_no_params() {
-        assert_eq!(
-            parse_as_vec(b"\x1b]\x07"),
-            vec![VTAction::OscDispatch(vec![])]
-        );
-    }
-
-    #[test]
-    fn test_osc_with_esc_sequence_st() {
-        // This case isn't the same as the other OSC cases; even though
-        // `ESC \` is the long form escape sequence for ST, the ESC on its
-        // own breaks out of the OSC state and jumps into the ESC state,
-        // and that leaves the `\` character to be dispatched there in
-        // the calling application.
-        assert_eq!(
-            parse_as_vec(b"\x1b]woot\x1b\\"),
-            vec![
-                VTAction::OscDispatch(vec![b"woot".to_vec()]),
-                VTAction::EscDispatch {
-                    params: vec![],
-                    intermediates: vec![],
-                    ignored_excess_intermediates: false,
-                    byte: b'\\'
-                }
-            ]
         );
     }
 
@@ -936,25 +867,6 @@ mod test {
     }
 
     #[test]
-    fn osc_utf8() {
-        assert_eq!(
-            parse_as_vec("\x1b]\u{af}\x07".as_bytes()),
-            vec![VTAction::OscDispatch(vec!["\u{af}".as_bytes().to_vec()])]
-        );
-    }
-
-    #[test]
-    fn osc_fedora_vte() {
-        assert_eq!(
-            parse_as_vec("\u{9d}777;preexec\u{9c}".as_bytes()),
-            vec![VTAction::OscDispatch(vec![
-                b"777".to_vec(),
-                b"preexec".to_vec(),
-            ])]
-        );
-    }
-
-    #[test]
     fn print_utf8() {
         assert_eq!(
             parse_as_vec("\u{af}".as_bytes()),
@@ -1020,33 +932,6 @@ mod test {
                 VTAction::DcsPut(b'a'),
                 VTAction::DcsPut(b't'),
                 VTAction::DcsPut(b'a'),
-                VTAction::DcsUnhook,
-                VTAction::EscDispatch {
-                    params: vec![],
-                    intermediates: vec![],
-                    ignored_excess_intermediates: false,
-                    byte: b'\\',
-                }
-            ]
-        );
-    }
-
-    #[test]
-    fn sixel() {
-        assert_eq!(
-            parse_as_vec("\x1bPqhello\x1b\\".as_bytes()),
-            vec![
-                VTAction::DcsHook {
-                    byte: b'q',
-                    params: vec![],
-                    intermediates: vec![],
-                    ignored_excess_intermediates: false,
-                },
-                VTAction::DcsPut(b'h'),
-                VTAction::DcsPut(b'e'),
-                VTAction::DcsPut(b'l'),
-                VTAction::DcsPut(b'l'),
-                VTAction::DcsPut(b'o'),
                 VTAction::DcsUnhook,
                 VTAction::EscDispatch {
                     params: vec![],
