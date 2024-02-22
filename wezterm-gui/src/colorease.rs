@@ -38,14 +38,6 @@ impl ColorEase {
         self.start.replace(start);
     }
 
-    pub fn intensity(&mut self, is_one_shot: bool) -> Option<(f32, Instant)> {
-        if is_one_shot {
-            self.intensity_one_shot()
-        } else {
-            Some(self.intensity_continuous())
-        }
-    }
-
     pub fn intensity_continuous(&mut self) -> (f32, Instant) {
         match self.intensity_one_shot() {
             Some(intensity) => intensity,

@@ -3,15 +3,12 @@ use crate::color::LinearRgba;
 use crate::customglyph::{BlockKey, Poly};
 use crate::glyphcache::CachedGlyph;
 use crate::quad::{QuadImpl, QuadTrait, TripleLayerQuadAllocator, TripleLayerQuadAllocatorTrait};
-use crate::termwindow::{
-    ColorEase, MouseCapture, RenderState, TermWindowNotif, UIItem, UIItemType,
-};
+use crate::termwindow::{MouseCapture, RenderState, TermWindowNotif, UIItem, UIItemType};
 use crate::utilsprites::RenderMetrics;
 use ::window::{RectF, WindowOps};
 use anyhow::anyhow;
 use config::{Dimension, DimensionContext};
 use finl_unicode::grapheme_clusters::Graphemes;
-use std::cell::RefCell;
 use std::rc::Rc;
 use termwiz::cell::{grapheme_column_width, Presentation};
 use termwiz::surface::Line;
@@ -150,12 +147,6 @@ impl BoxDimension {
 pub enum InheritableColor {
     Inherited,
     Color(LinearRgba),
-    Animated {
-        color: LinearRgba,
-        alt_color: LinearRgba,
-        ease: Rc<RefCell<ColorEase>>,
-        one_shot: bool,
-    },
 }
 
 impl Default for InheritableColor {
@@ -956,23 +947,6 @@ impl super::TermWindow {
                 None => LinearRgba::TRANSPARENT.into(),
             },
             InheritableColor::Color(color) => (*color).into(),
-            InheritableColor::Animated {
-                color,
-                alt_color,
-                ease,
-                one_shot,
-            } => {
-                if let Some((mix_value, next)) = ease.borrow_mut().intensity(*one_shot) {
-                    self.update_next_frame_time(Some(next));
-                    ResolvedColor {
-                        color: *color,
-                        alt_color: *alt_color,
-                        mix_value,
-                    }
-                } else {
-                    (*color).into()
-                }
-            }
         }
     }
 
@@ -987,23 +961,6 @@ impl super::TermWindow {
                 None => LinearRgba::TRANSPARENT.into(),
             },
             InheritableColor::Color(color) => (*color).into(),
-            InheritableColor::Animated {
-                color,
-                alt_color,
-                ease,
-                one_shot,
-            } => {
-                if let Some((mix_value, next)) = ease.borrow_mut().intensity(*one_shot) {
-                    self.update_next_frame_time(Some(next));
-                    ResolvedColor {
-                        color: *color,
-                        alt_color: *alt_color,
-                        mix_value,
-                    }
-                } else {
-                    (*color).into()
-                }
-            }
         }
     }
 
