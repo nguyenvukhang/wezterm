@@ -294,9 +294,6 @@ impl GuiFrontEnd {
                             SpawnWhere::NewWindow,
                         );
                     }
-                    KeyAssignment::SpawnCommandInNewTab(spawn) => {
-                        spawn_command(&spawn, SpawnWhere::NewTab);
-                    }
                     KeyAssignment::SpawnCommandInNewWindow(spawn) => {
                         spawn_command(&spawn, SpawnWhere::NewWindow);
                     }

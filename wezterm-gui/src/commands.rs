@@ -200,25 +200,6 @@ impl CommandDef {
     pub fn actions_for_palette_and_menubar(config: &ConfigHandle) -> Vec<ExpandedCommand> {
         let mut result = Self::expanded_commands(config);
 
-        // Generate some stuff based on the config
-        for cmd in &config.launch_menu {
-            let label = match cmd.label.as_ref() {
-                Some(label) => label.to_string(),
-                None => match cmd.args.as_ref() {
-                    Some(args) => args.join(" "),
-                    None => "(default shell)".to_string(),
-                },
-            };
-            result.push(ExpandedCommand {
-                brief: format!("{label} (New Tab)").into(),
-                doc: "".into(),
-                keys: vec![],
-                action: KeyAssignment::SpawnCommandInNewTab(cmd.clone()),
-                menubar: &["Shell"],
-                icon: Some("md_tab_plus".into()),
-            });
-        }
-
         // Generate some stuff based on the mux state
         if let Some(mux) = Mux::try_get() {
             let mut domains = mux.iter_domains();
@@ -240,19 +221,7 @@ impl CommandDef {
                 let label = name;
 
                 if dom.spawnable() {
-                    if dom.state() == DomainState::Attached {
-                        result.push(ExpandedCommand {
-                            brief: format!("New Tab (Domain {label})").into(),
-                            doc: "".into(),
-                            keys: vec![],
-                            action: KeyAssignment::SpawnCommandInNewTab(SpawnCommand {
-                                domain: SpawnTabDomain::DomainName(name.to_string()),
-                                ..SpawnCommand::default()
-                            }),
-                            menubar: &["Shell"],
-                            icon: Some("md_tab_plus".into()),
-                        });
-                    } else {
+                    if dom.state() != DomainState::Attached {
                         result.push(ExpandedCommand {
                             brief: format!("Attach Domain {label}").into(),
                             doc: "".into(),
@@ -596,8 +565,7 @@ fn spawn_command_from_action(action: &KeyAssignment) -> Option<&SpawnCommand> {
         SplitPane(config::keyassignment::SplitPane { command, .. }) => Some(command),
         SplitHorizontal(command)
         | SplitVertical(command)
-        | SpawnCommandInNewWindow(command)
-        | SpawnCommandInNewTab(command) => Some(command),
+        | SpawnCommandInNewWindow(command) => Some(command),
         _ => None,
     }
 }
@@ -854,14 +822,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             keys: vec![],
             args: &[ArgType::ActiveWindow],
             menubar: &["Shell"],
-            icon: Some("md_tab_plus"),
-        },
-        SpawnCommandInNewTab(cmd) => CommandDef {
-            brief: label_string(action, format!("Spawn a new Tab with {cmd:?}").to_string()).into(),
-            doc: format!("Spawn a new Tab with {cmd:?}").into(),
-            keys: vec![],
-            args: &[],
-            menubar: &[],
             icon: Some("md_tab_plus"),
         },
         SpawnCommandInNewWindow(cmd) => CommandDef {

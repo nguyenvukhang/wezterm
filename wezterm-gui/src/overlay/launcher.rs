@@ -9,7 +9,7 @@ use crate::commands::derive_command_from_key_assignment;
 use crate::inputmap::InputMap;
 use crate::termwindow::TermWindowNotif;
 use config::configuration;
-use config::keyassignment::{KeyAssignment, SpawnCommand, SpawnTabDomain};
+use config::keyassignment::KeyAssignment;
 use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
 use mux::domain::{DomainId, DomainState};
@@ -216,37 +216,11 @@ impl LauncherState {
 
     fn build_entries(&mut self, args: LauncherArgs) {
         let config = configuration();
-        // Pull in the user defined entries from the launch_menu
-        // section of the configuration.
-        if args.flags.contains(LauncherFlags::LAUNCH_MENU_ITEMS) {
-            for item in &config.launch_menu {
-                self.entries.push(Entry {
-                    label: match item.label.as_ref() {
-                        Some(label) => label.to_string(),
-                        None => match item.args.as_ref() {
-                            Some(args) => args.join(" "),
-                            None => "(default shell)".to_string(),
-                        },
-                    },
-                    action: KeyAssignment::SpawnCommandInNewTab(item.clone()),
-                });
-            }
-        }
 
         for domain in &args.domains {
-            let entry = if domain.state == DomainState::Attached {
-                Entry {
-                    label: format!("New Tab ({})", domain.label),
-                    action: KeyAssignment::SpawnCommandInNewTab(SpawnCommand {
-                        domain: SpawnTabDomain::DomainName(domain.name.to_string()),
-                        ..SpawnCommand::default()
-                    }),
-                }
-            } else {
-                Entry {
-                    label: format!("Attach {}", domain.label),
-                    action: KeyAssignment::AttachDomain(domain.name.to_string()),
-                }
+            let entry = Entry {
+                label: format!("Attach {}", domain.label),
+                action: KeyAssignment::AttachDomain(domain.name.to_string()),
             };
 
             // Preselect the entry that corresponds to the active tab

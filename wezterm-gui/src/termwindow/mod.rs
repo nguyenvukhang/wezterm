@@ -2397,9 +2397,6 @@ impl TermWindow {
             SpawnWindow => {
                 self.spawn_command(&SpawnCommand::default(), SpawnWhere::NewWindow);
             }
-            SpawnCommandInNewTab(spawn) => {
-                self.spawn_command(spawn, SpawnWhere::NewTab);
-            }
             SpawnCommandInNewWindow(spawn) => {
                 self.spawn_command(spawn, SpawnWhere::NewWindow);
             }
