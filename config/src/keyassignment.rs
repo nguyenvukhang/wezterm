@@ -542,7 +542,6 @@ pub enum KeyAssignment {
     ShowTabNavigator,
     HideApplication,
     QuitApplication,
-    SpawnCommandInNewWindow(SpawnCommand),
     SplitHorizontal(SpawnCommand),
     SplitVertical(SpawnCommand),
     ShowLauncher,

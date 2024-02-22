@@ -564,8 +564,7 @@ fn spawn_command_from_action(action: &KeyAssignment) -> Option<&SpawnCommand> {
     match action {
         SplitPane(config::keyassignment::SplitPane { command, .. }) => Some(command),
         SplitHorizontal(command)
-        | SplitVertical(command)
-        | SpawnCommandInNewWindow(command) => Some(command),
+        | SplitVertical(command) => Some(command),
         _ => None,
     }
 }
@@ -823,18 +822,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             args: &[ArgType::ActiveWindow],
             menubar: &["Shell"],
             icon: Some("md_tab_plus"),
-        },
-        SpawnCommandInNewWindow(cmd) => CommandDef {
-            brief: label_string(
-                action,
-                format!("Spawn a new Window with {cmd:?}").to_string(),
-            )
-            .into(),
-            doc: format!("Spawn a new Window with {cmd:?}").into(),
-            keys: vec![],
-            args: &[],
-            menubar: &[],
-            icon: Some("md_open_in_new"),
         },
         ActivateTab(-1) => CommandDef {
             brief: "Activate right-most tab".into(),

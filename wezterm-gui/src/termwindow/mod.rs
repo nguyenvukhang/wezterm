@@ -2397,9 +2397,6 @@ impl TermWindow {
             SpawnWindow => {
                 self.spawn_command(&SpawnCommand::default(), SpawnWhere::NewWindow);
             }
-            SpawnCommandInNewWindow(spawn) => {
-                self.spawn_command(spawn, SpawnWhere::NewWindow);
-            }
             SplitHorizontal(spawn) => {
                 log::trace!("SplitHorizontal {:?}", spawn);
                 self.spawn_command(

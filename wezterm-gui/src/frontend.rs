@@ -294,9 +294,6 @@ impl GuiFrontEnd {
                             SpawnWhere::NewWindow,
                         );
                     }
-                    KeyAssignment::SpawnCommandInNewWindow(spawn) => {
-                        spawn_command(&spawn, SpawnWhere::NewWindow);
-                    }
                     _ => {
                         log::warn!("unhandled perform: {action:?}");
                     }
