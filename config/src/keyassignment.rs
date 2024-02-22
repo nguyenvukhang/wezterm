@@ -1,4 +1,3 @@
-use crate::default_true;
 use crate::keys::KeyNoAction;
 use crate::window::WindowLevel;
 use luahelper::impl_lua_conversion_dynamic;
@@ -414,89 +413,12 @@ impl Default for CharSelectGroup {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, FromDynamic, ToDynamic)]
-pub struct CharSelectArguments {
-    #[dynamic(default)]
-    pub group: Option<CharSelectGroup>,
-    #[dynamic(default = "default_true")]
-    pub copy_on_select: bool,
-    #[dynamic(default)]
-    pub copy_to: ClipboardCopyDestination,
-}
-
-impl Default for CharSelectArguments {
-    fn default() -> Self {
-        Self {
-            group: None,
-            copy_on_select: true,
-            copy_to: ClipboardCopyDestination::default(),
-        }
-    }
-}
-
-#[derive(Default, Debug, Clone, PartialEq, FromDynamic, ToDynamic)]
-pub struct QuickSelectArguments {
-    /// Overrides the main quick_select_alphabet config
-    #[dynamic(default)]
-    pub alphabet: String,
-    /// Overrides the main quick_select_patterns config
-    #[dynamic(default)]
-    pub patterns: Vec<String>,
-    #[dynamic(default)]
-    pub action: Option<Box<KeyAssignment>>,
-    /// Label to use in place of "copy" when `action` is set
-    #[dynamic(default)]
-    pub label: String,
-    /// How man lines before and how many lines after the viewport to
-    /// search to produce the quickselect results
-    pub scope_lines: Option<usize>,
-}
-
 #[derive(Debug, Clone, PartialEq, FromDynamic, ToDynamic)]
 pub struct PromptInputLine {
     pub action: Box<KeyAssignment>,
     /// Descriptive text to show ahead of prompt
     #[dynamic(default)]
     pub description: String,
-}
-
-#[derive(Debug, Clone, PartialEq, FromDynamic, ToDynamic)]
-pub struct InputSelectorEntry {
-    pub label: String,
-    pub id: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, FromDynamic, ToDynamic)]
-pub struct InputSelector {
-    pub action: Box<KeyAssignment>,
-    #[dynamic(default)]
-    pub title: String,
-
-    pub choices: Vec<InputSelectorEntry>,
-
-    #[dynamic(default)]
-    pub fuzzy: bool,
-
-    #[dynamic(default = "default_num_alphabet")]
-    pub alphabet: String,
-
-    #[dynamic(default = "default_description")]
-    pub description: String,
-
-    #[dynamic(default = "default_fuzzy_description")]
-    pub fuzzy_description: String,
-}
-
-fn default_num_alphabet() -> String {
-    "1234567890abcdefghilmnopqrstuvwxyz".to_string()
-}
-
-fn default_description() -> String {
-    "Select an item and press Enter = accept,  Esc = cancel,  / = filter".to_string()
-}
-
-fn default_fuzzy_description() -> String {
-    "Fuzzy matching: ".to_string()
 }
 
 #[derive(Debug, Clone, PartialEq, FromDynamic, ToDynamic)]
