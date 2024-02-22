@@ -11,7 +11,6 @@ pub mod copy;
 pub mod debug;
 pub mod launcher;
 pub mod prompt;
-pub mod quickselect;
 
 pub use confirm_close_pane::{
     confirm_close_pane, confirm_close_tab, confirm_close_window, confirm_quit_program,
