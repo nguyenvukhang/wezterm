@@ -8,7 +8,6 @@ use crate::termwindow::render::{
 use ::window::bitmaps::TextureRect;
 use ::window::DeadKeyStatus;
 use anyhow::Context;
-use config::VisualBellTarget;
 use mux::pane::{PaneId, WithPaneLines};
 use mux::renderable::{RenderableDimensions, StableCursorPosition};
 use mux::tab::PositionedPane;
@@ -169,55 +168,6 @@ impl crate::TermWindow {
             } else {
                 Some(config.inactive_pane_hsb)
             });
-        }
-
-        {
-            // If the bell is ringing, we draw another background layer over the
-            // top of this in the configured bell color
-            if let Some(intensity) = self.get_intensity_if_bell_target_ringing(
-                &pos.pane,
-                &config,
-                VisualBellTarget::BackgroundColor,
-            ) {
-                // target background color
-                let LinearRgba(r, g, b, _) = config
-                    .resolved_palette
-                    .visual_bell
-                    .as_deref()
-                    .unwrap_or(&palette.foreground)
-                    .to_linear();
-
-                let background = if window_is_transparent {
-                    // for transparent windows, we fade in the target color
-                    // by adjusting its alpha
-                    LinearRgba::with_components(r, g, b, intensity)
-                } else {
-                    // otherwise We'll interpolate between the background color
-                    // and the the target color
-                    let (r1, g1, b1, a) = palette
-                        .background
-                        .to_linear()
-                        .mul_alpha(config.window_background_opacity)
-                        .tuple();
-                    LinearRgba::with_components(
-                        r1 + (r - r1) * intensity,
-                        g1 + (g - g1) * intensity,
-                        b1 + (b - b1) * intensity,
-                        a,
-                    )
-                };
-                log::trace!("bell color is {:?}", background);
-
-                let mut quad = self
-                    .filled_rectangle(layers, 0, background_rect, background)
-                    .context("filled_rectangle")?;
-
-                quad.set_hsv(if pos.is_active {
-                    None
-                } else {
-                    Some(config.inactive_pane_hsb)
-                });
-            }
         }
 
         let (selrange, rectangular) = {

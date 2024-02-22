@@ -1,4 +1,3 @@
-use crate::colorease::ColorEase;
 use crate::customglyph::{BlockKey, *};
 use crate::glyphcache::{CachedGlyph, GlyphCache};
 use crate::quad::{
@@ -11,7 +10,7 @@ use crate::utilsprites::RenderMetrics;
 use ::window::bitmaps::TextureRect;
 use ::window::{DeadKeyStatus, PointF, RectF, SizeF, WindowOps};
 use anyhow::anyhow;
-use config::{BoldBrightening, ConfigHandle, DimensionContext, TextStyle, VisualBellTarget};
+use config::{BoldBrightening, ConfigHandle, DimensionContext, TextStyle};
 use euclid::num::Zero;
 use mux::pane::{Pane, PaneId};
 use mux::renderable::{RenderableDimensions, StableCursorPosition};
@@ -222,39 +221,6 @@ impl crate::TermWindow {
         }
     }
 
-    fn get_intensity_if_bell_target_ringing(
-        &self,
-        pane: &Arc<dyn Pane>,
-        config: &ConfigHandle,
-        target: VisualBellTarget,
-    ) -> Option<f32> {
-        let mut per_pane = self.pane_state(pane.pane_id());
-        if let Some(ringing) = per_pane.bell_start {
-            if config.visual_bell.target == target {
-                let mut color_ease = ColorEase::new(
-                    config.visual_bell.fade_in_duration_ms,
-                    config.visual_bell.fade_in_function,
-                    config.visual_bell.fade_out_duration_ms,
-                    config.visual_bell.fade_out_function,
-                    Some(ringing),
-                );
-
-                let intensity = color_ease.intensity_one_shot();
-
-                match intensity {
-                    None => {
-                        per_pane.bell_start.take();
-                    }
-                    Some((intensity, next)) => {
-                        self.update_next_frame_time(Some(next));
-                        return Some(intensity);
-                    }
-                }
-            }
-        }
-        None
-    }
-
     pub fn filled_rectangle<'a>(
         &self,
         layers: &'a mut TripleLayerQuadAllocator,
@@ -398,41 +364,6 @@ impl crate::TermWindow {
 
     pub fn compute_cell_fg_bg(&self, params: ComputeCellFgBgParams) -> ComputeCellFgBgResult {
         if params.cursor.is_some() {
-            if let Some(bg_color_mix) = self.get_intensity_if_bell_target_ringing(
-                params.pane.expect("cursor only set if pane present"),
-                params.config,
-                VisualBellTarget::CursorColor,
-            ) {
-                let (fg_color, bg_color) =
-                    if self.config.force_reverse_video_cursor && params.cursor_is_default_color {
-                        (params.bg_color, params.fg_color)
-                    } else {
-                        (params.cursor_fg, params.cursor_bg)
-                    };
-
-                // interpolate between the background color
-                // and the the target color
-                let bg_color_alt = params
-                    .config
-                    .resolved_palette
-                    .visual_bell
-                    .map(|c| c.to_linear())
-                    .unwrap_or(fg_color);
-
-                return ComputeCellFgBgResult {
-                    fg_color,
-                    fg_color_alt: fg_color,
-                    fg_color_mix: 0.,
-                    bg_color,
-                    bg_color_alt,
-                    bg_color_mix,
-                    cursor_shape: Some(CursorShape::Default),
-                    cursor_border_color: bg_color,
-                    cursor_border_color_alt: bg_color_alt,
-                    cursor_border_mix: bg_color_mix,
-                };
-            }
-
             let dead_key_or_leader =
                 self.dead_key_status != DeadKeyStatus::None || self.leader_is_active();
 
