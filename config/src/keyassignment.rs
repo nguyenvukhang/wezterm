@@ -305,34 +305,6 @@ impl Default for ClipboardPasteSource {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, FromDynamic, ToDynamic)]
-pub enum PaneSelectMode {
-    Activate,
-    SwapWithActive,
-    SwapWithActiveKeepFocus,
-    MoveToNewTab,
-    MoveToNewWindow,
-}
-
-impl Default for PaneSelectMode {
-    fn default() -> Self {
-        Self::Activate
-    }
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Eq, FromDynamic, ToDynamic)]
-pub struct PaneSelectArguments {
-    /// Overrides the main quick_select_alphabet config
-    #[dynamic(default)]
-    pub alphabet: String,
-
-    #[dynamic(default)]
-    pub mode: PaneSelectMode,
-
-    #[dynamic(default)]
-    pub show_pane_ids: bool,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, FromDynamic, ToDynamic)]
 pub enum CharSelectGroup {
     RecentlyUsed,
     SmileysAndEmotion,
