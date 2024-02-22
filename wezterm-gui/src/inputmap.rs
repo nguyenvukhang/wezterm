@@ -339,13 +339,6 @@ impl InputMap {
             mouse.insert((code, mods), v);
         }
 
-        keys.by_name
-            .entry("copy_mode".to_string())
-            .or_insert_with(crate::overlay::copy::copy_key_table);
-        keys.by_name
-            .entry("search_mode".to_string())
-            .or_insert_with(crate::overlay::copy::search_key_table);
-
         Self {
             keys,
             leader,

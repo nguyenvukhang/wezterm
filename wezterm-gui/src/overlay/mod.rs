@@ -7,7 +7,6 @@ use std::sync::Arc;
 use wezterm_term::{TerminalConfiguration, TerminalSize};
 
 pub mod confirm_close_pane;
-pub mod copy;
 pub mod debug;
 pub mod launcher;
 pub mod prompt;

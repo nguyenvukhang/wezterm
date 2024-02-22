@@ -2737,9 +2737,6 @@ impl TermWindow {
                 })
                 .detach();
             }
-            CopyMode(_) => {
-                // NOP here; handled by the overlay directly
-            }
             RotatePanes(direction) => {
                 let mux = Mux::get();
                 let tab = match mux.get_active_tab_for_window(self.mux_window_id) {

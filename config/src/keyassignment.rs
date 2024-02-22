@@ -459,7 +459,6 @@ pub enum KeyAssignment {
     DetachDomain(SpawnTabDomain),
     AttachDomain(String),
 
-    CopyMode(CopyModeAssignment),
     RotatePanes(RotationDirection),
     SplitPane(SplitPane),
 

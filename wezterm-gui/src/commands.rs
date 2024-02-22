@@ -1722,14 +1722,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Shell", "Attach"],
             icon: Some("md_pipe"),
         },
-        CopyMode(copy_mode) => CommandDef {
-            brief: format!("{copy_mode:?}").into(),
-            doc: "".into(),
-            keys: vec![],
-            args: &[ArgType::ActivePane],
-            menubar: &["Edit", "Copy Mode"],
-            icon: None,
-        },
         RotatePanes(direction) => CommandDef {
             brief: format!("Rotate panes {direction:?}").into(),
             doc: format!("Rotate panes {direction:?}").into(),
