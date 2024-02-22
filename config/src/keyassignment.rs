@@ -107,31 +107,6 @@ pub enum SelectionMode {
     Block,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, FromDynamic, ToDynamic)]
-pub enum Pattern {
-    CaseSensitiveString(String),
-    CaseInSensitiveString(String),
-    Regex(String),
-    CurrentSelectionOrEmptyString,
-}
-
-impl Pattern {
-    pub fn is_empty(&self) -> bool {
-        match self {
-            Self::CaseSensitiveString(s) | Self::CaseInSensitiveString(s) | Self::Regex(s) => {
-                s.is_empty()
-            }
-            Self::CurrentSelectionOrEmptyString => true,
-        }
-    }
-}
-
-impl Default for Pattern {
-    fn default() -> Self {
-        Self::CurrentSelectionOrEmptyString
-    }
-}
-
 /// A mouse event that can trigger an action
 #[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, FromDynamic, ToDynamic)]
 pub enum MouseEventTrigger {
