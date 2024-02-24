@@ -90,42 +90,6 @@ impl_lua_conversion_dynamic!(UserPaletteEntry);
 fn build_commands(gui_window: GuiWin, pane: Option<MuxPane>) -> Vec<ExpandedCommand> {
     let mut commands = CommandDef::actions_for_palette_and_menubar(&config::configuration());
 
-    match config::run_immediate_with_lua_config(|lua| {
-        let mut entries: Vec<UserPaletteEntry> = vec![];
-
-        if let Some(lua) = lua {
-            let result = config::lua::emit_sync_callback(
-                &*lua,
-                ("augment-command-palette".to_string(), (gui_window, pane)),
-            )?;
-
-            if !matches!(&result, mlua::Value::Nil) {
-                entries = from_lua_value_dynamic(result)?;
-            }
-        }
-
-        Ok(entries)
-    }) {
-        Ok(entries) => {
-            for entry in entries {
-                commands.push(ExpandedCommand {
-                    brief: entry.brief.into(),
-                    doc: match entry.doc {
-                        Some(doc) => doc.into(),
-                        None => "".into(),
-                    },
-                    action: entry.action,
-                    keys: vec![],
-                    menubar: &[],
-                    icon: entry.icon.map(Cow::Owned),
-                });
-            }
-        }
-        Err(err) => {
-            log::warn!("augment-command-palette: {err:#}");
-        }
-    }
-
     let mut scores: HashMap<&str, f64> = HashMap::new();
     let recents = load_recents();
     if let Ok(recents) = &recents {
