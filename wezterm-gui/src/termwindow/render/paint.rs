@@ -32,7 +32,6 @@ impl crate::TermWindow {
                         if !allocated {
                             break 'pass;
                         }
-                        self.invalidate_modal();
                     }
                     Err(err) => {
                         log::error!("{:#}", err);
@@ -54,9 +53,7 @@ impl crate::TermWindow {
                             log::trace!("grow texture atlas to {}", size);
                             self.recreate_texture_atlas(Some(size))
                         };
-                        self.invalidate_modal();
                     } else if err.root_cause().downcast_ref::<ClearShapeCache>().is_some() {
-                        self.invalidate_modal();
                         self.shape_generation += 1;
                         self.shape_cache.borrow_mut().clear();
                         self.line_to_ele_shape_cache.borrow_mut().clear();
@@ -105,21 +102,6 @@ impl crate::TermWindow {
                 }
             }
         }
-    }
-
-    pub fn paint_modal(&mut self) -> anyhow::Result<()> {
-        if let Some(modal) = self.get_modal() {
-            for computed in modal.computed_element(self)?.iter() {
-                let mut ui_items = computed.ui_items();
-
-                let gl_state = self.render_state.as_ref().unwrap();
-                self.render_element(&computed, gl_state, None)?;
-
-                self.ui_items.append(&mut ui_items);
-            }
-        }
-
-        Ok(())
     }
 
     pub fn paint_pass(&mut self) -> anyhow::Result<()> {
@@ -212,7 +194,6 @@ impl crate::TermWindow {
         self.paint_window_borders(&mut layers)
             .context("paint_window_borders")?;
         drop(layers);
-        self.paint_modal().context("paint_modal")?;
 
         Ok(())
     }

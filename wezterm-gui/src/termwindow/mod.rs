@@ -17,7 +17,6 @@ use crate::termwindow::background::{
     load_background_image, reload_background_image, LoadedBackgroundLayer,
 };
 use crate::termwindow::keyevent::{KeyTableArgs, KeyTableState};
-use crate::termwindow::modal::Modal;
 use crate::termwindow::render::{
     CachedLineState, LineQuadCacheKey, LineQuadCacheValue, LineToEleShapeCacheKey,
     LineToElementShapeItem,
@@ -65,7 +64,6 @@ pub mod background;
 pub mod box_model;
 pub mod clipboard;
 pub mod keyevent;
-pub mod modal;
 mod mouseevent;
 mod prevcursor;
 pub mod render;
@@ -412,8 +410,6 @@ pub struct TermWindow {
     ui_items: Vec<UIItem>,
     dragging: Option<(UIItem, MouseEvent)>,
 
-    modal: RefCell<Option<Rc<dyn Modal>>>,
-
     event_states: HashMap<String, EventState>,
     pub current_event: Option<Value>,
     has_animation: RefCell<Option<Instant>>,
@@ -749,7 +745,6 @@ impl TermWindow {
             last_ui_item: None,
             is_click_to_focus_window: false,
             key_table_state: KeyTableState::default(),
-            modal: RefCell::new(None),
             opengl_info: None,
         };
 
@@ -1032,7 +1027,6 @@ impl TermWindow {
             TermWindowNotif::InvalidateShapeCache => {
                 self.shape_generation += 1;
                 self.shape_cache.borrow_mut().clear();
-                self.invalidate_modal();
                 window.invalidate();
             }
             TermWindowNotif::PerformAssignment {
@@ -1242,7 +1236,6 @@ impl TermWindow {
                 *self.mux_window_id_for_subscriptions.lock().unwrap() = mux_window_id;
 
                 self.clear_all_overlays();
-                self.invalidate_modal();
 
                 let mux = Mux::get();
                 if let Some(window) = mux.get_window(self.mux_window_id) {
@@ -1649,7 +1642,6 @@ impl TermWindow {
             .borrow_mut()
             .update_config(&config);
         self.fancy_tab_bar.take();
-        self.invalidate_modal();
         self.input_map = InputMap::new(&config);
         self.leader_is_down = None;
         self.render_state.as_mut().map(|rs| rs.config_changed());
@@ -1696,35 +1688,7 @@ impl TermWindow {
             &self.render_metrics,
         );
 
-        self.invalidate_modal();
         self.emit_window_event("window-config-reloaded", None);
-    }
-
-    fn invalidate_modal(&mut self) {
-        if let Some(modal) = self.get_modal() {
-            modal.reconfigure(self);
-            if let Some(window) = self.window.as_ref() {
-                window.invalidate();
-            }
-        }
-    }
-
-    pub fn cancel_modal(&self) {
-        self.modal.borrow_mut().take();
-        if let Some(window) = self.window.as_ref() {
-            window.invalidate();
-        }
-    }
-
-    pub fn set_modal(&self, modal: Rc<dyn Modal>) {
-        self.modal.borrow_mut().replace(modal);
-        if let Some(window) = self.window.as_ref() {
-            window.invalidate();
-        }
-    }
-
-    fn get_modal(&self) -> Option<Rc<dyn Modal>> {
-        self.modal.borrow().as_ref().map(|m| Rc::clone(&m))
     }
 
     fn update_scrollbar(&mut self) {
@@ -1858,7 +1822,6 @@ impl TermWindow {
         );
         if new_tab_bar != self.tab_bar {
             self.tab_bar = new_tab_bar;
-            self.invalidate_modal();
             if let Some(window) = self.window.as_ref() {
                 window.invalidate();
             }
@@ -2200,12 +2163,6 @@ impl TermWindow {
         assignment: &KeyAssignment,
     ) -> anyhow::Result<PerformAssignmentResult> {
         use KeyAssignment::*;
-
-        if let Some(modal) = self.get_modal() {
-            if modal.perform_assignment(assignment, self) {
-                return Ok(PerformAssignmentResult::Handled);
-            }
-        }
 
         match pane.perform_assignment(assignment) {
             PerformAssignmentResult::Unhandled => {}
