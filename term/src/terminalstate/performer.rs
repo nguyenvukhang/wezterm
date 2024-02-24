@@ -614,7 +614,6 @@ impl<'a> Performer<'a> {
                 self.use_private_color_registers_for_each_graphic = false;
                 self.color_map = default_color_map();
                 self.application_cursor_keys = false;
-                self.sixel_display_mode = false;
                 self.dec_ansi_mode = false;
                 self.application_keypad = false;
                 self.bracketed_paste = false;
@@ -622,7 +621,6 @@ impl<'a> Performer<'a> {
                 self.mouse_tracking = false;
                 self.mouse_encoding = MouseEncoding::X10;
                 self.keyboard_encoding = KeyboardEncoding::Xterm;
-                self.sixel_scrolls_right = false;
                 self.any_event_mouse = false;
                 self.button_event_mouse = false;
                 self.current_mouse_buttons.clear();

@@ -290,7 +290,6 @@ pub struct TerminalState {
 
     /// https://vt100.net/dec/ek-vt38t-ug-001.pdf#page=132 has a
     /// discussion on what sixel dispay mode (DECSDM) does.
-    sixel_display_mode: bool,
     use_private_color_registers_for_each_graphic: bool,
 
     /// Graphics mode color register map.
@@ -349,8 +348,6 @@ pub struct TerminalState {
     term_version: String,
 
     writer: BufWriter<ThreadedWriter>,
-
-    sixel_scrolls_right: bool,
 
     user_vars: HashMap<String, String>,
 
@@ -518,7 +515,6 @@ impl TerminalState {
             application_cursor_keys: false,
             modify_other_keys: None,
             dec_ansi_mode: false,
-            sixel_display_mode: false,
             use_private_color_registers_for_each_graphic: false,
             color_map,
             application_keypad: false,
@@ -526,7 +522,6 @@ impl TerminalState {
             focus_tracking: false,
             mouse_encoding: MouseEncoding::X10,
             keyboard_encoding: KeyboardEncoding::Xterm,
-            sixel_scrolls_right: false,
             any_event_mouse: false,
             button_event_mouse: false,
             mouse_tracking: false,
@@ -1302,8 +1297,7 @@ impl TerminalState {
                                 action_or_status: XtSmGraphicsStatus::Success.to_i64(),
                                 value: vec![65536],
                             },
-                            XtSmGraphicsItem::RegisGraphicsGeometry
-                            | XtSmGraphicsItem::SixelGraphicsGeometry => XtSmGraphics {
+                            XtSmGraphicsItem::RegisGraphicsGeometry => XtSmGraphics {
                                 item: g.item,
                                 action_or_status: XtSmGraphicsStatus::Success.to_i64(),
                                 value: vec![self.pixel_width as i64, self.pixel_height as i64],
@@ -1655,20 +1649,6 @@ impl TerminalState {
                 self.decqrm_response(mode, true, self.application_cursor_keys);
             }
 
-            Mode::SetDecPrivateMode(DecPrivateMode::Code(DecPrivateModeCode::SixelDisplayMode)) => {
-                self.sixel_display_mode = true;
-            }
-            Mode::ResetDecPrivateMode(DecPrivateMode::Code(
-                DecPrivateModeCode::SixelDisplayMode,
-            )) => {
-                self.sixel_display_mode = false;
-            }
-            Mode::QueryDecPrivateMode(DecPrivateMode::Code(
-                DecPrivateModeCode::SixelDisplayMode,
-            )) => {
-                self.decqrm_response(mode, true, self.sixel_display_mode);
-            }
-
             Mode::SetDecPrivateMode(DecPrivateMode::Code(DecPrivateModeCode::DecAnsiMode)) => {
                 self.dec_ansi_mode = true;
             }
@@ -1808,22 +1788,6 @@ impl TerminalState {
                         _ => false,
                     },
                 );
-            }
-
-            Mode::SetDecPrivateMode(DecPrivateMode::Code(
-                DecPrivateModeCode::SixelScrollsRight,
-            )) => {
-                self.sixel_scrolls_right = true;
-            }
-            Mode::ResetDecPrivateMode(DecPrivateMode::Code(
-                DecPrivateModeCode::SixelScrollsRight,
-            )) => {
-                self.sixel_scrolls_right = false;
-            }
-            Mode::QueryDecPrivateMode(DecPrivateMode::Code(
-                DecPrivateModeCode::SixelScrollsRight,
-            )) => {
-                self.decqrm_response(mode, true, self.sixel_scrolls_right);
             }
 
             Mode::SetDecPrivateMode(DecPrivateMode::Code(

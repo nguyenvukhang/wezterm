@@ -239,7 +239,6 @@ pub enum DeviceAttributes {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XtSmGraphicsItem {
     NumberOfColorRegisters,
-    SixelGraphicsGeometry,
     RegisGraphicsGeometry,
     Unspecified(i64),
 }
@@ -248,7 +247,6 @@ impl Display for XtSmGraphicsItem {
     fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
         match self {
             Self::NumberOfColorRegisters => write!(f, "1"),
-            Self::SixelGraphicsGeometry => write!(f, "2"),
             Self::RegisGraphicsGeometry => write!(f, "3"),
             Self::Unspecified(n) => write!(f, "{}", n),
         }
@@ -326,7 +324,6 @@ impl XtSmGraphics {
         Ok(CSI::Device(Box::new(Device::XtSmGraphics(XtSmGraphics {
             item: match params.get(0).ok_or(())? {
                 CsiParam::Integer(1) => XtSmGraphicsItem::NumberOfColorRegisters,
-                CsiParam::Integer(2) => XtSmGraphicsItem::SixelGraphicsGeometry,
                 CsiParam::Integer(3) => XtSmGraphicsItem::RegisGraphicsGeometry,
                 CsiParam::Integer(n) => XtSmGraphicsItem::Unspecified(*n),
                 _ => return Err(()),
@@ -809,8 +806,6 @@ pub enum DecPrivateModeCode {
     /// https://vt100.net/docs/vt510-rm/DECLRMM.html
     LeftRightMarginMode = 69,
 
-    /// DECSDM - https://vt100.net/dec/ek-vt38t-ug-001.pdf#page=132
-    SixelDisplayMode = 80,
     /// Enable mouse button press/release reporting
     MouseTracking = 1000,
     /// Warning: this requires a cooperative and timely response from
@@ -853,9 +848,6 @@ pub enum DecPrivateModeCode {
     SynchronizedOutput = 2026,
 
     MinTTYApplicationEscapeKeyMode = 7727,
-
-    /// xterm: adjust cursor positioning after emitting sixel
-    SixelScrollsRight = 8452,
 
     /// Windows Terminal: win32-input-mode
     /// <https://github.com/microsoft/terminal/blob/main/doc/specs/%234999%20-%20Improved%20keyboard%20handling%20in%20Conpty.md>

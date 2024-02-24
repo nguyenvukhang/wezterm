@@ -86,9 +86,6 @@ builder! {
         /// The default is to assume yes as this is mostly harmless.
         hyperlinks: Option<bool>,
 
-        /// Configure whether sixel graphics are supported.
-        sixel: Option<bool>,
-
         /// Specify whether `bce`, background color erase, is supported.
         bce: Option<bool>,
 
@@ -152,7 +149,6 @@ pub enum ColorLevel {
 pub struct Capabilities {
     color_level: ColorLevel,
     hyperlinks: bool,
-    sixel: bool,
     bce: bool,
     terminfo_db: Option<terminfo::Database>,
     bracketed_paste: bool,
@@ -238,10 +234,6 @@ impl Capabilities {
             }
         });
 
-        // I don't know of a way to detect SIXEL support, so we
-        // assume no by default.
-        let sixel = hints.sixel.unwrap_or(false);
-
         // The use of OSC 8 for hyperlinks means that it is generally
         // safe to assume yes: if the terminal doesn't support it,
         // the text will look "OK", although some versions of VTE based
@@ -274,7 +266,6 @@ impl Capabilities {
 
         Ok(Self {
             color_level,
-            sixel,
             hyperlinks,
             bce,
             terminfo_db,
@@ -287,11 +278,6 @@ impl Capabilities {
     /// Indicates how many colors are supported
     pub fn color_level(&self) -> ColorLevel {
         self.color_level
-    }
-
-    /// Does the terminal support SIXEL graphics?
-    pub fn sixel(&self) -> bool {
-        self.sixel
     }
 
     /// Does the terminal support hyperlinks?
