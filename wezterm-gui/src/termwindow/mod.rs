@@ -1823,8 +1823,6 @@ impl TermWindow {
         };
         let tabs = self.get_tab_information();
         let panes = self.get_pane_information();
-        let active_tab = tabs.iter().find(|t| t.is_active).cloned();
-        let active_pane = panes.iter().find(|p| p.is_active).cloned();
 
         let border = self.get_os_border();
         let tab_bar_height = self.tab_bar_pixel_height().unwrap_or(0.);
@@ -1873,77 +1871,6 @@ impl TermWindow {
         }
         drop(window);
 
-        let title = match config::run_immediate_with_lua_config(|lua| {
-            if let Some(lua) = lua {
-                let tabs = lua.create_sequence_from(tabs.clone().into_iter())?;
-                let panes = lua.create_sequence_from(panes.clone().into_iter())?;
-
-                let v = config::lua::emit_sync_callback(
-                    &*lua,
-                    (
-                        "format-window-title".to_string(),
-                        (
-                            active_tab.clone(),
-                            active_pane.clone(),
-                            tabs,
-                            panes,
-                            (*self.config).clone(),
-                        ),
-                    ),
-                )?;
-                match &v {
-                    mlua::Value::Nil => Ok(None),
-                    _ => Ok(Some(String::from_lua(v, &*lua)?)),
-                }
-            } else {
-                Ok(None)
-            }
-        }) {
-            Ok(s) => s,
-            Err(err) => {
-                log::warn!("format-window-title: {}", err);
-                None
-            }
-        };
-
-        let title = match title {
-            Some(title) => title,
-            None => {
-                if let (Some(pos), Some(tab)) = (active_pane, active_tab) {
-                    if num_tabs == 1 {
-                        format!("{}{}", if pos.is_zoomed { "[Z] " } else { "" }, pos.title)
-                    } else {
-                        format!(
-                            "{}[{}/{}] {}",
-                            if pos.is_zoomed { "[Z] " } else { "" },
-                            tab.tab_index + 1,
-                            num_tabs,
-                            pos.title
-                        )
-                    }
-                } else {
-                    "".to_string()
-                }
-            }
-        };
-
-        if let Some(window) = self.window.as_ref() {
-            window.set_title(&title);
-
-            let show_tab_bar = if num_tabs == 1 {
-                self.config.enable_tab_bar && !self.config.hide_tab_bar_if_only_one_tab
-            } else {
-                self.config.enable_tab_bar
-            };
-
-            // If the number of tabs changed and caused the tab bar to
-            // hide/show, then we'll need to resize things.  It is simplest
-            // to piggy back on the config reloading code for that, so that
-            // is what we're doing.
-            if show_tab_bar != self.show_tab_bar {
-                self.config_was_reloaded();
-            }
-        }
         self.schedule_next_status_update();
     }
 
