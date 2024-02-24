@@ -2,7 +2,7 @@ use crate::client::Client;
 use crate::pane::ClientPane;
 use anyhow::{anyhow, bail};
 use async_trait::async_trait;
-use codec::{ListPanesResponse, SpawnV2, SplitPane};
+use codec::{ListPanesResponse, SplitPane};
 use config::keyassignment::SpawnTabDomain;
 use config::UnixDomain;
 use mux::connui::{ConnectionUI, ConnectionUIParams};
@@ -801,52 +801,6 @@ impl Domain for ClientDomain {
             .ok_or_else(|| anyhow!("local tab {local_tab_id} is invalid"))?;
 
         Ok(Some((tab, local_win_id)))
-    }
-
-    async fn spawn(
-        &self,
-        size: TerminalSize,
-        command: Option<CommandBuilder>,
-        command_dir: Option<String>,
-        window: WindowId,
-    ) -> anyhow::Result<Arc<Tab>> {
-        let inner = self
-            .inner()
-            .ok_or_else(|| anyhow!("domain is not attached"))?;
-
-        let workspace = Mux::get().active_workspace();
-
-        let result = inner
-            .client
-            .spawn_v2(SpawnV2 {
-                domain: SpawnTabDomain::DomainId(inner.remote_domain_id),
-                window_id: inner.local_to_remote_window(window),
-                size,
-                command,
-                command_dir,
-                workspace,
-            })
-            .await?;
-
-        inner.record_remote_to_local_window_mapping(result.window_id, window);
-
-        let pane: Arc<dyn Pane> = Arc::new(ClientPane::new(
-            &inner,
-            result.tab_id,
-            result.pane_id,
-            size,
-            "wezterm",
-        ));
-        let tab = Arc::new(Tab::new(&size));
-        tab.assign_pane(&pane);
-        inner.remove_old_tab_mapping(result.tab_id);
-        inner.record_remote_to_local_tab_mapping(result.tab_id, tab.tab_id());
-
-        let mux = Mux::get();
-        mux.add_tab_and_active_pane(&tab)?;
-        mux.add_tab_to_window(&tab, window)?;
-
-        Ok(tab)
     }
 
     async fn split_pane(

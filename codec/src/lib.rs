@@ -460,7 +460,6 @@ pdu! {
     SetPaneZoomed: 33,
     SplitPane: 34,
     KillPane: 35,
-    SpawnV2: 36,
     PaneRemoved: 37,
     SetPalette: 38,
     NotifyAlert: 39,
@@ -500,8 +499,7 @@ impl Pdu {
             | Self::SendPaste(_)
             | Self::Resize(_)
             | Self::SetClipboard(_)
-            | Self::SetPaneZoomed(_)
-            | Self::SpawnV2(_) => true,
+            | Self::SetPaneZoomed(_) => true,
             _ => false,
         }
     }
@@ -656,17 +654,6 @@ pub struct MovePaneToNewTab {
 pub struct MovePaneToNewTabResponse {
     pub tab_id: TabId,
     pub window_id: WindowId,
-}
-
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
-pub struct SpawnV2 {
-    pub domain: config::keyassignment::SpawnTabDomain,
-    /// If None, create a new window for this new tab
-    pub window_id: Option<WindowId>,
-    pub command: Option<CommandBuilder>,
-    pub command_dir: Option<String>,
-    pub size: TerminalSize,
-    pub workspace: String,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Debug)]

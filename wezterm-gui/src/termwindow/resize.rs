@@ -190,11 +190,11 @@ impl super::TermWindow {
             let ri_calc = ResizeIncrementCalculator {
                 x: self.render_metrics.cell_size.width as u16,
                 y: self.render_metrics.cell_size.height as u16,
-                padding_left: padding_left,
-                padding_top: padding_top,
-                padding_right: padding_right,
-                padding_bottom: padding_bottom,
-                border: border,
+                padding_left,
+                padding_top,
+                padding_right,
+                padding_bottom,
+                border,
                 tab_bar_height: tab_bar_height as usize,
             };
 
@@ -248,11 +248,11 @@ impl super::TermWindow {
             let ri_calc = ResizeIncrementCalculator {
                 x: self.render_metrics.cell_size.width as u16,
                 y: self.render_metrics.cell_size.height as u16,
-                padding_left: padding_left,
-                padding_top: padding_top,
-                padding_right: padding_right,
-                padding_bottom: padding_bottom,
-                border: border,
+                padding_left,
+                padding_top,
+                padding_right,
+                padding_bottom,
+                border,
                 tab_bar_height: tab_bar_height as usize,
             };
 

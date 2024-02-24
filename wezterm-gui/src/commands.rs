@@ -786,14 +786,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Shell"],
             icon: Some("md_tab_plus"),
         },
-        SpawnTab(SpawnTabDomain::DomainId(id)) => CommandDef {
-            brief: format!("New Tab (Domain with id {id})").into(),
-            doc: format!("Create a new tab in the domain with id {id}").into(),
-            keys: vec![],
-            args: &[ArgType::ActiveWindow],
-            menubar: &["Shell"],
-            icon: Some("md_tab_plus"),
-        },
         ActivateTab(-1) => CommandDef {
             brief: "Activate right-most tab".into(),
             doc: "Activates the tab on the far right".into(),
@@ -1415,14 +1407,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         DetachDomain(SpawnTabDomain::DefaultDomain) => CommandDef {
             brief: "Detach the default domain".into(),
             doc: "Detaches (disconnects from) the default domain".into(),
-            keys: vec![],
-            args: &[ArgType::ActivePane],
-            menubar: &["Shell", "Detach"],
-            icon: Some("md_pipe_disconnected"),
-        },
-        DetachDomain(SpawnTabDomain::DomainId(id)) => CommandDef {
-            brief: format!("Detach the domain with id {id}").into(),
-            doc: format!("Detaches (disconnects from) the domain with id {id}").into(),
             keys: vec![],
             args: &[ArgType::ActivePane],
             menubar: &["Shell", "Detach"],

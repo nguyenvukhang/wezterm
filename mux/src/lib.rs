@@ -1082,9 +1082,6 @@ impl Mux {
                 }
                 None => self.default_domain(),
             },
-            SpawnTabDomain::DomainId(domain_id) => self
-                .get_domain(*domain_id)
-                .ok_or_else(|| anyhow!("domain id {} is invalid", domain_id))?,
         };
         Ok(domain)
     }

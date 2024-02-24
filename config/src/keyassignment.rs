@@ -41,8 +41,6 @@ pub enum SpawnTabDomain {
     DefaultDomain,
     /// Use the domain from the current tab in the associated window
     CurrentPaneDomain,
-    /// Use a specific domain by id
-    DomainId(usize),
 }
 
 impl Default for SpawnTabDomain {
