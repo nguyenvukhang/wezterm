@@ -1,5 +1,5 @@
-current:
-	@make debug
+current: debug
+	open Alatty.app
 
 analyze:
 	python3 analyze.py

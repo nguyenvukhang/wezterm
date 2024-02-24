@@ -1,7 +1,6 @@
 use crate::termwindow::{PaneInformation, TabInformation};
 use config::{ConfigHandle, TabBarColors};
 use finl_unicode::grapheme_clusters::Graphemes;
-use mlua::FromLua;
 use termwiz::cell::{unicode_column_width, Cell, CellAttributes};
 use termwiz::color::ColorSpec;
 use termwiz::escape::csi::Sgr;
@@ -42,114 +41,46 @@ struct TitleText {
     len: usize,
 }
 
-fn call_format_tab_title(
-    tab: &TabInformation,
-    tab_info: &[TabInformation],
-    pane_info: &[PaneInformation],
-    config: &ConfigHandle,
-    hover: bool,
-    tab_max_width: usize,
-) -> Option<TitleText> {
-    match config::run_immediate_with_lua_config(|lua| {
-        if let Some(lua) = lua {
-            let tabs = lua.create_sequence_from(tab_info.iter().cloned())?;
-            let panes = lua.create_sequence_from(pane_info.iter().cloned())?;
-
-            let v = config::lua::emit_sync_callback(
-                &*lua,
-                (
-                    "format-tab-title".to_string(),
-                    (
-                        tab.clone(),
-                        tabs,
-                        panes,
-                        (**config).clone(),
-                        hover,
-                        tab_max_width,
-                    ),
-                ),
-            )?;
-            match &v {
-                mlua::Value::Nil => Ok(None),
-                mlua::Value::Table(_) => {
-                    let items = <Vec<FormatItem>>::from_lua(v, &*lua)?;
-
-                    let esc = format_as_escapes(items.clone())?;
-                    let line = parse_status_text(&esc, CellAttributes::default());
-
-                    Ok(Some(TitleText {
-                        items,
-                        len: line.len(),
-                    }))
-                }
-                _ => {
-                    let s = String::from_lua(v, &*lua)?;
-                    let line = parse_status_text(&s, CellAttributes::default());
-                    Ok(Some(TitleText {
-                        len: line.len(),
-                        items: vec![FormatItem::Text(s)],
-                    }))
-                }
-            }
-        } else {
-            Ok(None)
-        }
-    }) {
-        Ok(s) => s,
-        Err(err) => {
-            log::warn!("format-tab-title: {}", err);
-            None
-        }
-    }
-}
-
 fn compute_tab_title(
     tab: &TabInformation,
-    tab_info: &[TabInformation],
-    pane_info: &[PaneInformation],
+    _tab_info: &[TabInformation],
+    _pane_info: &[PaneInformation],
     config: &ConfigHandle,
-    hover: bool,
-    tab_max_width: usize,
+    _hover: bool,
+    _tab_max_width: usize,
 ) -> TitleText {
-    let title = call_format_tab_title(tab, tab_info, pane_info, config, hover, tab_max_width);
-
-    match title {
-        Some(title) => title,
-        None => {
-            let title = if let Some(pane) = &tab.active_pane {
-                let mut title = if tab.tab_title.is_empty() {
-                    pane.title.clone()
-                } else {
-                    tab.tab_title.clone()
-                };
-                let classic_spacing = " ";
-                if config.show_tab_index_in_tab_bar {
-                    title = format!(
-                        "{}{}: {}{}",
-                        classic_spacing,
-                        tab.tab_index
-                            + if config.tab_and_split_indices_are_zero_based {
-                                0
-                            } else {
-                                1
-                            },
-                        title,
-                        classic_spacing,
-                    );
-                }
-                while unicode_column_width(&title, None) < 5 {
-                    title.push(' ');
-                }
-                title
-            } else {
-                " no pane ".to_string()
-            };
-
-            TitleText {
-                len: unicode_column_width(&title, None),
-                items: vec![FormatItem::Text(title)],
-            }
+    let title = if let Some(pane) = &tab.active_pane {
+        let mut title = if tab.tab_title.is_empty() {
+            pane.title.clone()
+        } else {
+            tab.tab_title.clone()
+        };
+        let classic_spacing = " ";
+        if config.show_tab_index_in_tab_bar {
+            title = format!(
+                "{}{}: {}{}",
+                classic_spacing,
+                tab.tab_index
+                    + if config.tab_and_split_indices_are_zero_based {
+                        0
+                    } else {
+                        1
+                    },
+                title,
+                classic_spacing,
+            );
         }
+        while unicode_column_width(&title, None) < 5 {
+            title.push(' ');
+        }
+        title
+    } else {
+        " no pane ".to_string()
+    };
+
+    TitleText {
+        len: unicode_column_width(&title, None),
+        items: vec![FormatItem::Text(title)],
     }
 }
 
