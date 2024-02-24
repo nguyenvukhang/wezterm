@@ -9,7 +9,6 @@ use std::path::PathBuf;
 use wezterm_dynamic::{FromDynamic, FromDynamicOptions, ToDynamic, Value};
 use wezterm_input_types::{KeyCode, Modifiers};
 use wezterm_term::input::MouseButton;
-use wezterm_term::SemanticType;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, FromDynamic, ToDynamic)]
 pub enum SelectionMode {
@@ -407,42 +406,6 @@ impl Default for SplitSize {
 pub enum RotationDirection {
     Clockwise,
     CounterClockwise,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, FromDynamic, ToDynamic)]
-pub enum CopyModeAssignment {
-    MoveToViewportBottom,
-    MoveToViewportTop,
-    MoveToViewportMiddle,
-    MoveToScrollbackTop,
-    MoveToScrollbackBottom,
-    SetSelectionMode(Option<SelectionMode>),
-    ClearSelectionMode,
-    MoveToStartOfLineContent,
-    MoveToEndOfLineContent,
-    MoveToStartOfLine,
-    MoveToStartOfNextLine,
-    MoveToSelectionOtherEnd,
-    MoveToSelectionOtherEndHoriz,
-    MoveBackwardWord,
-    MoveForwardWord,
-    MoveForwardWordEnd,
-    MoveRight,
-    MoveLeft,
-    MoveUp,
-    MoveDown,
-    MoveByPage(NotNan<f64>),
-    PageUp,
-    PageDown,
-    Close,
-    MoveBackwardSemanticZone,
-    MoveForwardSemanticZone,
-    MoveBackwardZoneOfType(SemanticType),
-    MoveForwardZoneOfType(SemanticType),
-    JumpForward { prev_char: bool },
-    JumpBackward { prev_char: bool },
-    JumpAgain,
-    JumpReverse,
 }
 
 pub type KeyTable = HashMap<(KeyCode, Modifiers), KeyTableEntry>;
