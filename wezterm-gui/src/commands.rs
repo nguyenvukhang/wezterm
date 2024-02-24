@@ -1433,14 +1433,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Edit"],
             icon: None,
         },
-        ShowLauncherArgs(_) => CommandDef {
-            brief: "Show the launcher".into(),
-            doc: "Shows the launcher menu".into(),
-            keys: vec![],
-            args: &[ArgType::ActiveWindow],
-            menubar: &["Shell"],
-            icon: None,
-        },
         ShowTabNavigator => CommandDef {
             brief: "Navigate tabs".into(),
             doc: "Shows the tab navigator".into(),
