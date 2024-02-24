@@ -413,7 +413,6 @@ pub enum KeyAssignment {
     QuitApplication,
     SplitHorizontal(SpawnCommand),
     SplitVertical(SpawnCommand),
-    ShowLauncher,
     ShowLauncherArgs(LauncherActionArgs),
     ClearScrollback(ScrollbackEraseMode),
 

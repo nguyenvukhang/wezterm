@@ -317,7 +317,7 @@ impl super::TermWindow {
         };
         let action = match button {
             MousePress::Left => Some(KeyAssignment::SpawnTab(SpawnTabDomain::CurrentPaneDomain)),
-            MousePress::Right => Some(KeyAssignment::ShowLauncher),
+            MousePress::Right => None,
             MousePress::Middle => None,
         };
 

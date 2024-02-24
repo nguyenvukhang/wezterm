@@ -1433,7 +1433,7 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Edit"],
             icon: None,
         },
-        ShowLauncherArgs(_) | ShowLauncher => CommandDef {
+        ShowLauncherArgs(_) => CommandDef {
             brief: "Show the launcher".into(),
             doc: "Shows the launcher menu".into(),
             keys: vec![],
@@ -1849,7 +1849,6 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         ActivatePaneDirection(PaneDirection::Down),
         TogglePaneZoomState,
         ActivateLastTab,
-        ShowLauncher,
         ShowTabNavigator,
     ];
 }

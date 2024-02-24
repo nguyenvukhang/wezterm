@@ -2462,7 +2462,6 @@ impl TermWindow {
             ScrollToTop => self.scroll_to_top(pane),
             ScrollToBottom => self.scroll_to_bottom(pane),
             ShowTabNavigator => self.show_tab_navigator(),
-            ShowLauncher => self.show_launcher(),
             ShowLauncherArgs(args) => {
                 self.show_launcher_impl(args.title.as_deref().unwrap_or("Launcher"), args.flags)
             }
