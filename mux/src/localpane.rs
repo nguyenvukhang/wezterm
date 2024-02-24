@@ -517,22 +517,6 @@ impl Pane for LocalPane {
                 info.root
             );
 
-            let hook_result = config::run_immediate_with_lua_config(|lua| {
-                let lua = match lua {
-                    Some(lua) => lua,
-                    None => return Ok(None),
-                };
-                let v = config::lua::emit_sync_callback(
-                    &*lua,
-                    ("mux-is-process-stateful".to_string(), (info.root.clone())),
-                )?;
-                match v {
-                    mlua::Value::Nil => Ok(None),
-                    mlua::Value::Boolean(v) => Ok(Some(v)),
-                    _ => Ok(None),
-                }
-            });
-
             fn default_stateful_check(proc_list: &LocalProcessInfo) -> bool {
                 // Fig uses `figterm` a pseudo terminal for a lot of functionality, it runs between
                 // the shell and terminal. Unfortunately it is typically named `<shell> (figterm)`,
@@ -561,20 +545,7 @@ impl Pane for LocalPane {
                 false
             }
 
-            let is_stateful = match hook_result {
-                Ok(None) => default_stateful_check(&info.root),
-                Ok(Some(s)) => s,
-                Err(err) => {
-                    log::error!(
-                        "Error while running mux-is-process-stateful \
-                         hook: {:#}, falling back to default behavior",
-                        err
-                    );
-                    default_stateful_check(&info.root)
-                }
-            };
-
-            !is_stateful
+            !default_stateful_check(&info.root)
         } else {
             #[cfg(unix)]
             {
