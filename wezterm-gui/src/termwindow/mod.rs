@@ -35,7 +35,7 @@ use config::{
     GeometryOrigin, GuiPosition, TermConfig, WindowCloseConfirmation,
 };
 use lfucache::*;
-use mlua::{FromLua, UserData, UserDataFields};
+use mlua::{UserData, UserDataFields};
 use mux::pane::{CloseReason, Pane, PaneId, PerformAssignmentResult};
 use mux::renderable::RenderableDimensions;
 use mux::tab::{
@@ -67,7 +67,6 @@ pub mod clipboard;
 pub mod keyevent;
 pub mod modal;
 mod mouseevent;
-pub mod palette;
 mod prevcursor;
 pub mod render;
 pub mod resize;

@@ -29,7 +29,6 @@ use wezterm_term::{CellAttributes, Line, StableRowIndex};
 use window::color::LinearRgba;
 
 pub mod borders;
-pub mod corners;
 pub mod draw;
 pub mod paint;
 pub mod pane;
