@@ -8,13 +8,11 @@ use wezterm_term::{TerminalConfiguration, TerminalSize};
 
 pub mod confirm_close_pane;
 pub mod debug;
-pub mod launcher;
 pub mod prompt;
 
 pub use confirm_close_pane::{
     confirm_close_pane, confirm_close_tab, confirm_close_window, confirm_quit_program,
 };
-pub use launcher::{launcher, LauncherArgs, LauncherFlags};
 
 pub fn start_overlay<T, F>(
     term_window: &TermWindow,
