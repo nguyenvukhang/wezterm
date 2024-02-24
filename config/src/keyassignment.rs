@@ -463,7 +463,6 @@ pub enum KeyAssignment {
     SplitPane(SplitPane),
 
     ResetTerminal,
-    ActivateCommandPalette,
     ActivateWindow(usize),
     ActivateWindowRelative(isize),
     ActivateWindowRelativeNoWrap(isize),

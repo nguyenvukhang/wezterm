@@ -87,7 +87,7 @@ pub struct UserPaletteEntry {
 }
 impl_lua_conversion_dynamic!(UserPaletteEntry);
 
-fn build_commands(gui_window: GuiWin, pane: Option<MuxPane>) -> Vec<ExpandedCommand> {
+fn build_commands() -> Vec<ExpandedCommand> {
     let mut commands = CommandDef::actions_for_palette_and_menubar(&config::configuration());
 
     let mut scores: HashMap<&str, f64> = HashMap::new();
@@ -169,11 +169,7 @@ fn compute_matches(selection: &str, commands: &[ExpandedCommand]) -> Vec<usize> 
 
 impl CommandPalette {
     pub fn new(term_window: &mut TermWindow) -> Self {
-        let mux_pane = term_window
-            .get_active_pane_or_overlay()
-            .map(|pane| MuxPane(pane.pane_id()));
-
-        let commands = build_commands(GuiWin::new(term_window), mux_pane);
+        let commands = build_commands();
 
         Self {
             element: RefCell::new(None),

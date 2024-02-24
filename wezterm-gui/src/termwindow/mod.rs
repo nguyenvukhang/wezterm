@@ -2784,10 +2784,6 @@ impl TermWindow {
                     termwiz::escape::Esc::Code(termwiz::escape::EscCode::FullReset),
                 )]);
             }
-            ActivateCommandPalette => {
-                let modal = crate::termwindow::palette::CommandPalette::new(self);
-                self.set_modal(Rc::new(modal));
-            }
             PromptInputLine(args) => self.show_prompt_input_line(args),
         };
         Ok(PerformAssignmentResult::Handled)

@@ -1756,14 +1756,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Shell"],
             icon: None,
         },
-        ActivateCommandPalette => CommandDef {
-            brief: "Activate Command Palette".into(),
-            doc: "Shows the command palette modal".into(),
-            keys: vec![(Modifiers::CTRL.union(Modifiers::SHIFT), "p".into())],
-            args: &[ArgType::ActivePane],
-            menubar: &["Edit"],
-            icon: None,
-        },
     })
 }
 
@@ -1803,7 +1795,6 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         ClearScrollback(ScrollbackEraseMode::ScrollbackOnly),
         ClearScrollback(ScrollbackEraseMode::ScrollbackAndViewport),
         ClearKeyTableStack,
-        ActivateCommandPalette,
         // ----------------- View
         DecreaseFontSize,
         IncreaseFontSize,
