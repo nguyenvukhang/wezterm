@@ -1433,14 +1433,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             menubar: &["Edit"],
             icon: None,
         },
-        ShowTabNavigator => CommandDef {
-            brief: "Navigate tabs".into(),
-            doc: "Shows the tab navigator".into(),
-            keys: vec![],
-            args: &[ArgType::ActiveWindow],
-            menubar: &["Window", "Select Tab"],
-            icon: Some("cod_list_flat"),
-        },
         DetachDomain(SpawnTabDomain::CurrentPaneDomain) => CommandDef {
             brief: "Detach the domain of the active pane".into(),
             doc: "Detaches (disconnects from) the domain of the active pane".into(),
@@ -1841,6 +1833,5 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         ActivatePaneDirection(PaneDirection::Down),
         TogglePaneZoomState,
         ActivateLastTab,
-        ShowTabNavigator,
     ];
 }

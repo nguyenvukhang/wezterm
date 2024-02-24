@@ -431,18 +431,7 @@ impl super::TermWindow {
                 | TabBarItem::RightStatus
                 | TabBarItem::WindowButton(_) => {}
             },
-            WMEK::Press(MousePress::Right) => match item {
-                TabBarItem::Tab { .. } => {
-                    self.show_tab_navigator();
-                }
-                TabBarItem::NewTabButton { .. } => {
-                    self.do_new_tab_button_click(MousePress::Right);
-                }
-                TabBarItem::None
-                | TabBarItem::LeftStatus
-                | TabBarItem::RightStatus
-                | TabBarItem::WindowButton(_) => {}
-            },
+            WMEK::Press(MousePress::Right) => {},
             WMEK::Move => match item {
                 TabBarItem::None | TabBarItem::LeftStatus | TabBarItem::RightStatus => {
                     context.set_window_drag_position(event.screen_coords);

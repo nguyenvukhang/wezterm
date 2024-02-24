@@ -2080,72 +2080,6 @@ impl TermWindow {
         promise::spawn::spawn(future).detach();
     }
 
-    fn show_tab_navigator(&mut self) {
-        self.show_launcher_impl("Tab Navigator", LauncherFlags::TABS);
-    }
-
-    fn show_launcher(&mut self) {
-        self.show_launcher_impl(
-            "Launcher",
-            LauncherFlags::LAUNCH_MENU_ITEMS
-                | LauncherFlags::WORKSPACES
-                | LauncherFlags::DOMAINS
-                | LauncherFlags::KEY_ASSIGNMENTS
-                | LauncherFlags::COMMANDS,
-        );
-    }
-
-    fn show_launcher_impl(&mut self, title: &str, flags: LauncherFlags) {
-        let mux_window_id = self.mux_window_id;
-        let window = self.window.as_ref().unwrap().clone();
-
-        let mux = Mux::get();
-        let tab = match mux.get_active_tab_for_window(self.mux_window_id) {
-            Some(tab) => tab,
-            None => return,
-        };
-
-        let pane = match self.get_active_pane_or_overlay() {
-            Some(pane) => pane,
-            None => return,
-        };
-
-        let domain_id_of_current_pane = tab
-            .get_active_pane()
-            .expect("tab has no panes!")
-            .domain_id();
-        let pane_id = pane.pane_id();
-        let tab_id = tab.tab_id();
-        let title = title.to_string();
-
-        promise::spawn::spawn(async move {
-            let args = LauncherArgs::new(
-                &title,
-                flags,
-                mux_window_id,
-                pane_id,
-                domain_id_of_current_pane,
-            )
-            .await;
-
-            let win = window.clone();
-            win.notify(TermWindowNotif::Apply(Box::new(move |term_window| {
-                let mux = Mux::get();
-                if let Some(tab) = mux.get_tab(tab_id) {
-                    let window = window.clone();
-                    let (overlay, future) =
-                        start_overlay(term_window, &tab, move |_tab_id, term| {
-                            launcher(args, term, window)
-                        });
-
-                    term_window.assign_overlay(tab_id, overlay);
-                    promise::spawn::spawn(future).detach();
-                }
-            })));
-        })
-        .detach();
-    }
-
     /// Returns the Prompt semantic zones
     fn get_semantic_prompt_zones(&mut self, pane: &Arc<dyn Pane>) -> &[StableRowIndex] {
         let cache = self
@@ -2461,7 +2395,6 @@ impl TermWindow {
             ScrollToPrompt(n) => self.scroll_to_prompt(*n, pane)?,
             ScrollToTop => self.scroll_to_top(pane),
             ScrollToBottom => self.scroll_to_bottom(pane),
-            ShowTabNavigator => self.show_tab_navigator(),
             HideApplication => {
                 let con = Connection::get().expect("call on gui thread");
                 con.hide_application();

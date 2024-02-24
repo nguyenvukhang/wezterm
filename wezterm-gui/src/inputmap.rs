@@ -7,7 +7,7 @@ use config::{ConfigHandle, MouseEventAltScreen, MouseEventTriggerMods};
 use std::collections::HashMap;
 use std::time::Duration;
 use wezterm_term::input::MouseButton;
-use window::{KeyCode, Modifiers, PhysKeyCode, UIKeyCapRendering};
+use window::{KeyCode, Modifiers};
 
 pub struct InputMap {
     pub keys: KeyTables,

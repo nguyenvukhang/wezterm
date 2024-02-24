@@ -408,7 +408,6 @@ pub enum KeyAssignment {
     ScrollToPrompt(isize),
     ScrollToTop,
     ScrollToBottom,
-    ShowTabNavigator,
     HideApplication,
     QuitApplication,
     SplitHorizontal(SpawnCommand),
