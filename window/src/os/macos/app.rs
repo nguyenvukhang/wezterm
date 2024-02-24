@@ -1,6 +1,6 @@
 use crate::connection::ConnectionOps;
 use crate::macos::menu::RepresentedItem;
-use crate::macos::{nsstring, nsstring_to_str};
+use crate::macos::nsstring;
 use crate::menu::{Menu, MenuItem};
 use crate::{ApplicationEvent, Connection};
 use cocoa::appkit::NSApplicationTerminateReply;
@@ -112,22 +112,6 @@ extern "C" fn wezterm_perform_key_assignment(
     }
 }
 
-extern "C" fn application_open_file(
-    this: &mut Object,
-    _sel: Sel,
-    _app: *mut Object,
-    file_name: *mut Object,
-) {
-    let launched: BOOL = unsafe { *this.get_ivar("launched") };
-    if launched == YES {
-        let file_name = unsafe { nsstring_to_str(file_name) }.to_string();
-        if let Some(conn) = Connection::get() {
-            log::debug!("application_open_file {file_name}");
-            conn.dispatch_app_event(ApplicationEvent::OpenCommandScript(file_name));
-        }
-    }
-}
-
 extern "C" fn application_dock_menu(
     _self: &mut Object,
     _sel: Sel,
@@ -161,10 +145,6 @@ fn get_class() -> &'static Class {
             cls.add_method(
                 sel!(applicationDidFinishLaunching:),
                 application_did_finish_launching as extern "C" fn(&mut Object, Sel, *mut Object),
-            );
-            cls.add_method(
-                sel!(application:openFile:),
-                application_open_file as extern "C" fn(&mut Object, Sel, *mut Object, *mut Object),
             );
             cls.add_method(
                 sel!(applicationDockMenu:),

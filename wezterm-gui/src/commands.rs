@@ -233,27 +233,6 @@ impl CommandDef {
                     }
                 }
             }
-            for dom in &domains {
-                let name = dom.domain_name();
-                // FIXME: use domain_label here, but needs to be async
-                let label = name;
-
-                if dom.state() == DomainState::Attached {
-                    if name == "local" {
-                        continue;
-                    }
-                    result.push(ExpandedCommand {
-                        brief: format!("Detach Domain {label}").into(),
-                        doc: "".into(),
-                        keys: vec![],
-                        action: KeyAssignment::DetachDomain(SpawnTabDomain::DomainName(
-                            name.to_string(),
-                        )),
-                        menubar: &["Shell", "Detach"],
-                        icon: Some("md_pipe_disconnected".into()),
-                    });
-                }
-            }
 
             let active_workspace = mux.active_workspace();
             for workspace in mux.iter_workspaces() {
@@ -802,14 +781,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         SpawnTab(SpawnTabDomain::DefaultDomain) => CommandDef {
             brief: "New Tab (Default Domain)".into(),
             doc: "Create a new tab in the default domain".into(),
-            keys: vec![],
-            args: &[ArgType::ActiveWindow],
-            menubar: &["Shell"],
-            icon: Some("md_tab_plus"),
-        },
-        SpawnTab(SpawnTabDomain::DomainName(name)) => CommandDef {
-            brief: format!("New Tab (`{name}` Domain)").into(),
-            doc: format!("Create a new tab in the domain named {name}").into(),
             keys: vec![],
             args: &[ArgType::ActiveWindow],
             menubar: &["Shell"],
@@ -1444,14 +1415,6 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
         DetachDomain(SpawnTabDomain::DefaultDomain) => CommandDef {
             brief: "Detach the default domain".into(),
             doc: "Detaches (disconnects from) the default domain".into(),
-            keys: vec![],
-            args: &[ArgType::ActivePane],
-            menubar: &["Shell", "Detach"],
-            icon: Some("md_pipe_disconnected"),
-        },
-        DetachDomain(SpawnTabDomain::DomainName(name)) => CommandDef {
-            brief: format!("Detach the `{name}` domain").into(),
-            doc: format!("Detaches (disconnects from) the domain named `{name}`").into(),
             keys: vec![],
             args: &[ArgType::ActivePane],
             menubar: &["Shell", "Detach"],

@@ -5,18 +5,16 @@ use ::window::*;
 use anyhow::{anyhow, Context};
 use clap::builder::ValueParser;
 use clap::{Parser, ValueHint};
-use config::keyassignment::{SpawnCommand, SpawnTabDomain};
+use config::keyassignment::SpawnCommand;
 use config::ConfigHandle;
 use mux::activity::Activity;
 use mux::domain::{Domain, LocalDomain};
 use mux::Mux;
 use mux_lua::MuxDomain;
 use portable_pty::cmdbuilder::CommandBuilder;
-use promise::spawn::block_on;
 use std::borrow::Cow;
 use std::env::current_dir;
 use std::ffi::OsString;
-use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 use wezterm_client::domain::ClientDomain;
@@ -238,18 +236,6 @@ async fn async_run_terminal_gui(
         None => None,
     };
 
-    // Apply the domain to the command
-    let spawn_command = match (spawn_command, &opts.domain) {
-        (Some(spawn), Some(name)) => Some(SpawnCommand {
-            domain: SpawnTabDomain::DomainName(name.to_string()),
-            ..spawn
-        }),
-        (None, Some(name)) => Some(SpawnCommand {
-            domain: SpawnTabDomain::DomainName(name.to_string()),
-            ..SpawnCommand::default()
-        }),
-        (spawn, None) => spawn,
-    };
     let mux = Mux::get();
 
     let domain = if let Some(name) = &opts.domain {
@@ -294,123 +280,6 @@ async fn async_run_terminal_gui(
         }
     }
     spawn_tab_in_domain_if_mux_is_empty(cmd, is_connecting, domain, opts.workspace).await
-}
-
-#[derive(Debug)]
-enum Publish {
-    TryPathOrPublish(PathBuf),
-    NoConnectNoPublish,
-    NoConnectButPublish,
-}
-
-impl Publish {
-    pub fn resolve(mux: &Arc<Mux>, config: &ConfigHandle, always_new_process: bool) -> Self {
-        if mux.default_domain().domain_name() != config.default_domain.as_deref().unwrap_or("local")
-        {
-            return Self::NoConnectNoPublish;
-        }
-
-        if always_new_process {
-            return Self::NoConnectNoPublish;
-        }
-
-        if config::is_config_overridden() {
-            // They're using a specific config file: assume that it is
-            // different from the running gui
-            log::trace!("skip existing gui: config is different");
-            return Self::NoConnectNoPublish;
-        }
-
-        match wezterm_client::discovery::resolve_gui_sock_path(
-            &crate::termwindow::get_window_class(),
-        ) {
-            Ok(path) => Self::TryPathOrPublish(path),
-            Err(_) => Self::NoConnectButPublish,
-        }
-    }
-
-    pub fn try_spawn(
-        &mut self,
-        cmd: Option<CommandBuilder>,
-        config: &ConfigHandle,
-        workspace: Option<&str>,
-        domain: SpawnTabDomain,
-    ) -> anyhow::Result<bool> {
-        if let Publish::TryPathOrPublish(gui_sock) = &self {
-            let dom = config::UnixDomain {
-                socket_path: Some(gui_sock.clone()),
-                no_serve_automatically: true,
-                ..Default::default()
-            };
-            let mut ui = mux::connui::ConnectionUI::new_headless();
-            match wezterm_client::client::Client::new_unix_domain(None, &dom, false, &mut ui, true)
-            {
-                Ok(client) => {
-                    let executor = promise::spawn::ScopedExecutor::new();
-                    let command = cmd.clone();
-                    let res = block_on(executor.run(async move {
-                        let vers = client.verify_version_compat(&mut ui).await?;
-
-                        if vers.executable_path != std::env::current_exe().context("resolve executable path")? {
-                            *self = Publish::NoConnectNoPublish;
-                            anyhow::bail!(
-                                "Running GUI is a different executable from us, will start a new one");
-                        }
-                        if vers.config_file_path
-                            != std::env::var_os("WEZTERM_CONFIG_FILE").map(Into::into)
-                        {
-                            *self = Publish::NoConnectNoPublish;
-                            anyhow::bail!(
-                                "Running GUI has different config from us, will start a new one"
-                            );
-                        }
-                        client
-                            .spawn_v2(codec::SpawnV2 {
-                                domain,
-                                window_id: None,
-                                command,
-                                command_dir: None,
-                                size: config.initial_size(0),
-                                workspace: workspace.unwrap_or(
-                                    config
-                                        .default_workspace
-                                        .as_deref()
-                                        .unwrap_or(mux::DEFAULT_WORKSPACE)
-                                ).to_string(),
-                            })
-                            .await
-                    }));
-
-                    match res {
-                        Ok(res) => {
-                            log::info!(
-                                "Spawned your command via the existing GUI instance. \
-                             Use wezterm start --always-new-process if you do not want this behavior. \
-                             Result={:?}",
-                                res
-                            );
-                            Ok(true)
-                        }
-                        Err(err) => {
-                            log::trace!(
-                                "while attempting to ask existing instance to spawn: {:#}",
-                                err
-                            );
-                            Ok(false)
-                        }
-                    }
-                }
-                Err(err) => {
-                    // Couldn't connect: it's probably a stale symlink.
-                    // That's fine: we can continue with starting a fresh gui below.
-                    log::trace!("{:#}", err);
-                    Ok(false)
-                }
-            }
-        } else {
-            Ok(false)
-        }
-    }
 }
 
 fn setup_mux(
@@ -485,32 +354,11 @@ fn run_terminal_gui(opts: StartCommand, default_domain_name: Option<String>) -> 
         None
     };
 
-    let mux = build_initial_mux(
+    build_initial_mux(
         &config,
         default_domain_name.as_deref(),
         opts.workspace.as_deref(),
     )?;
-
-    // First, let's see if we can ask an already running wezterm to do this.
-    // We must do this before we start the gui frontend as the scheduler
-    // requirements are different.
-    let mut publish = Publish::resolve(
-        &mux,
-        &config,
-        opts.always_new_process || opts.position.is_some(),
-    );
-    log::trace!("{:?}", publish);
-    if publish.try_spawn(
-        cmd.clone(),
-        &config,
-        opts.workspace.as_deref(),
-        match &opts.domain {
-            Some(name) => SpawnTabDomain::DomainName(name.to_string()),
-            None => SpawnTabDomain::DefaultDomain,
-        },
-    )? {
-        return Ok(());
-    }
 
     let gui = crate::frontend::try_new()?;
     let activity = Activity::new();

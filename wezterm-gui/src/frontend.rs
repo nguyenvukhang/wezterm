@@ -207,59 +207,6 @@ impl GuiFrontEnd {
     fn app_event_handler(event: ApplicationEvent) {
         log::trace!("Got app event {event:?}");
         match event {
-            ApplicationEvent::OpenCommandScript(file_name) => {
-                let quoted_file_name = match shlex::try_quote(&file_name) {
-                    Ok(name) => name.to_owned().to_string(),
-                    Err(_) => {
-                        log::error!(
-                            "OpenCommandScript: {file_name} has embedded NUL bytes and
-                             cannot be launched via the shell"
-                        );
-                        return;
-                    }
-                };
-                promise::spawn::spawn(async move {
-                    use config::keyassignment::SpawnTabDomain;
-                    use wezterm_term::TerminalSize;
-
-                    // We send the script to execute to the shell on stdin, rather than ask the
-                    // shell to execute it directly, so that we start the shell and read in the
-                    // user's rc files before running the script.  Without this, wezterm on macOS
-                    // is launched with a default and very anemic path, and that is frustrating for
-                    // users.
-
-                    let mux = Mux::get();
-                    let window_id = None;
-                    let pane_id = None;
-                    let cmd = None;
-                    let cwd = None;
-                    let workspace = mux.active_workspace();
-
-                    match mux
-                        .spawn_tab_or_window(
-                            window_id,
-                            SpawnTabDomain::DomainName("local".to_string()),
-                            cmd,
-                            cwd,
-                            TerminalSize::default(),
-                            pane_id,
-                            workspace,
-                            None, // optional position
-                        )
-                        .await
-                    {
-                        Ok((_tab, pane, _window_id)) => {
-                            log::trace!("Spawned {file_name} as pane_id {}", pane.pane_id());
-                            let mut writer = pane.writer();
-                            write!(writer, "{quoted_file_name} ; exit\n").ok();
-                        }
-                        Err(err) => {
-                            log::error!("Failed to spawn {file_name}: {err:#?}");
-                        }
-                    };
-                })
-                .detach();
-            }
             ApplicationEvent::PerformKeyAssignment(action) => {
                 // We should only get here when there are no windows open
                 // and the user picks an action from the menubar.
